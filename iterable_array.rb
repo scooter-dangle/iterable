@@ -104,20 +104,3 @@ class IterableArray
         @array.send( method, *args, &block )
     end
 end
-
-
-puts "Bat: "
-bat = IterableArray.new
-puts "\n"
-
-puts bat.first
-
-puts "Ball: "
-ball = IterableArray.new  [ 5, 7, 22, 13 ]
-puts "\n"
-
-ball.each { |item| puts (item + 3); ball.delete(item) if item == 7 }
-puts ball
-
-puts ball.class
-
