@@ -1,4 +1,3 @@
-# comment for test commit
 require 'forwardable'
 
 class IterableArray
