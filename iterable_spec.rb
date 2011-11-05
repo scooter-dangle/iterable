@@ -13,6 +13,7 @@ describe IterableArray do
         end
     end
 
-    it 'should return an IterableArray for every method in @@array_accessors'
-
+    describe 'instance methods' do
+        it 'should return an InterableArray when the corresponding Array method would return an array'
+    end
 end
