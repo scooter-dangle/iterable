@@ -12,4 +12,7 @@ describe IterableArray do
             @itArray.should respond_to(method)
         end
     end
+
+    it 'should return an IterableArray for every method in @@array_accessors'
+
 end
