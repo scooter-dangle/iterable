@@ -100,7 +100,7 @@ class IterableArray
 
             def eql?(arg)
                 (arg.class == IterableArray) and
-                    (self.to_a == arg.to_a)
+                    (self == arg.to_a)
             end
         end
     end
