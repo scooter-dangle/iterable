@@ -40,7 +40,7 @@ class IterableArray
 
 
     def initialize( array = [] )
-        @array = array
+        @array = Array.new array
         define_iterators
         define_array_accessors
     end

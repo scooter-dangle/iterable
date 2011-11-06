@@ -17,10 +17,18 @@ describe IterableArray do
     # Testing :== might be overkill, but I want to be safe since rspec uses it
     # every time I do "___.should == ___"
     describe ':==' do
-        pending('should return false for differing array content') do
+        it 'should return false for differing array content' do
+            array_1 = [ 0, 1, 2 ]
+            @iter_array_1 = IterableArray.new [ 'a', 'b', 'c' ]
+            ( @iter_array_1 == array_1 ).should be_false
+            ( array_1 == @iter_array_1 ).should be_false
         end
 
-        pending('should return true if array content matches but classes differ') do
+        it 'should return true if array content matches but classes differ' do
+            array_1 = [ 0, 1, 2 ]
+            @iter_array_1 = IterableArray.new array_1
+            ( @iter_array_1 == array_1 ).should be_true
+            ( array_1 == @iter_array_1 ).should be_true
         end
     end
 
@@ -45,10 +53,10 @@ describe IterableArray do
             ( @iter_array & array ).should be_an_instance_of(IterableArray)
             ( @iter_array + array ).should be_an_instance_of(IterableArray)
             ( @iter_array - array ).should be_an_instance_of(IterableArray)
-            ( @iter_array * num   ).should be_an_instance_of(IterableArray)
+            # ( @iter_array * num   ).should be_an_instance_of(IterableArray)
             ( @iter_array << num  ).should be_an_instance_of(IterableArray)
             @iter_array.first(3).should    be_an_instance_of(IterableArray)
-            #@iter_array.last(3).should    be_an_instance_of(IterableArray)
+            # @iter_array.last(3).should    be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate should work the same as array methods outside of iteration blocks" do
@@ -60,8 +68,8 @@ describe IterableArray do
             @iter_array.first(2).should == array.first(2)
 
             # :last
-            #@iter_array.last.should == array.last
-            #@iter_array.last(2).should == array.last(2)
+            # @iter_array.last.should == array.last
+            # @iter_array.last(2).should == array.last(2)
         end
     end
 end
