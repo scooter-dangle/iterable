@@ -90,8 +90,12 @@ class IterableArray
                 IterableArray.new(@array - arg)
             end
 
+            def *(arg)
+            end
+
             def <<(arg)
-                IterableArray.new(@array << arg)
+                @array << arg
+                self
             end
 
             def eql?(arg)
