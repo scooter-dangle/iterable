@@ -53,7 +53,11 @@ describe IterableArray do
             ( @iter_array & array ).should be_an_instance_of(IterableArray)
             ( @iter_array + array ).should be_an_instance_of(IterableArray)
             ( @iter_array - array ).should be_an_instance_of(IterableArray)
-            # ( @iter_array * num   ).should be_an_instance_of(IterableArray)
+            ( @iter_array * num   ).should be_an_instance_of(IterableArray)
+            ( @iter_array << num  ).should be_an_instance_of(IterableArray)
+            @iter_array.values_at(0..2).should be_an_instance_of(IterableArray)
+            @iter_array.indices(1..2).should be_an_instance_of(IterableArray)
+            @iter_array.indexes(1..2).should be_an_instance_of(IterableArray)
             ( @iter_array << num  ).should be_an_instance_of(IterableArray)
             @iter_array.first(3).should    be_an_instance_of(IterableArray)
             # @iter_array.last(3).should    be_an_instance_of(IterableArray)
@@ -66,6 +70,10 @@ describe IterableArray do
             # :first
             @iter_array.first.should == array.first
             @iter_array.first(2).should == array.first(2)
+
+            # :*
+            (@iter_array * ' ').should == (array * ' ')
+            (@iter_array * 2).should == (array * 2)
 
             # :last
             # @iter_array.last.should == array.last
