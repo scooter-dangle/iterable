@@ -78,6 +78,13 @@ describe IterableArray do
             # :last
             # @iter_array.last.should == array.last
             # @iter_array.last(2).should == array.last(2)
+
+            # :join
+            # Need to determine how to handle the case where an
+            # IterableArray (or even a regular array?) contains
+            # further IterableArrays. This also applies to :transpose.
+            @iter_array.join(' ').should == array.join(' ')
+            @iter_array.join.should == array.join
         end
     end
 end
