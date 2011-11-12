@@ -49,7 +49,7 @@ class IterableArray
         define_array_accessors
     end
 
-    # private # Only commented out for testing purposes.
+    private # Only comment out for testing purposes.
 
     def bastardize
         @array = IterableArray.new @array

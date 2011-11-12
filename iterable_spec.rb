@@ -1,4 +1,6 @@
-require '~/iterable/iterable.rb'
+require File.join(File.dirname(__FILE__),'iterable.rb')
+# require '~/iterable/iterable.rb'
+
 
 describe IterableArray do
     it 'should not claim to be an Array' do
