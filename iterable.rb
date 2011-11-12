@@ -3,22 +3,22 @@ require 'forwardable'
 class IterableArray
     extend Forwardable
 
-    attr_accessor :array  # For testing purposes only!
+    # attr_accessor :array  # For testing purposes only!
     
     # @@plain_accessors contains methods that return a non-array without
     # modifying the called array.
 
     @@plain_accessors = [ :==, :size, :length, :to_a, :to_s, :include?, :hash, :to_ary, :inspect, :at, :empty? ]
 
-    # @@array_accessors contains non-modifying methods that (would otherwise)
+    # @@special_accessors contains non-modifying methods that (would otherwise)
     # return an array. For this class, we want to return IterableArray objects
     # instead. Note: A few methods can still return a non-array in some cases.
     #
-    # Description above is outdated. Should probably rename @@array_accessors
+    # Description above is outdated. Should probably rename @@special_accessors
     # as @@complex_accessors. (Since many of them have to be handled
     # specially for reasons other than that they return an array.)
 
-    @@array_accessors = [ :&, :*, :+, :-, :<<, :[], :eql?, :indices, :indexes, :values_at, :join, :first, :last ]
+    @@special_accessors = [ :&, :*, :+, :-, :<<, :[], :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last ]
 
     @@modifiers = [ :delete, :delete_at, :pop, :push ]
     @@iterators = [ :each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :select ]
@@ -29,7 +29,7 @@ class IterableArray
     @@hybrids   = [ :fetch, :fill, :index ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#public_instance_methods => [ :frozen?, :[]=, :concat, :<<, :shift, :unshift, :insert, :reverse_each, :find_index, :rindex, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :select!, :keep_if, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :shuffle!, :shuffle, :sample, :cycle, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :clone, :dup, :initialize_dup, :initialize_clone, :freeze, :instance_variables, :instance_of?, :kind_of?, :is_a?, :tap, :extend, :display, :to_enum, :enum_for, :equal?, :!, :!= ]
+    # working:  Array#public_instance_methods => [ :frozen?, :[]=, :concat, :<<, :shift, :unshift, :insert, :reverse_each, :find_index, :rindex, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :select!, :keep_if, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :<=>, :slice, :slice!, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :shuffle!, :shuffle, :sample, :cycle, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :clone, :dup, :freeze, :tap, :extend, :display, :to_enum, :enum_for, :!, :!= ]
     # original: Array#public_instance_methods => [ :inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :class, :singleton_class, :clone, :dup, :initialize_dup, :initialize_clone, :taint, :tainted?, :untaint, :untrust, :untrusted?, :trust, :freeze, :methods, :singleton_methods, :protected_methods, :private_methods, :public_methods, :instance_variables, :instance_variable_get, :instance_variable_set, :instance_variable_defined?, :instance_of?, :kind_of?, :is_a?, :tap, :send, :public_send, :respond_to?, :respond_to_missing?, :extend, :display, :method, :public_method, :define_singleton_method, :__id__, :object_id, :to_enum, :enum_for, :equal?, :!, :!=, :instance_eval, :instance_exec, :__send__ ]
 
     # The following 2 lines don't work in 1.8.7/1.9.2... I need to look up using
@@ -46,17 +46,17 @@ class IterableArray
     def initialize( array = [] )
         @array = Array.new array
         define_iterators
-        define_array_accessors
+        define_special_accessors
     end
 
     private # Only comment out for testing purposes.
 
     def bastardize
         @array = IterableArray.new @array
-        undefine_methods @@array_accessors
+        undefine_methods @@special_accessors
         undefine_methods @@iterators
         class << self
-            @@array_accessors.each { |meth| def_delegator :@array, meth }
+            @@special_accessors.each { |meth| def_delegator :@array, meth }
             # def_delegators :@array, @@iterators
             @@iterators.each { |meth| def_delegator :@array, meth }
         end
@@ -70,16 +70,58 @@ class IterableArray
             # def_delegators :@array, @@modifiers
             @@modifiers.each { |meth| def_delegator :@array, meth }
         end
-        define_array_accessors
+        define_special_accessors
         define_iterators
     end
 
-    def define_array_accessors
+    def define_special_accessors
         class << self
+            def [](arg1, arg2=nil)
+                case arg1
+
+                when Fixnum
+                    return @array.at(arg1) unless arg2
+
+                    IterableArray.new @array[arg1, arg2]
+
+                when Range
+                    IterableArray.new @array[arg1]
+                end
+            end
+
             def first(n = nil)
                 return @array.first if n == nil
                 IterableArray.new @array.first(n)
             end
+
+            def last(n = nil)
+                return @array.last if n == nil
+                IterableArray.new @array.last(n)
+            end
+
+            def assoc(obj)
+                each do |x|
+                    if x.respond_to? :at and x.at(0) == obj
+                        return x
+                    end
+                end
+
+                nil
+            end
+
+            def rassoc(obj)
+                each do |elem|
+                    if elem.respond_to? :at and elem.at(1) == obj
+                        return elem
+                    end
+                end
+
+                nil
+            end
+
+            # Not defined since Array#nitems is not defined in 1.9.2+
+            # def nitems
+            # end
 
             def &(arg)
                 return IterableArray.new(@array & arg) if arg.class == IterableArray or arg.class == Array
@@ -99,9 +141,12 @@ class IterableArray
                 @array * arg
             end
 
-            def values_at(args)
-                return IterableArray.new @array.values_at(args) if args.kind_of? Range
-                @array.values_at(args)
+            def values_at(*args)
+                out = []
+                args.each do |arg|
+                    out += @array.values_at(arg)
+                end
+                IterableArray.new out
             end
 
             alias_method :indices, :values_at
@@ -119,6 +164,8 @@ class IterableArray
                 @array.join(sep)
             end
 
+            # :eql? returns true only when array contents are the same and
+            # both objects are IterableArray instances
             def eql?(arg)
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
