@@ -101,6 +101,11 @@ describe IterableArray do
             # :<<
             ( @iter_array << num ).should == ( array << num)
 
+            # :<=>
+            ( @iter_array <=> @iter_array_2 ).should == ( array <=> array_2 )
+            ( @iter_array_2 <=> @iter_array ).should == ( array_2 <=> array )
+            ( @iter_array <=> @iter_array ).should == ( array <=> array )
+
             # :&
             ( @iter_array_2 & array ).should == ( array_2 & array)
 
