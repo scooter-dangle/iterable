@@ -18,9 +18,12 @@ class IterableArray
     # as @@complex_accessors. (Since many of them have to be handled
     # specially for reasons other than that they return an array.)
 
-    @@special_accessors = [ :&, :*, :+, :-, :<<, :[], :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last ]
+    @@special_accessors = [ :&, :|, :*, :+, :-, :[], :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last ]
 
-    @@modifiers = [ :delete, :delete_at, :pop, :push ]
+    @@special_modifiers = [ :<< ]
+
+    @@plain_modifiers = [ :delete, :delete_at, :pop, :push ]
+
     @@iterators = [ :each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :select ]
 
     # @@hybrids contains methods that fit into the previous groups depending
@@ -29,48 +32,52 @@ class IterableArray
     @@hybrids   = [ :fetch, :fill, :index ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#public_instance_methods => [ :frozen?, :[]=, :concat, :<<, :shift, :unshift, :insert, :reverse_each, :find_index, :rindex, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :select!, :keep_if, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :<=>, :slice, :slice!, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :shuffle!, :shuffle, :sample, :cycle, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :clone, :dup, :freeze, :tap, :extend, :display, :to_enum, :enum_for, :!, :!= ]
+    # working:  Array#public_instance_methods => [ :frozen?, :[]=, :concat, :<<, :shift, :unshift, :insert, :reverse_each, :find_index, :rindex, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :select!, :keep_if, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :<=>, :slice, :slice!, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :shuffle!, :shuffle, :sample, :cycle, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :clone, :dup, :freeze, :tap, :extend, :display, :to_enum, :enum_for, :!, :!= ]
     # original: Array#public_instance_methods => [ :inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack, :entries, :sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :member?, :each_with_index, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before, :nil?, :===, :=~, :!~, :class, :singleton_class, :clone, :dup, :initialize_dup, :initialize_clone, :taint, :tainted?, :untaint, :untrust, :untrusted?, :trust, :freeze, :methods, :singleton_methods, :protected_methods, :private_methods, :public_methods, :instance_variables, :instance_variable_get, :instance_variable_set, :instance_variable_defined?, :instance_of?, :kind_of?, :is_a?, :tap, :send, :public_send, :respond_to?, :respond_to_missing?, :extend, :display, :method, :public_method, :define_singleton_method, :__id__, :object_id, :to_enum, :enum_for, :equal?, :!, :!=, :instance_eval, :instance_exec, :__send__ ]
 
     # The following 2 lines don't work in 1.8.7/1.9.2... I need to look up using
     # arrays as args for those?
     # def_delegators :@array, @@plain_accessors
-    # def_delegators :@array, @@modifiers
+    # def_delegators :@array, @@plain_modifiers
     #
     # Using the following instead:
 
     @@plain_accessors.each { |meth| def_delegator :@array, meth }
-    @@modifiers.each { |meth| def_delegator :@array, meth }
+    @@plain_modifiers.each { |meth| def_delegator :@array, meth }
 
+
+    private # Only comment out for testing purposes.
 
     def initialize( array = [] )
         @array = Array.new array
         define_iterators
         define_special_accessors
+        define_special_modifiers_noniterating
     end
-
-    private # Only comment out for testing purposes.
 
     def bastardize
         @array = IterableArray.new @array
-        undefine_methods @@special_accessors
         undefine_methods @@iterators
+        undefine_methods @@special_accessors
+        undefine_methods @@special_modifiers
         class << self
             @@special_accessors.each { |meth| def_delegator :@array, meth }
-            # def_delegators :@array, @@iterators
             @@iterators.each { |meth| def_delegator :@array, meth }
         end
-        define_modifiers
+        define_plain_modifiers
+        define_special_modifiers_iterating
     end
 
     def debastardize
         @array = @array.to_a
-        undefine_methods @@modifiers
+        undefine_methods @@plain_modifiers
+        undefine_methods @@special_modifiers
         class << self
-            # def_delegators :@array, @@modifiers
-            @@modifiers.each { |meth| def_delegator :@array, meth }
+            # def_delegators :@array, @@plain_modifiers
+            @@plain_modifiers.each { |meth| def_delegator :@array, meth }
         end
         define_special_accessors
+        define_special_modifiers_noniterating
         define_iterators
     end
 
@@ -127,6 +134,10 @@ class IterableArray
                 IterableArray.new(@array & arg.to_a)
             end
 
+            def |(arg)
+                IterableArray.new(@array | arg.to_a)
+            end
+
             def +(arg)
                 IterableArray.new(@array + arg)
             end
@@ -151,10 +162,6 @@ class IterableArray
             alias_method :indices, :values_at
             alias_method :indexes, :values_at
 
-            def <<(arg)
-                @array << arg
-                self
-            end
 
             # :join is defined here (instead of directly delegating it to
             # @array) since we might want to later define how it handles
@@ -172,7 +179,24 @@ class IterableArray
         end
     end
 
-    def define_modifiers
+    def define_special_modifiers_noniterating
+        class << self
+            def <<(arg)
+                @array << arg
+                self
+            end
+        end
+    end
+
+    def define_special_modifiers_iterating
+        class << self
+            def <<(arg) # Not yet defined
+                # @array << arg
+            end
+        end
+    end
+
+    def define_plain_modifiers
         class << self
             def pop
                 puts ":pop called on bastardized array"

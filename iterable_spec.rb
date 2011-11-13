@@ -76,6 +76,7 @@ describe IterableArray do
             ( @iter_array & array ).should be_an_instance_of(IterableArray)
             ( @iter_array + array ).should be_an_instance_of(IterableArray)
             ( @iter_array - array ).should be_an_instance_of(IterableArray)
+            ( @iter_array | array ).should be_an_instance_of(IterableArray)
             ( @iter_array * num   ).should be_an_instance_of(IterableArray)
             ( @iter_array << num  ).should be_an_instance_of(IterableArray)
             @iter_array[1, 2].should be_an_instance_of(IterableArray)
@@ -102,6 +103,9 @@ describe IterableArray do
 
             # :&
             ( @iter_array_2 & array ).should == ( array_2 & array)
+
+            # :|
+            ( @iter_array_2 | array ).should == ( array_2 | array)
 
             # :+
             ( @iter_array + array ).should == ( array + array)
