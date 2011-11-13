@@ -93,7 +93,24 @@ describe IterableArray do
         it "that don't iterate should work the same as array methods outside of iteration blocks" do
             array = [ 'a', 'b', 'c', 'd' ]
             @iter_array = IterableArray.new array
+            array_2 = [ 'c', 'd', 'e' ]
+            @iter_array_2 = IterableArray.new array_2
             num   = 3
+
+            # :<<
+            ( @iter_array << num ).should == ( array << num)
+
+            # :&
+            ( @iter_array_2 & array ).should == ( array_2 & array)
+
+            # :+
+            ( @iter_array + array ).should == ( array + array)
+
+            # :-
+            ( @iter_array_2 - array ).should == ( array_2 - array)
+
+            # :+
+            ( @iter_array + array ).should == ( array + array)
 
             # :[]
             @iter_array[num].should == array[num]
