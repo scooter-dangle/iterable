@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__),'iterable.rb'
+require File.join(File.dirname(__FILE__),'iterable.rb')
 # require '~/iterable/iterable.rb'
 
 
@@ -149,6 +149,14 @@ describe IterableArray do
             # also applies to :transpose.
             @iter_ary.join(' ').should == @ary.join(' ')
             @iter_ary.join.should == @ary.join
+        end
+
+        describe "inside iteration blocks" do
+            before :each do
+            end
+
+            it "should take iteration into account" do
+            end
         end
     end
 end
