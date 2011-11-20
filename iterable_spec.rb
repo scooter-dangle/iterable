@@ -81,6 +81,8 @@ describe IterableArray do
             ( @iter_ary << num  ).should be_an_instance_of(IterableArray)
             @iter_ary[1, 2].should be_an_instance_of(IterableArray)
             @iter_ary[1...num].should be_an_instance_of(IterableArray)
+            @iter_ary.slice(1, 2).should be_an_instance_of(IterableArray)
+            @iter_ary.slice(1...num).should be_an_instance_of(IterableArray)
             @iter_ary.values_at(1...num).should be_an_instance_of(IterableArray)
             @iter_ary.values_at(0).should be_an_instance_of(IterableArray)
             @iter_ary.values_at(1, 0).should be_an_instance_of(IterableArray)

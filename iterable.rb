@@ -75,6 +75,8 @@ class IterableArray
                 end
             end
 
+            alias_method :slice, :[]
+
             def first(n = nil)
                 return @array.first if n == nil
                 IterableArray.new @array.first(n)
