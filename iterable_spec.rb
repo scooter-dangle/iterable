@@ -161,4 +161,38 @@ describe IterableArray do
             end
         end
     end
+
+    describe "iteration methods" do
+        # Will probably need to have some modification methods implemented
+        # before being able to *really* test iteration methods.
+        it "should work like normal iteration methods when array is not modified during iteration" do
+            @ary = [ 'a', 'b', 'c', 'd' ]
+            @iter_ary = IterableArray.new @ary
+
+            # :each
+            out_1, out_2 = [], []
+            appender_1 = lambda { |x| out_1 << x } 
+            appender_2 = lambda { |x| out_2 << x } 
+            @iter_ary.each(&appender_1)
+            @ary.each(&appender_2)
+            out_1.should == out_2
+
+            # :map / :collect
+            out_1, out_2 = [], []
+            @iter_ary.map(&appender_1).should == @ary.map(&appender_2)
+
+            out_1.should == out_2
+
+            # :map! / :collect!
+            out_1, out_2 = [], []
+            fancy_appender_1 = lambda { |x| (out_1 << x).dup } 
+            fancy_appender_2 = lambda { |x| (out_2 << x).dup } 
+            @iter_ary.map!(&fancy_appender_1).should == @ary.map!(&fancy_appender_2)
+
+            @iter_ary.should == @ary
+
+            out_1.should == out_2
+
+        end
+    end
 end
