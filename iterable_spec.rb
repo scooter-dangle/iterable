@@ -193,6 +193,9 @@ describe IterableArray do
 
             out_1.should == out_2
 
+            # :cycle
+
+
         end
     end
 end
