@@ -5,10 +5,10 @@ class IterableArray
 
     # attr_accessor :array  # For testing purposes only!
 
-    @@plain_accessors = [ :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :reverse, :empty? ]
+    @@plain_accessors   = [ :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :reverse, :empty? ]
     @@special_accessors = [ :&, :|, :*, :+, :-, :[], :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last ]
 
-    @@plain_modifiers = [ :delete, :delete_at, :pop, :push ]
+    @@plain_modifiers   = [ :delete, :delete_at, :pop, :push ]
     @@special_modifiers = [ :<< ]
 
     @@iterators = [ :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :select ]

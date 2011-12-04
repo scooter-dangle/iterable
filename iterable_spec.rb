@@ -77,8 +77,8 @@ describe IterableArray do
             ( @iter_ary + @ary ).should be_an_instance_of(IterableArray)
             ( @iter_ary - @ary ).should be_an_instance_of(IterableArray)
             ( @iter_ary | @ary ).should be_an_instance_of(IterableArray)
-            ( @iter_ary * num   ).should be_an_instance_of(IterableArray)
-            ( @iter_ary << num  ).should be_an_instance_of(IterableArray)
+            ( @iter_ary * num  ).should be_an_instance_of(IterableArray)
+            ( @iter_ary << num ).should be_an_instance_of(IterableArray)
             @iter_ary[1, 2].should be_an_instance_of(IterableArray)
             @iter_ary[1...num].should be_an_instance_of(IterableArray)
             @iter_ary.slice(1, 2).should be_an_instance_of(IterableArray)
@@ -89,8 +89,8 @@ describe IterableArray do
             @iter_ary.indices((1..2)).should be_an_instance_of(IterableArray)
             @iter_ary.indexes((1..2)).should be_an_instance_of(IterableArray)
             ( @iter_ary << num  ).should be_an_instance_of(IterableArray)
-            @iter_ary.first(3).should    be_an_instance_of(IterableArray)
-            @iter_ary.last(3).should    be_an_instance_of(IterableArray)
+            @iter_ary.first(3).should be_an_instance_of(IterableArray)
+            @iter_ary.last(3).should be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate should work the same as array methods outside of iteration blocks" do
@@ -195,7 +195,68 @@ describe IterableArray do
 
             # :cycle
 
-
         end
+    end
+
+    describe "complex iteration" do
+        before :each do
+            @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl, :eve ]
+            @out = []
+        end
+
+        it do
+            @batting_order.each do |x|
+                @out << x
+                if x == :carrie
+                    @batting_order.delete_at(@batting_order.index(x))
+                end
+                @batting_order.should == [ :alice, :bob, :darryl, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+            end
+        end
+
+        it do
+            @batting_order.each do |x|
+                @out << x
+                if x == :carrie
+                    @batting_order.pop
+                end
+                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
+                @out.should == [ :alice, :bob, :carrie, :darryl ]
+            end
+        end
+
+        it do
+            @batting_order.each do |x|
+                @out << x
+                if x == :carrie
+                    @batting_order.shift
+                end
+                @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+            end
+        end
+
+        it do
+             @batting_order.each do |x|
+                 @out << x
+                 @batting_order.reverse! if x == :darryl
+             end
+             @batting_order.should == [ :eve, :darryl, :carrie, :bob, :alice ]
+             @out.should == [ :alice, :bob, :carrie, :darryl, :carrie, :bob, :alice ]
+        end
+
+        it do
+             @batting_order.each do |x|
+                 @out << x
+                 if x == :carrie
+                     @batting_order.delete_at(@batting_order.index(x))
+                     @batting_order.reverse!
+                 end
+             end
+             @batting_order.should == [ :eve, :darryl, :bob, :alice ]
+             @out.should == [ :alice, :bob, :carrie, :bob, :alice ]
+        end
+
     end
 end
