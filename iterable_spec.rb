@@ -64,9 +64,11 @@ describe IterableArray do
 
 
     describe 'instance methods' do
-        it 'should not include :nitems since :nitems is not in 1.9.x' do
-            @iter_ary = IterableArray.new [ 'a', 'b', 'c' ]
-            @iter_ary.singleton_class.instance_methods.should_not include(:nitems)
+        if RUBY_VERSION >= "1.9"
+            it 'should not include :nitems since :nitems is not in 1.9.x' do
+                @iter_ary = IterableArray.new [ 'a', 'b', 'c' ]
+                @iter_ary.singleton_class.instance_methods.should_not include(:nitems)
+            end
         end
 
         it 'should return an InterableArray when the corresponding Array method would return an array' do
