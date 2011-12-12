@@ -153,6 +153,12 @@ describe IterableArray do
             # also applies to :transpose.
             @iter_ary.join(' ').should == @ary.join(' ')
             @iter_ary.join.should == @ary.join
+
+            # :index
+            obj = 'b'
+            @iter_ary.index(obj).should == @ary.index(obj)
+            obj = 'z'
+            @iter_ary.index(obj).should == @ary.index(obj)
         end
 
         describe "inside iteration blocks" do
@@ -179,10 +185,11 @@ describe IterableArray do
             @ary.each(&appender_2)
             out_1.should == out_2
 
+            # :each_index
+
             # :map / :collect
             out_1, out_2 = [], []
             @iter_ary.map(&appender_1).should == @ary.map(&appender_2)
-
             out_1.should == out_2
 
             # :map! / :collect!
@@ -190,12 +197,25 @@ describe IterableArray do
             fancy_appender_1 = lambda { |x| (out_1 << x).dup } 
             fancy_appender_2 = lambda { |x| (out_2 << x).dup } 
             @iter_ary.map!(&fancy_appender_1).should == @ary.map!(&fancy_appender_2)
-
             @iter_ary.should == @ary
-
             out_1.should == out_2
-
+            @ary = [ 'a', 'b', 'c', 'd' ]  # reset @ary
+            @iter_ary = IterableArray.new @ary  # reset @iter_ary
+            
             # :cycle
+            # out_1, out_2 = [], []
+
+            # :index
+            out_1, out_2 = [], []
+            obj = 'c'
+            index_appender_1 = lambda { |x| out_1 << x; x == obj } 
+            index_appender_2 = lambda { |x| out_2 << x; x == obj } 
+            @iter_ary.index(&index_appender_1).should == @ary.index(&index_appender_2)
+            out_1.should == out_2
+            out_1, out_2 = [], []
+            obj = 'z'
+            @iter_ary.index(&index_appender_1).should == @ary.index(&index_appender_2)
+            out_1.should == out_2
 
         end
     end
@@ -209,34 +229,28 @@ describe IterableArray do
         it do
             @batting_order.each do |x|
                 @out << x
-                if x == :carrie
-                    @batting_order.delete_at(@batting_order.index(x))
-                end
-                @batting_order.should == [ :alice, :bob, :darryl, :eve ]
-                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.delete_at(@batting_order.index(x)) if x == :carrie
             end
+            @batting_order.should == [ :alice, :bob, :darryl, :eve ]
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
         end
 
         it do
             @batting_order.each do |x|
                 @out << x
-                if x == :carrie
-                    @batting_order.pop
-                end
-                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
-                @out.should == [ :alice, :bob, :carrie, :darryl ]
+                @batting_order.pop if x == :carrie
             end
+            @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
+            @out.should == [ :alice, :bob, :carrie, :darryl ]
         end
 
         it do
             @batting_order.each do |x|
                 @out << x
-                if x == :carrie
-                    @batting_order.shift
-                end
-                @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
-                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.shift if x == :carrie
             end
+            @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
         end
 
         it do

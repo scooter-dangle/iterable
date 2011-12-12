@@ -315,6 +315,32 @@ class IterableArray
                 nil
             end
 
+            def index(obj = :undefined)
+                unless block_given?
+                    # What should I change :undefined to?
+                    # I can't use null or nil or anything in case the index
+                    # of null or nil needs to be looked up.
+                    # Rubinius uses a plain (non-symbol) 'undefined' keyword,
+                    # but that doesn't seem to work in 1.9.2.
+                    return @array.index(obj) unless obj == :undefined
+                    return @array.to_enum(:index)
+                end
+
+                bastardize
+
+                @iter_index = 0
+                while @iter_index < @array.size
+                    item = @array.at(@iter_index)
+                    if yield item
+                        debastardize
+                        return @iter_index
+                    end
+                    @iter_index += 1
+                end
+
+                debastardize
+                nil
+            end
         end
     end
 
