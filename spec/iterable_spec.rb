@@ -198,43 +198,38 @@ describe IterableArray do
         end
 
         it ':each' do
-            @iter_ary.each(&(@appender.call @out_1)).should ==
-                 @ary.each(&(@appender.call @out_2))
+            @iter_ary.each(&(@appender.call @out_1)).should == @ary.each(&(@appender.call @out_2))
             check_outs
             @iter_ary.each {}.should be_an_instance_of(IterableArray)
         end
 
         it ':each_index' do
-            @iter_ary.each_index(&(@appender.call @out_1)).should ==
-                 @ary.each_index(&(@appender.call @out_2))
+            @iter_ary.each_index(&(@appender.call @out_1)).should == @ary.each_index(&(@appender.call @out_2))
             check_outs
             @iter_ary.each_index {}.should be_an_instance_of(IterableArray)
         end
 
         it ':each_with_index' do
             @iter_ary.each_with_index(&(@each_with_index_appender.call @out_1)).should ==
-                 @ary.each_with_index(&(@each_with_index_appender.call @out_2))
+                @ary.each_with_index(&(@each_with_index_appender.call @out_2))
             check_outs
             @iter_ary.each_with_index {}.should be_an_instance_of(IterableArray)
         end
 
         it ':reverse_each' do
-            @iter_ary.reverse_each(&(@appender.call @out_1)).should ==
-                 @ary.reverse_each(&(@appender.call @out_2))
+            @iter_ary.reverse_each(&(@appender.call @out_1)).should == @ary.reverse_each(&(@appender.call @out_2))
             check_outs
             @iter_ary.reverse_each {}.should be_an_instance_of(IterableArray)
         end
 
         it ':map / :collect' do
-            @iter_ary.map(&(@appender.call @out_1)).should ==
-                 @ary.map(&(@appender.call @out_2))
+            @iter_ary.map(&(@appender.call @out_1)).should == @ary.map(&(@appender.call @out_2))
             check_outs
             @iter_ary.map {}.should be_an_instance_of(IterableArray)
         end
 
         it ':map! / :collect!' do
-            @iter_ary.map!(&(@map_appender.call @out_1)).should ==
-                 @ary.map!(&(@map_appender.call @out_2))
+            @iter_ary.map!(&(@map_appender.call @out_1)).should == @ary.map!(&(@map_appender.call @out_2))
             @iter_ary.should == @ary
             check_outs
             @iter_ary.map! {}.should be_an_instance_of(IterableArray)
@@ -247,14 +242,14 @@ describe IterableArray do
             it do
                 obj = 'c'
                 @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
-                     @ary.index(&(@index_appender.call obj, @out_2))
+                    @ary.index(&(@index_appender.call obj, @out_2))
                 check_outs
             end
 
             it do
                 obj = 'z'
                 @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
-                     @ary.index(&(@index_appender.call obj, @out_2))
+                    @ary.index(&(@index_appender.call obj, @out_2))
                 check_outs
             end
         end
