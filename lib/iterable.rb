@@ -3,6 +3,9 @@ require 'forwardable'
 class IterableArray
     extend Forwardable
 
+    # Probably won't be able to take advantage of Enumerable :(
+    # include Enumerable
+
     # attr_accessor :array  # For testing purposes only!
 
     @@plain_accessors   = [ :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :reverse, :empty? ]
@@ -27,7 +30,7 @@ class IterableArray
 
     private # Only comment out for testing purposes.
 
-    def initialize( array = [] )
+    def initialize array = []
         @array = Array.new array
         define_iterators
         define_special_accessors
@@ -77,17 +80,17 @@ class IterableArray
 
             alias_method :slice, :[]
 
-            def first(n = nil)
+            def first n = nil
                 return @array.first if n == nil
                 IterableArray.new @array.first(n)
             end
 
-            def last(n = nil)
+            def last n = nil
                 return @array.last if n == nil
                 IterableArray.new @array.last(n)
             end
 
-            def assoc(obj)
+            def assoc obj
                 each do |x|
                     if x.respond_to? :at and x.at(0) == obj
                         return x
@@ -97,7 +100,7 @@ class IterableArray
                 nil
             end
 
-            def rassoc(obj)
+            def rassoc obj
                 each do |elem|
                     if elem.respond_to? :at and elem.at(1) == obj
                         return elem
@@ -137,7 +140,7 @@ class IterableArray
                 @array <=> other
             end
 
-            def values_at(*args)
+            def values_at *args
                 out = []
                 args.each do |arg|
                     out += @array.values_at(arg)
@@ -152,7 +155,7 @@ class IterableArray
             # :join is defined here (instead of directly delegating it to
             # @array) since we might want to later define how it handles
             # an array that contains IterableArrays as elements.
-            def join(sep=nil)
+            def join sep=nil
                 @array.join(sep)
             end
 
@@ -202,7 +205,6 @@ class IterableArray
         class << self
             def each
                 return @array.to_enum(:each) unless block_given?
-
                 bastardize
 
                 @iter_index = 0
@@ -212,11 +214,11 @@ class IterableArray
                 end
 
                 debastardize
+                self
             end
 
             def each_index
                 return @array.to_enum(:each_index) unless block_given?
-
                 bastardize
 
                 @iter_index = 0
@@ -226,11 +228,25 @@ class IterableArray
                 end
 
                 debastardize
+                self
+            end
+
+            def each_with_index
+                return @array.to_enum(:each_with_index) unless block_given?
+                bastardize
+
+                @iter_index = 0
+                while @iter_index < @array.size
+                    yield @array.at(@iter_index), @iter_index
+                    @iter_index += 1
+                end
+
+                debastardize
+                self
             end
 
             def reverse_each
                 return @array.to_enum(:reverse_each) unless block_given?
-
                 bastardize
 
                 @iter_index = @array.size
@@ -240,12 +256,12 @@ class IterableArray
                 end
 
                 debastardize
+                self
             end
 
             def map
                 return @array.dup unless block_given?
                 out = Array.new []
-
                 bastardize
 
                 @iter_index = 0
@@ -255,7 +271,6 @@ class IterableArray
                 end
 
                 debastardize
-
                 IterableArray.new out
             end
 
@@ -263,20 +278,12 @@ class IterableArray
 
             def map!
                 return to_enum(:map!) unless block_given?
-
                 bastardize
 
                 @iter_index = 0
                 while @iter_index < @array.size
-                    # I believe that the following line might not work since
-                    # Ruby might evaluate @iter_index in the left-hand side
-                    # of the assignment before it yields to the iteration
-                    # block. If something occurs during iteration that would
-                    # change the iteration index, I'd want to wait to evaluate
-                    # @array[@iter_index] until after I know for sure what
-                    # value @iter_index has, right?
-                    # @array[@iter_index] = yield(@array.at(@iter_index))
-
+                    # The following verbosity required so that @iter_index will be
+                    # evaluated after any modifications to it by the block.
                     temp_value = yield(@array.at(@iter_index))
                     @array[@iter_index] = temp_value
                     @iter_index += 1
@@ -288,9 +295,8 @@ class IterableArray
 
             alias_method :collect!, :map!
 
-            def cycle(n = nil, &block)
+            def cycle n = nil, &block
                 return @array.to_enum(:cycle, n) unless block_given?
-
                 bastardize
 
                 if n.equal? nil
@@ -315,7 +321,7 @@ class IterableArray
                 nil
             end
 
-            def index(obj = :undefined)
+            def index obj = :undefined
                 unless block_given?
                     # What should I change :undefined to?
                     # I can't use null or nil or anything in case the index
@@ -325,7 +331,6 @@ class IterableArray
                     return @array.index(obj) unless obj == :undefined
                     return @array.to_enum(:index)
                 end
-
                 bastardize
 
                 @iter_index = 0
@@ -344,7 +349,7 @@ class IterableArray
         end
     end
 
-    def undefine_methods(ary)
+    def undefine_methods ary
         ary.each do |meth|
             class << self
                 begin
@@ -359,7 +364,7 @@ class IterableArray
 
     # :method_missing should probably be disabled during testing. Is
     # there a more elegant / built-in way to do this?
-#    def method_missing( method, *args, &block )
+#    def method_missing  method, *args, &block 
 #        @array.send( method, *args, &block )
 #    end
 

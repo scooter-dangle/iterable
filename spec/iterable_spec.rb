@@ -1,16 +1,23 @@
-require File.join(File.dirname(__FILE__),'iterable.rb')
-# require '~/iterable/iterable.rb'
+require File.join(File.split(File.dirname(__FILE__))[0], 'lib/iterable.rb')
 
 
 describe IterableArray do
     it 'should not claim to be an Array' do
         @iter_ary = IterableArray.new
         @iter_ary.class.should_not == Array
+        @iter_ary.class.should == IterableArray
     end
 
-    pending('should respond to every Array instance method') do # MAYbe...
+    pending 'should respond to every Array instance method' do # MAYbe...
         @iter_ary = IterableArray.new
-        Array.instance_methods.each do |method|
+        Array.instance_methods(false).each do |method|
+            @iter_ary.should respond_to(method)
+        end
+    end
+
+    pending 'should respond to every Enumerable instance method' do # MAYbe...
+        @iter_ary = IterableArray.new
+        Enumerable.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
         end
     end
@@ -51,7 +58,7 @@ describe IterableArray do
     end
 
 
-    it ":eql? should act like a class-sensitive version of :==" do
+    it ':eql? should act like a class-sensitive version of :==' do
         @ary_1 = [ 0, 1, 2 ]
         @ary_2 = [ 'a', 'b', 'c' ]
         @iter_ary_1 = IterableArray.new @ary_1
@@ -64,7 +71,7 @@ describe IterableArray do
 
 
     describe 'instance methods' do
-        if RUBY_VERSION >= "1.9"
+        if RUBY_VERSION >= '1.9'
             it 'should not include :nitems since :nitems is not in 1.9.x' do
                 @iter_ary = IterableArray.new [ 'a', 'b', 'c' ]
                 @iter_ary.singleton_class.instance_methods.should_not include(:nitems)
@@ -75,24 +82,23 @@ describe IterableArray do
             @iter_ary = IterableArray.new [ 'a', 'b', 'c', 'd' ]
             @ary = [ 0, 1, 2, 3 ]
             num   = 3
-            ( @iter_ary & @ary ).should be_an_instance_of(IterableArray)
-            ( @iter_ary + @ary ).should be_an_instance_of(IterableArray)
-            ( @iter_ary - @ary ).should be_an_instance_of(IterableArray)
-            ( @iter_ary | @ary ).should be_an_instance_of(IterableArray)
-            ( @iter_ary * num  ).should be_an_instance_of(IterableArray)
-            ( @iter_ary << num ).should be_an_instance_of(IterableArray)
-            @iter_ary[1, 2].should be_an_instance_of(IterableArray)
-            @iter_ary[1...num].should be_an_instance_of(IterableArray)
-            @iter_ary.slice(1, 2).should be_an_instance_of(IterableArray)
-            @iter_ary.slice(1...num).should be_an_instance_of(IterableArray)
+            ( @iter_ary & @ary )        .should be_an_instance_of(IterableArray)
+            ( @iter_ary + @ary )        .should be_an_instance_of(IterableArray)
+            ( @iter_ary - @ary )        .should be_an_instance_of(IterableArray)
+            ( @iter_ary | @ary )        .should be_an_instance_of(IterableArray)
+            ( @iter_ary * num  )        .should be_an_instance_of(IterableArray)
+            ( @iter_ary << num )        .should be_an_instance_of(IterableArray)
+            @iter_ary[1, 2]             .should be_an_instance_of(IterableArray)
+            @iter_ary[1...num]          .should be_an_instance_of(IterableArray)
+            @iter_ary.slice(1, 2)       .should be_an_instance_of(IterableArray)
+            @iter_ary.slice(1...num)    .should be_an_instance_of(IterableArray)
             @iter_ary.values_at(1...num).should be_an_instance_of(IterableArray)
-            @iter_ary.values_at(0).should be_an_instance_of(IterableArray)
-            @iter_ary.values_at(1, 0).should be_an_instance_of(IterableArray)
-            @iter_ary.indices((1..2)).should be_an_instance_of(IterableArray)
-            @iter_ary.indexes((1..2)).should be_an_instance_of(IterableArray)
-            ( @iter_ary << num  ).should be_an_instance_of(IterableArray)
-            @iter_ary.first(3).should be_an_instance_of(IterableArray)
-            @iter_ary.last(3).should be_an_instance_of(IterableArray)
+            @iter_ary.values_at(0)      .should be_an_instance_of(IterableArray)
+            @iter_ary.values_at(1, 0)   .should be_an_instance_of(IterableArray)
+            @iter_ary.indices((1..2))   .should be_an_instance_of(IterableArray)
+            @iter_ary.indexes((1..2))   .should be_an_instance_of(IterableArray)
+            @iter_ary.first(3)          .should be_an_instance_of(IterableArray)
+            @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate should work the same as array methods outside of iteration blocks" do
@@ -160,67 +166,96 @@ describe IterableArray do
             obj = 'z'
             @iter_ary.index(obj).should == @ary.index(obj)
         end
-
-        describe "inside iteration blocks" do
-            before :each do
-            end
-
-            it "should take iteration into account" do
-            end
-        end
     end
 
-    describe "iteration methods" do
+    describe 'non-modifying iteration' do
         # Will probably need to have some modification methods implemented
         # before being able to *really* test iteration methods.
-        it "should work like normal iteration methods when array is not modified during iteration" do
+        before :all do
+            @out_1, @out_2 = [], []
+            @appender = lambda { |out| lambda { |x| out << x } }
+            @each_with_index_appender = lambda { |out| lambda { |x, y| out << [x, y] } }
+            @map_appender = lambda { |out| lambda { |x| (out << x).dup } }
+            @index_appender = lambda { |obj, out| lambda { |x| out << x; x == obj } }
+        end
+
+        before :each do
             @ary = [ 'a', 'b', 'c', 'd' ]
             @iter_ary = IterableArray.new @ary
+            @out_1, @out_2 = [], []
+        end
 
-            # :each
-            out_1, out_2 = [], []
-            appender_1 = lambda { |x| out_1 << x } 
-            appender_2 = lambda { |x| out_2 << x } 
-            @iter_ary.each(&appender_1)
-            @ary.each(&appender_2)
-            out_1.should == out_2
+        def check_outs
+            @out_1.should_not == []
+            @out_1.should == @out_2
+        end
 
-            # :each_index
+        it 'is this test even working?' do
+            @ary.should == [ 'a', 'b', 'c', 'd' ]
+            @iter_ary.should == IterableArray.new([ 'a', 'b', 'c', 'd' ])
+            @ary.each(&(@appender.call @out_1)).should == [ 'a', 'b', 'c', 'd' ]
+            @out_1.should == [ 'a', 'b', 'c', 'd' ]
+        end
 
-            # :map / :collect
-            out_1, out_2 = [], []
-            @iter_ary.map(&appender_1).should == @ary.map(&appender_2)
-            out_1.should == out_2
+        it ':each' do
+            @iter_ary.each(&(@appender.call @out_1)).should == @ary.each(&(@appender.call @out_2))
+            check_outs
+            @iter_ary.each {}.should be_an_instance_of(IterableArray)
+        end
 
-            # :map! / :collect!
-            out_1, out_2 = [], []
-            fancy_appender_1 = lambda { |x| (out_1 << x).dup } 
-            fancy_appender_2 = lambda { |x| (out_2 << x).dup } 
-            @iter_ary.map!(&fancy_appender_1).should == @ary.map!(&fancy_appender_2)
+        it ':each_index' do
+            @iter_ary.each_index(&(@appender.call @out_1)).should == @ary.each_index(&(@appender.call @out_2))
+            check_outs
+            @iter_ary.each_index {}.should be_an_instance_of(IterableArray)
+        end
+
+        it ':each_with_index' do
+            @iter_ary.each_with_index(&(@each_with_index_appender.call @out_1)).should ==
+                @ary.each_with_index(&(@each_with_index_appender.call @out_2))
+            check_outs
+            @iter_ary.each_with_index {}.should be_an_instance_of(IterableArray)
+        end
+
+        it ':reverse_each' do
+            @iter_ary.reverse_each(&(@appender.call @out_1)).should == @ary.reverse_each(&(@appender.call @out_2))
+            check_outs
+            @iter_ary.reverse_each {}.should be_an_instance_of(IterableArray)
+        end
+
+        it ':map / :collect' do
+            @iter_ary.map(&(@appender.call @out_1)).should == @ary.map(&(@appender.call @out_2))
+            check_outs
+            @iter_ary.map {}.should be_an_instance_of(IterableArray)
+        end
+
+        it ':map! / :collect!' do
+            @iter_ary.map!(&(@map_appender.call @out_1)).should == @ary.map!(&(@map_appender.call @out_2))
             @iter_ary.should == @ary
-            out_1.should == out_2
-            @ary = [ 'a', 'b', 'c', 'd' ]  # reset @ary
-            @iter_ary = IterableArray.new @ary  # reset @iter_ary
-            
-            # :cycle
-            # out_1, out_2 = [], []
+            check_outs
+            @iter_ary.map! {}.should be_an_instance_of(IterableArray)
+        end
 
-            # :index
-            out_1, out_2 = [], []
-            obj = 'c'
-            index_appender_1 = lambda { |x| out_1 << x; x == obj } 
-            index_appender_2 = lambda { |x| out_2 << x; x == obj } 
-            @iter_ary.index(&index_appender_1).should == @ary.index(&index_appender_2)
-            out_1.should == out_2
-            out_1, out_2 = [], []
-            obj = 'z'
-            @iter_ary.index(&index_appender_1).should == @ary.index(&index_appender_2)
-            out_1.should == out_2
+        # :cycle
+        # @out_1, @out_2 = [], []
 
+        describe ':index' do
+            it do
+                obj = 'c'
+                @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
+                    @ary.index(&(@index_appender.call obj, @out_2))
+                check_outs
+            end
+
+            it do
+                obj = 'z'
+                @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
+                    @ary.index(&(@index_appender.call obj, @out_2))
+                check_outs
+            end
         end
     end
 
-    describe "complex iteration" do
+    describe 'complex iteration' do
         before :each do
             @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl, :eve ]
             @out = []
@@ -254,25 +289,24 @@ describe IterableArray do
         end
 
         it do
-             @batting_order.each do |x|
-                 @out << x
-                 @batting_order.reverse! if x == :darryl
-             end
-             @batting_order.should == [ :eve, :darryl, :carrie, :bob, :alice ]
-             @out.should == [ :alice, :bob, :carrie, :darryl, :carrie, :bob, :alice ]
+            @batting_order.each do |x|
+                @out << x
+                @batting_order.reverse! if x == :darryl
+            end
+            @batting_order.should == [ :eve, :darryl, :carrie, :bob, :alice ]
+            @out.should == [ :alice, :bob, :carrie, :darryl, :carrie, :bob, :alice ]
         end
 
         it do
-             @batting_order.each do |x|
-                 @out << x
-                 if x == :carrie
-                     @batting_order.delete_at(@batting_order.index(x))
-                     @batting_order.reverse!
-                 end
-             end
-             @batting_order.should == [ :eve, :darryl, :bob, :alice ]
-             @out.should == [ :alice, :bob, :carrie, :bob, :alice ]
+            @batting_order.each do |x|
+                @out << x
+                if x == :carrie
+                    @batting_order.delete_at(@batting_order.index(x))
+                    @batting_order.reverse!
+                end
+            end
+            @batting_order.should == [ :eve, :darryl, :bob, :alice ]
+            @out.should == [ :alice, :bob, :carrie, :bob, :alice ]
         end
-
     end
 end
