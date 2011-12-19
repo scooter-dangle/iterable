@@ -13,12 +13,26 @@ describe IterableArray do
         Array.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
         end
+
+        @iter_ary = IterableArray.new [1]
+        @iter_ary.each do
+            Array.instance_methods(false).each do |method|
+                @iter_ary.should respond_to(method)
+            end
+        end
     end
 
     pending 'should respond to every Enumerable instance method' do # MAYbe...
         @iter_ary = IterableArray.new
         Enumerable.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
+        end
+
+        @iter_ary = IterableArray.new [1]
+        @iter_ary.each do
+            Enumerable.instance_methods(false).each do |method|
+                @iter_ary.should respond_to(method)
+            end
         end
     end
 
@@ -240,8 +254,12 @@ describe IterableArray do
             @iter_ary.map! {}.should be_an_instance_of(IterableArray)
         end
 
-        # :cycle
-        # @out_1, @out_2 = [], []
+        it ':cycle' do
+            @iter_ary.cycle(3, &(@appender.call @out_1)).should ==
+                 @ary.cycle(3, &(@appender.call @out_2))
+            check_outs
+            @iter_ary.cycle(3) {}.should equal(nil)
+        end
 
         describe ':index' do
             it do
@@ -261,9 +279,104 @@ describe IterableArray do
     end
 
     describe 'complex iteration' do
+        before :all do
+            @bound = 20
+        end
+
         before :each do
             @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl, :eve ]
             @out = []
+
+            @drop_player = false
+            @counter = 0
+            @caught = false
+        end
+
+        it do
+            @batting_order.each do |x|
+                @out << x
+                @batting_order[@batting_order.index(x)] = :maurice if x == :carrie
+            end
+            @batting_order.should == [ :alice, :bob, :maurice, :darryl, :eve ]
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+        end
+
+        it do
+            @batting_order.each do |x|
+                @out << x
+                @batting_order[@batting_order.index(x) + 1] = :maurice if x == :carrie
+            end
+            @batting_order.should == [ :alice, :bob, :carrie, :maurice, :eve ]
+            @out.should == [ :alice, :bob, :carrie, :maurice, :eve ]
+        end
+
+        it do
+            catch :no_end do
+                @batting_order.cycle(3) do |x|
+                    @out << x
+                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
+                    @drop_player = true if x == :darryl
+                    if @counter >= @bound
+                        @caught = true
+                        throw :no_end
+                    end
+                    @counter += 1
+                end
+            end
+            @caught.should be_false
+            @batting_order.should == []
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
+        end
+
+        it do
+            catch :no_end do
+                @batting_order.cycle(1) do |x|
+                    @out << x
+                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
+                    @drop_player = true if x == :darryl
+                    if @counter >= @bound
+                        @caught = true
+                        throw :no_end
+                    end
+                    @counter += 1
+                end
+            end
+            @caught.should be_false
+            @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+        end
+
+        it do
+            catch :no_end do
+                @batting_order.cycle do |x|
+                    @out << x
+                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
+                    @drop_player = true if x == :darryl
+                    if @counter >= @bound
+                        @caught = true
+                        throw :no_end
+                    end
+                    @counter += 1
+                end
+            end
+            @caught.should be_false
+            @batting_order.should == []
+            @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
+        end
+
+        it do
+            catch :no_end do
+                @batting_order.cycle do |x|
+                    @batting_order.delete_at(@batting_order.index(x)) if this == :darryl
+                    if @counter >= @bound
+                        @caught = true
+                        throw :no_end
+                    end
+                    @counter += 1
+                end
+            end
+            @caught.should be_true
+            @batting_order.should == [ :alice, :bob, :carrie, :eve ]
         end
 
         it do
