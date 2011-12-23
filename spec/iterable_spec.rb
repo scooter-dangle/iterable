@@ -292,25 +292,27 @@ describe IterableArray do
             @caught = false
         end
 
-        it do
-            @batting_order.each do |x|
-                @out << x
-                @batting_order[@batting_order.index(x)] = :maurice if x == :carrie
+        describe 'where array elements are modified without changing array length' do
+            it do
+                @batting_order.each do |x|
+                    @out << x
+                    @batting_order[@batting_order.index(x)] = :maurice if x == :carrie
+                end
+                @batting_order.should == [ :alice, :bob, :maurice, :darryl, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
             end
-            @batting_order.should == [ :alice, :bob, :maurice, :darryl, :eve ]
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+
+            it do
+                @batting_order.each do |x|
+                    @out << x
+                    @batting_order[@batting_order.index(x) + 1] = :maurice if x == :carrie
+                end
+                @batting_order.should == [ :alice, :bob, :carrie, :maurice, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :maurice, :eve ]
+            end
         end
 
-        it do
-            @batting_order.each do |x|
-                @out << x
-                @batting_order[@batting_order.index(x) + 1] = :maurice if x == :carrie
-            end
-            @batting_order.should == [ :alice, :bob, :carrie, :maurice, :eve ]
-            @out.should == [ :alice, :bob, :carrie, :maurice, :eve ]
-        end
-
-        it do
+        it 'qjq' do
             catch :no_end do
                 @batting_order.cycle(3) do |x|
                     @out << x
@@ -328,7 +330,7 @@ describe IterableArray do
             @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
         end
 
-        it do
+        it 'qjq' do
             catch :no_end do
                 @batting_order.cycle(1) do |x|
                     @out << x
@@ -346,7 +348,7 @@ describe IterableArray do
             @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
         end
 
-        it do
+        it 'qjq' do
             catch :no_end do
                 @batting_order.cycle do |x|
                     @out << x
@@ -364,7 +366,7 @@ describe IterableArray do
             @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
         end
 
-        it do
+        it 'qjq' do
             catch :no_end do
                 @batting_order.cycle do |x|
                     @batting_order.delete_at(@batting_order.index(x)) if this == :darryl
@@ -379,34 +381,40 @@ describe IterableArray do
             @batting_order.should == [ :alice, :bob, :carrie, :eve ]
         end
 
-        it do
-            @batting_order.each do |x|
-                @out << x
-                @batting_order.delete_at(@batting_order.index(x)) if x == :carrie
+        describe 'where a currently yielded element is deleted' do
+            it do
+                @batting_order.each do |x|
+                    @out << x
+                    @batting_order.delete_at(@batting_order.index(x)) if x == :carrie
+                end
+                @batting_order.should == [ :alice, :bob, :darryl, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
             end
-            @batting_order.should == [ :alice, :bob, :darryl, :eve ]
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
         end
 
-        it do
-            @batting_order.each do |x|
-                @out << x
-                @batting_order.pop if x == :carrie
+        describe 'where an element after the currently yielded element is deleted' do
+            it do
+                @batting_order.each do |x|
+                    @out << x
+                    @batting_order.pop if x == :carrie
+                end
+                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
+                @out.should == [ :alice, :bob, :carrie, :darryl ]
             end
-            @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
-            @out.should == [ :alice, :bob, :carrie, :darryl ]
         end
 
-        it do
-            @batting_order.each do |x|
-                @out << x
-                @batting_order.shift if x == :carrie
+        describe 'where an element before the currently yielded element is deleted' do
+            it do
+                @batting_order.each do |x|
+                    @out << x
+                    @batting_order.shift if x == :carrie
+                end
+                @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
             end
-            @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
         end
 
-        it do
+        it 'qjq' do
             @batting_order.each do |x|
                 @out << x
                 @batting_order.reverse! if x == :darryl
@@ -415,7 +423,7 @@ describe IterableArray do
             @out.should == [ :alice, :bob, :carrie, :darryl, :carrie, :bob, :alice ]
         end
 
-        it do
+        it 'qjq' do
             @batting_order.each do |x|
                 @out << x
                 if x == :carrie
