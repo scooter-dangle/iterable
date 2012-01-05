@@ -187,6 +187,7 @@ describe IterableArray do
         # before being able to *really* test iteration methods.
         before :all do
             @out_1, @out_2 = [], []
+            # Dude! This is gross! Need to refactor as functions returning lambdas.
             @appender = lambda { |out| lambda { |x| out << x } }
             @each_with_index_appender = lambda { |out| lambda { |x, y| out << [x, y] } }
             @map_appender = lambda { |out| lambda { |x| (out << x).dup } }
