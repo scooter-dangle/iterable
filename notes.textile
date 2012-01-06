@@ -4,9 +4,9 @@ Need something to allow switching 2 (or more) items in the array that will adjus
 
   Example:
 
-  @battingOrder = IterableArray.new [ 'bob', 'joe', 'jenna', 'will' ]
-  ...
-  battingOrder.iterationMethod do |item, index|
+bc.. battingOrder = IterableArray.new [ 'bob', 'joe', 'jenna', 'will' ]
+    ...
+    battingOrder.iterationMethod do |item, index|
     # Within an iteration block...
     # Assume the current index is 1 and that the current item is 'joe'...
     # battingOrder[1], battingOrder[2] = battingOrder[2], battingOrder[1]
@@ -21,8 +21,8 @@ Need something to allow switching 2 (or more) items in the array that will adjus
 
     # However, I won't do it until I have most of the Array instance methods
     # implemented.
-  ...
-  end@
+    ...
+  end
   
 h2. Break/halt
 
