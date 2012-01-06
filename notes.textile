@@ -28,7 +28,7 @@ h2. Break/halt
 
 Using break within an iteration block on an IterableArray will prevent the IterableArray iteration method from cleaning up / tearing down its index-aware methods and structure. In the case of nested iteration, the index-tracking could be broken. As a result, I think I'll need to provide a custom catch/throw mechanism similar to the @:halt@ method used in Sinatra.
 
-h2. methods that modify and iterate
+h2. methods that iterate _and_ modify
 
 (Example: @:delete_if@). Will implement after finishing all the easier methods. It might be possible by getting a binding in the original, parent IterableArray and passing that single binding on to all its descendants.
 
