@@ -2,13 +2,13 @@ require File.join(File.split(File.dirname(__FILE__))[0], 'lib', 'iterable.rb')
 
 
 describe IterableArray do
-    it 'should not claim to be an Array' do
+    it 'does not claim to be an Array' do
         @iter_ary = IterableArray.new
         @iter_ary.class.should_not == Array
         @iter_ary.class.should == IterableArray
     end
 
-    pending 'should respond to every Array instance method' do # MAYbe...
+    pending 'responds to every Array instance method' do # MAYbe...
         @iter_ary = IterableArray.new
         Array.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
@@ -22,7 +22,7 @@ describe IterableArray do
         end
     end
 
-    pending 'should respond to every Enumerable instance method' do # MAYbe...
+    pending 'responds to every Enumerable instance method' do # MAYbe...
         @iter_ary = IterableArray.new
         Enumerable.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
@@ -37,7 +37,7 @@ describe IterableArray do
     end
 
     describe ':assoc and :rassoc' do
-        it 'should work like Array#assoc and Array#rassoc but also return IterableArrays' do
+        it 'work like Array#assoc and Array#rassoc but also return IterableArrays' do
             @ary = [ 42, [ 'x', 'y', 'z' ], [ 0, 1, 2 ], IterableArray.new( [ :alpha, :beta, :gamma ] ) ]
             @iter_ary = IterableArray.new @ary
 
@@ -56,14 +56,14 @@ describe IterableArray do
     # Testing :== might be overkill, but I want to be safe since rspec uses it
     # every time I do "___.should == ___"
     describe ':==' do
-        it 'should return false for differing array content' do
+        it 'returns false for differing array content' do
             @ary_1 = [ 0, 1, 2 ]
             @iter_ary_1 = IterableArray.new [ 'a', 'b', 'c' ]
             ( @iter_ary_1 == @ary_1 ).should be_false
             ( @ary_1 == @iter_ary_1 ).should be_false
         end
 
-        it 'should return true if array content matches but classes differ' do
+        it 'returns true if array content matches but classes differ' do
             @ary_1 = [ 0, 1, 2 ]
             @iter_ary_1 = IterableArray.new @ary_1
             ( @iter_ary_1 == @ary_1 ).should be_true
@@ -72,7 +72,7 @@ describe IterableArray do
     end
 
 
-    it ':eql? should act like a class-sensitive version of :==' do
+    it ':eql? acts like a class-sensitive version of :==' do
         @ary_1 = [ 0, 1, 2 ]
         @ary_2 = [ 'a', 'b', 'c' ]
         @iter_ary_1 = IterableArray.new @ary_1
@@ -92,7 +92,7 @@ describe IterableArray do
             end
         end
 
-        it 'should return an InterableArray when the corresponding Array method would return an array' do
+        it 'return an InterableArray when the corresponding Array method would return an array' do
             @iter_ary = IterableArray.new [ 'a', 'b', 'c', 'd' ]
             @ary = [ 0, 1, 2, 3 ]
             num   = 3
@@ -115,7 +115,7 @@ describe IterableArray do
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
         end
 
-        it "that don't iterate should work the same as array methods outside of iteration blocks" do
+        it "that don't iterate work the same as array methods outside of iteration blocks" do
             @ary = [ 'a', 'b', 'c', 'd' ]
             @iter_ary = IterableArray.new @ary
             @ary_2 = [ 'c', 'd', 'e' ]
