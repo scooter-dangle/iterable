@@ -6,7 +6,7 @@ A(n unfinished) gem providing arrays with [Wikipedia-defined iteration](http://e
 Current status
 --------------
 
-This gem is **nowhere** near complete! Don't use it for anything! To see what it does, look at the spec: it currently fails everything within `describe 'complex iteration' do`. Everything else passes.
+This gem is **nowhere** near complete! Don't use it for anything! To see what it does, look at the spec: it currently fails (almost) everything within `describe 'complex iteration' do`. Everything else passes.
 
 Motivation
 ----------
