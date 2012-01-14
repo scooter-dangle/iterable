@@ -37,7 +37,7 @@ describe IterableArray do
     end
 
     describe ':assoc and :rassoc' do
-        it 'work like Array#assoc and Array#rassoc but also return IterableArrays' do
+        it 'work like Array#assoc and Array#rassoc but return IterableArrays' do
             @ary = [ 42, [ 'x', 'y', 'z' ], [ 0, 1, 2 ], IterableArray.new( [ :alpha, :beta, :gamma ] ) ]
             @iter_ary = IterableArray.new @ary
 
@@ -120,7 +120,7 @@ describe IterableArray do
             @iter_ary = IterableArray.new @ary
             @ary_2 = [ 'c', 'd', 'e' ]
             @iter_ary_2 = IterableArray.new @ary_2
-            num   = 3
+            num = 3
 
             # :<<
             ( @iter_ary << num ).should == ( @ary << num)
@@ -187,11 +187,23 @@ describe IterableArray do
         # before being able to *really* test iteration methods.
         before :all do
             @out_1, @out_2 = [], []
-            # Dude! This is gross! Need to refactor as functions returning lambdas.
-            @appender = lambda { |out| lambda { |x| out << x } }
-            @each_with_index_appender = lambda { |out| lambda { |x, y| out << [x, y] } }
-            @map_appender = lambda { |out| lambda { |x| (out << x).dup } }
-            @index_appender = lambda { |obj, out| lambda { |x| out << x; x == obj } }
+        end
+
+        # Some holpful functions... Should I put these somewhere else?
+        def appender out
+            lambda { |x| out << x }
+        end
+
+        def each_with_index_appender out
+            lambda { |x, y| out << [x, y] }
+        end
+
+        def map_appender out
+            lambda { |x| (out << x).dup }
+        end
+
+        def index_appender obj, out
+            lambda { |x| out << x; x == obj }
         end
 
         before :each do
@@ -205,59 +217,59 @@ describe IterableArray do
             @out_1.should == @out_2
         end
 
-        it 'is this test even working?' do
-            @ary.should == [ 'a', 'b', 'c', 'd' ]
-            @iter_ary.should == IterableArray.new([ 'a', 'b', 'c', 'd' ])
-            @ary.each(&(@appender.call @out_1)).should == [ 'a', 'b', 'c', 'd' ]
-            @out_1.should == [ 'a', 'b', 'c', 'd' ]
-        end
+#        it 'is this test even working?' do
+#            @ary.should == [ 'a', 'b', 'c', 'd' ]
+#            @iter_ary.should == IterableArray.new([ 'a', 'b', 'c', 'd' ])
+#            @ary.each(&(appender @out_1)).should == [ 'a', 'b', 'c', 'd' ]
+#            @out_1.should == [ 'a', 'b', 'c', 'd' ]
+#        end
 
         it ':each' do
-            @iter_ary.each(&(@appender.call @out_1)).should ==
-                 @ary.each(&(@appender.call @out_2))
+            @iter_ary.each(&(appender @out_1)).should ==
+                 @ary.each(&(appender @out_2))
             check_outs
             @iter_ary.each {}.should be_an_instance_of(IterableArray)
         end
 
         it ':each_index' do
-            @iter_ary.each_index(&(@appender.call @out_1)).should ==
-                 @ary.each_index(&(@appender.call @out_2))
+            @iter_ary.each_index(&(appender @out_1)).should ==
+                 @ary.each_index(&(appender @out_2))
             check_outs
             @iter_ary.each_index {}.should be_an_instance_of(IterableArray)
         end
 
         it ':each_with_index' do
-            @iter_ary.each_with_index(&(@each_with_index_appender.call @out_1)).should ==
-                 @ary.each_with_index(&(@each_with_index_appender.call @out_2))
+            @iter_ary.each_with_index(&(each_with_index_appender @out_1)).should ==
+                 @ary.each_with_index(&(each_with_index_appender @out_2))
             check_outs
             @iter_ary.each_with_index {}.should be_an_instance_of(IterableArray)
         end
 
         it ':reverse_each' do
-            @iter_ary.reverse_each(&(@appender.call @out_1)).should ==
-                 @ary.reverse_each(&(@appender.call @out_2))
+            @iter_ary.reverse_each(&(appender @out_1)).should ==
+                 @ary.reverse_each(&(appender @out_2))
             check_outs
             @iter_ary.reverse_each {}.should be_an_instance_of(IterableArray)
         end
 
         it ':map / :collect' do
-            @iter_ary.map(&(@appender.call @out_1)).should ==
-                 @ary.map(&(@appender.call @out_2))
+            @iter_ary.map(&(appender @out_1)).should ==
+                 @ary.map(&(appender @out_2))
             check_outs
             @iter_ary.map {}.should be_an_instance_of(IterableArray)
         end
 
         it ':map! / :collect!' do
-            @iter_ary.map!(&(@map_appender.call @out_1)).should ==
-                 @ary.map!(&(@map_appender.call @out_2))
+            @iter_ary.map!(&(map_appender @out_1)).should ==
+                 @ary.map!(&(map_appender @out_2))
             @iter_ary.should == @ary
             check_outs
             @iter_ary.map! {}.should be_an_instance_of(IterableArray)
         end
 
         it ':cycle' do
-            @iter_ary.cycle(3, &(@appender.call @out_1)).should ==
-                 @ary.cycle(3, &(@appender.call @out_2))
+            @iter_ary.cycle(3, &(appender @out_1)).should ==
+                 @ary.cycle(3, &(appender @out_2))
             check_outs
             @iter_ary.cycle(3) {}.should equal(nil)
         end
@@ -265,15 +277,15 @@ describe IterableArray do
         describe ':index' do
             it do
                 obj = 'c'
-                @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
-                     @ary.index(&(@index_appender.call obj, @out_2))
+                @iter_ary.index(&(index_appender obj, @out_1)).should ==
+                     @ary.index(&(index_appender obj, @out_2))
                 check_outs
             end
 
             it do
                 obj = 'z'
-                @iter_ary.index(&(@index_appender.call obj, @out_1)).should ==
-                     @ary.index(&(@index_appender.call obj, @out_2))
+                @iter_ary.index(&(index_appender obj, @out_1)).should ==
+                     @ary.index(&(index_appender obj, @out_2))
                 check_outs
             end
         end
@@ -293,7 +305,7 @@ describe IterableArray do
             @caught = false
         end
 
-        describe 'where array elements are modified without changing array length' do
+        describe 'where only simple array element assignments are made' do
             it do
                 @batting_order.each do |x|
                     @out << x
