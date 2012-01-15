@@ -3,8 +3,8 @@ iterable
 
 A(n unfinished) gem providing arrays with [Wikipedia-defined iteration](http://en.wikipedia.org/wiki/Iterator#Contrasting_with_indexing) (as opposed to Wikipedia-defined indexing) via the IterableArray class, where many operations on an array have a defined behavior _while_ the array is being traversed by an iterator method.
 
-Current status
---------------
+Current status (as of 2012 01 09)
+---------------------------------
 
 This gem is **nowhere** near complete! Don't use it for anything! To see what it does, look at the spec: it currently fails (almost) everything within `describe 'complex iteration' do`. Everything else passes.
 

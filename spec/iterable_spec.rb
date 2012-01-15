@@ -293,7 +293,7 @@ describe IterableArray do
 
     describe 'complex iteration' do
         before :all do
-            @bound = 20
+            @bound = 200
         end
 
         before :each do
@@ -302,14 +302,14 @@ describe IterableArray do
 
             @drop_player = false
             @counter = 0
-            @caught = false
+            @caught = true
         end
 
         describe 'where only simple array element assignments are made' do
             it do
                 @batting_order.each do |x|
                     @out << x
-                    @batting_order[@batting_order.index(x)] = :maurice if x == :carrie
+                    @batting_order[@batting_order.index x] = :maurice if x == :carrie
                 end
                 @batting_order.should == [ :alice, :bob, :maurice, :darryl, :eve ]
                 @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
@@ -325,80 +325,84 @@ describe IterableArray do
             end
         end
 
-        it 'qjq' do
-            catch :no_end do
-                @batting_order.cycle(3) do |x|
-                    @out << x
-                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
-                    @drop_player = true if x == :darryl
-                    if @counter >= @bound
-                        @caught = true
-                        throw :no_end
+        describe ':cycle' do
+            # This first one really only tests very basic behavior that
+            # has probably already been tested in the non-modifying
+            # iteration section. Should I get rid of it?
+            it do
+                catch :out_of_bound do
+                    @batting_order.cycle(1) do |x|
+                        @out << x
+                        @batting_order.delete_at(@batting_order.index x) if @drop_player
+                        @drop_player = true if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
                     end
-                    @counter += 1
+                    @caught = false
                 end
-            end
-            @caught.should be_false
-            @batting_order.should == []
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
-        end
 
-        it 'qjq' do
-            catch :no_end do
-                @batting_order.cycle(1) do |x|
-                    @out << x
-                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
-                    @drop_player = true if x == :darryl
-                    if @counter >= @bound
-                        @caught = true
-                        throw :no_end
-                    end
-                    @counter += 1
-                end
+                @counter.should == 5
+                @caught.should be_false
+                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
             end
-            @caught.should be_false
-            @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
-        end
 
-        it 'qjq' do
-            catch :no_end do
-                @batting_order.cycle do |x|
-                    @out << x
-                    @batting_order.delete_at(@batting_order.index(x)) if @drop_player
-                    @drop_player = true if x == :darryl
-                    if @counter >= @bound
-                        @caught = true
-                        throw :no_end
+            it 'exits a finite cycle early when the array becomes empty' do
+                catch :out_of_bound do
+                    @batting_order.cycle(5) do |x|
+                        @out << x
+                        @batting_order.delete_at(@batting_order.index x) if @drop_player
+                        @drop_player = true if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
                     end
-                    @counter += 1
+                    @caught = false
                 end
-            end
-            @caught.should be_false
-            @batting_order.should == []
-            @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
-        end
 
-        it 'qjq' do
-            catch :no_end do
-                @batting_order.cycle do |x|
-                    @batting_order.delete_at(@batting_order.index(x)) if this == :darryl
-                    if @counter >= @bound
-                        @caught = true
-                        throw :no_end
-                    end
-                    @counter += 1
-                end
+                @counter.should == 9
+                @caught.should be_false
+                @batting_order.should == []
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
             end
-            @caught.should be_true
-            @batting_order.should == [ :alice, :bob, :carrie, :eve ]
+
+            it 'exits an infinite cycle when the array becomes empty' do
+                catch :out_of_bound do
+                    @batting_order.cycle do |x|
+                        @out << x
+                        @batting_order.delete_at(@batting_order.index x) if @drop_player
+                        @drop_player = true if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                    end
+                    @caught = false
+                end
+
+                @counter.should == 9
+                @caught.should be_false
+                @batting_order.should == []
+                @out.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
+            end
+
+            it 'continues indefinitely for an infinite cycle when the array is modified but not emptied' do
+                catch :out_of_bound do
+                    @batting_order.cycle do |x|
+                        @batting_order.delete_at(@batting_order.index x) if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                    end
+                    @caught = false
+                end
+
+                @caught.should be_true
+                @batting_order.should == [ :alice, :bob, :carrie, :eve ]
+            end
         end
 
         describe 'where a currently yielded element is deleted' do
             it do
                 @batting_order.each do |x|
                     @out << x
-                    @batting_order.delete_at(@batting_order.index(x)) if x == :carrie
+                    @batting_order.delete_at(@batting_order.index x) if x == :carrie
                 end
                 @batting_order.should == [ :alice, :bob, :darryl, :eve ]
                 @out.should == [ :alice, :bob, :carrie, :darryl, :eve ]
@@ -440,7 +444,7 @@ describe IterableArray do
             @batting_order.each do |x|
                 @out << x
                 if x == :carrie
-                    @batting_order.delete_at(@batting_order.index(x))
+                    @batting_order.delete_at(@batting_order.index x)
                     @batting_order.reverse!
                 end
             end

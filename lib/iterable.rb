@@ -27,8 +27,6 @@ class IterableArray
 
     def_delegators :@array, *@@plain_accessors
     def_delegators :@array, *@@plain_modifiers
-#    @@plain_accessors.each { |meth| def_delegator :@array, meth }
-#    @@plain_modifiers.each { |meth| def_delegator :@array, meth }
 
     private # Only comment out for testing purposes.
 
@@ -47,8 +45,6 @@ class IterableArray
         class << self
             def_delegators :@array, *@@special_accessors
             def_delegators :@array, *@@iterators
-#            @@special_accessors.each { |meth| def_delegator :@array, meth }
-#            @@iterators.each { |meth| def_delegator :@array, meth }
         end
         define_plain_modifiers
         define_special_modifiers_iterating
@@ -60,7 +56,6 @@ class IterableArray
         undefine_methods @@special_modifiers
         class << self
             def_delegators :@array, *@@plain_modifiers
-            # @@plain_modifiers.each { |meth| def_delegator :@array, meth }
         end
         define_special_accessors
         define_special_modifiers_noniterating
@@ -155,7 +150,6 @@ class IterableArray
             alias_method :indices, :values_at
             alias_method :indexes, :values_at
 
-
             # :join is defined here (instead of directly delegating it to
             # @array) since we might want to later define how it handles
             # an array that contains IterableArrays as elements.
@@ -191,13 +185,24 @@ class IterableArray
 
     def define_plain_modifiers
         class << self
-            def pop
-            end
+#            def pop
+#            end
 
-            def push value
-            end
+#            def push value
+#            end
 
             def delete_at index
+                # Flip to positive and weed out out of bounds
+                index += @array.size if index < 0
+                return nil if index < 0 or index >= @array.size
+
+                @forward_index -= 1 if index < @forward_index
+                if index < @current_index
+                    @current_index -= 1
+                    @backward_index -= 1
+                end
+
+                @array.delete_at index
             end
         end
     end
@@ -208,10 +213,13 @@ class IterableArray
                 return @array.to_enum(:each) unless block_given?
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    yield @array.at(@iter_index)
-                    @iter_index += 1
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    yield @array.at(@current_index)
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -222,10 +230,13 @@ class IterableArray
                 return @array.to_enum(:each_index) unless block_given?
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    yield @iter_index
-                    @iter_index += 1
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    yield @current_index
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -236,10 +247,13 @@ class IterableArray
                 return @array.to_enum(:each_with_index) unless block_given?
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    yield @array.at(@iter_index), @iter_index
-                    @iter_index += 1
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    yield @array.at(@current_index), @current_index
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -250,10 +264,14 @@ class IterableArray
                 return @array.to_enum(:reverse_each) unless block_given?
                 bastardize
 
-                @iter_index = @array.size
-                while @iter_index > 0
-                    yield @array.at(@iter_index - 1)
-                    @iter_index -= 1
+                @current_index = @array.size - 1
+                @backward_index, @forward_index = @current_index - 1, @current_index + 1
+                while @current_index >= 0
+                    yield @array.at @current_index
+
+                    @current_index  = @backward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -265,10 +283,13 @@ class IterableArray
                 out = Array.new []
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    out << yield(@array.at(@iter_index))
-                    @iter_index += 1
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    out << yield(@array.at(@current_index))
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -281,13 +302,16 @@ class IterableArray
                 return to_enum(:map!) unless block_given?
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    # The following verbosity required so that @iter_index will be
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    # The following verbosity required so that @current_index will be
                     # evaluated after any modifications to it by the block.
-                    temp_value = yield(@array.at(@iter_index))
-                    @array[@iter_index] = temp_value
-                    @iter_index += 1
+                    temp_value = yield(@array.at(@current_index))
+                    @array[@current_index] = temp_value
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
@@ -302,18 +326,24 @@ class IterableArray
 
                 if n.equal? nil
                     until @array.empty?
-                        @iter_index = 0
-                        while @iter_index < @array.size
-                            yield @array.at(@iter_index)
-                            @iter_index += 1
+                        @backward_index, @current_index, @forward_index = -1, 0, 1
+                        while @current_index < @array.size
+                            yield @array.at(@current_index)
+
+                            @current_index  = @forward_index
+                            @forward_index  = @current_index + 1
+                            @backward_index = @current_index - 1
                         end
                     end
                 else
                     n.times do
-                        @iter_index = 0
-                        while @iter_index < @array.size
-                            yield @array.at(@iter_index)
-                            @iter_index += 1
+                        @backward_index, @current_index, @forward_index = -1, 0, 1
+                        while @current_index < @array.size
+                            yield @array.at(@current_index)
+
+                            @current_index  = @forward_index
+                            @forward_index  = @current_index + 1
+                            @backward_index = @current_index - 1
                         end
                     end
                 end
@@ -334,14 +364,17 @@ class IterableArray
                 end
                 bastardize
 
-                @iter_index = 0
-                while @iter_index < @array.size
-                    item = @array.at(@iter_index)
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+                    item = @array.at(@current_index)
                     if yield item
                         debastardize
-                        return @iter_index
+                        return @current_index
                     end
-                    @iter_index += 1
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
                 end
 
                 debastardize
