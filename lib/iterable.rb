@@ -172,6 +172,12 @@ class IterableArray
                 @array << arg
                 self
             end
+
+            def shift n = nil
+                return @array.shift if n == nil
+
+                IterableArray.new @array.shift(n)
+            end
         end
     end
 
@@ -179,6 +185,14 @@ class IterableArray
         class << self
             def <<(arg) # Not yet defined
                 # @array << arg
+            end
+
+            def shift n = nil
+                return self.delete_at(0) if n == nil
+
+                out = []
+                [ n, @array.length ].min.times { out << self.delete_at(0) }
+                IterableArray.new out
             end
         end
     end
