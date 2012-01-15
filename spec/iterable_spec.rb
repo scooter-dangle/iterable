@@ -182,6 +182,35 @@ describe IterableArray do
         end
     end
 
+    describe 'modifiers outside of iteration' do
+        before :each do
+            @ary_1 = [ 'a', 'b', 'c', 'd' ]
+            @iter_ary_1 = IterableArray.new @ary_1
+            @ary_2 = [ 'c', 'd', 'e' ]
+            @iter_ary_2 = IterableArray.new @ary_2
+            @num = 3
+        end
+
+        it do
+            @iter_ary_1.delete_at(1).should == @ary_1.delete_at(1)
+            @iter_ary_1.should == @ary_1
+
+            @iter_ary_1.delete_at(-2).should == @ary_1.delete_at(-2)
+            @iter_ary_1.should == @ary_1
+
+            @iter_ary_1.delete_at(6).should == @ary_1.delete_at(6)
+            @iter_ary_1.should == @ary_1
+        end
+
+        it do
+            @iter_ary_1.shift.should == @ary_1.shift
+            @iter_ary_1.should == @ary_1
+
+            @iter_ary_2.shift(2).should == @ary_2.shift(2)
+            @iter_ary_2.should == @ary_2
+        end
+    end
+
     describe 'non-modifying iteration' do
         # Will probably need to have some modification methods implemented
         # before being able to *really* test iteration methods.
