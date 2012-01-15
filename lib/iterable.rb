@@ -32,13 +32,14 @@ class IterableArray
 
     def initialize array = []
         @array = Array.new array
+        @progenitor_binding = binding
         define_iterators
         define_special_accessors
         define_special_modifiers_noniterating
     end
 
     def bastardize
-        @array = IterableArray.new @array
+        @array = self.new_with_binding @array
         undefine_methods @@iterators
         undefine_methods @@special_accessors
         undefine_methods @@special_modifiers
@@ -416,4 +417,18 @@ class IterableArray
 #        @array.send( method, *args, &block )
 #    end
 
+    protected
+
+    # Necessary for allowing nested iteration with modifying iterators (like
+    # :delete_if)
+    def new_with_binding array
+        iter_ary = IterableArray.new array
+        iter_ary.take_progenitor_binding @progenitor_binding
+        iter_ary
+    end
+
+    def take_progenitor_binding progenitor_binding
+        @progenitor_binding = progenitor_binding
+        class << self; undef_method(:take_progenitor_binding); end
+    end
 end
