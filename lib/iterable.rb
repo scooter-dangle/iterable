@@ -1,3 +1,8 @@
+# Note: Currently this uses a super sloppy/cluttered approach to adding and removing methods.
+# I'd put the methods in modules and extend the IterableArray instance with the appropriate
+# module except that removing/unextending a module would require the mixology gem, which currently
+# does not work in Rubinius. :(
+
 require 'forwardable'
 
 class IterableArray
