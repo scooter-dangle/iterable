@@ -490,12 +490,71 @@ describe IterableArray do
         end
 
         before :each do
-            @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl, :eve, :fred, :grace ]
+            @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl ]
             @batting_history = []
 
             @drop_batter = false
             @counter = 0
             @caught = true
+        end
+
+        it do
+            @batting_order.each do |x|
+                @batting_history << x
+                if x == :bob
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.delete_at(@batting_order.index x) if x == :bob
+                    end
+                end
+            end
+            @batting_history.should == [ :alice, :bob, :alice, :bob, :carrie, :darryl, :carrie, :darryl ]
+        end
+
+        it do
+            @batting_order.each do |x|
+                @batting_history << x
+                if x == :carrie
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.delete_at(@batting_order.index x) if x == :bob or x == :darryl
+                    end
+                end
+            end
+            @batting_history.should == [ :alice, :bob, :carrie, :alice, :bob, :carrie, :darryl ]
+        end
+
+        it do
+            @batting_order.reverse_each do |x|
+                @batting_history << x
+                if x == :carrie
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.delete_at(@batting_order.index x) if x == :alice
+                    end
+                end
+            end
+            @batting_history.should == [ :darryl, :carrie, :alice, :bob, :carrie, :darryl, :bob ]
+        end
+
+        it do
+            @batting_order.reverse_each do |x|
+                @batting_history << x
+                if x == :carrie
+                    @batting_order.delete_at(@batting_order.index x)
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        if x == :bob
+                            @batting_order.reverse_each do |x|
+                                @batting_history << x
+                                @batting_order.delete_at(@batting_order.index x)
+                                @batting_order.push(:eve) if x == :bob
+                            end
+                        end
+                    end
+                end
+            end
+            @batting_history.should == [ :darryl, :carrie, :alice, :bob, :darryl, :bob, :alice, :eve ]
         end
 
     end
