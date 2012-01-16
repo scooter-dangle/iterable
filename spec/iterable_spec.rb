@@ -113,6 +113,7 @@ describe IterableArray do
             @iter_ary.indexes((1..2))   .should be_an_instance_of(IterableArray)
             @iter_ary.first(3)          .should be_an_instance_of(IterableArray)
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
+            @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate work the same as array methods outside of iteration blocks" do
@@ -179,6 +180,10 @@ describe IterableArray do
             @iter_ary.index(obj).should == @ary.index(obj)
             obj = 'z'
             @iter_ary.index(obj).should == @ary.index(obj)
+            
+            # :push
+            @iter_ary.push(num).should == @ary.push(num)
+            @iter_ary.should == @ary
         end
     end
 

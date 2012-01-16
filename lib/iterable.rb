@@ -14,9 +14,9 @@ class IterableArray
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
     @@plain_accessors   = [ :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
-    @@special_accessors = [ :&, :|, :*, :+, :-, :[], :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last, :reverse ]
+    @@special_accessors = [ :&, :|, :*, :+, :-, :[], :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :last, :reverse, :push ]
 
-    @@plain_modifiers   = [ :delete, :delete_at, :pop, :push ]
+    @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :<<, :shift, :reverse! ]
 
     @@iterators = [ :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :each_with_index, :select ]
@@ -168,6 +168,16 @@ class IterableArray
             def eql?(arg)
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
+            end
+
+            # Don't yet have any cases where push should be treated
+            # specially during iteration, although I'll need to keep an
+            # eye on it.
+            # Also, what should I use for the default argument here?
+            # (What if someone really wants to push `nil` onto the array?)
+            def push obj = nil
+                @array.push obj unless obj == nil
+                self
             end
         end
     end
