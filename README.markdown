@@ -13,5 +13,5 @@ Motivation
 
 Testing Rubninius by running on it some Ruby tutorials I've followed, I found that my answer to the extra credit [koan](http://rubykoans.com) wasn't terminating because `cycle` kept iterating through an empty player array. I hadn't realized that iterator behavior isn't always defined when you modify the array during iteration, and I wanted to see how far I could get in allowing that behavior to be defined.
 
-It's been pretty suite/fun/addictive to work on as I believe it's the first thing I've written in any language that has required an understanding of a design feature peculiar to that language (as opposed to just control-flow / glue code scripts I've made before). In particular, it depends on Ruby's support for a fully dynamic object model.
+It's been pretty suite/fun/addictive to work on as I believe it's the first thing I've written that has required an understanding of a design feature peculiar to Ruby (as opposed to just control-flow / glue code scripts I've made before). In particular, it depends on Ruby's support for a fully dynamic object model.
 
