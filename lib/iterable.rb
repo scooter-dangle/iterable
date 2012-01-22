@@ -290,6 +290,31 @@ class IterableArray
                 self
             end
 
+            def delete_if        # Rubinius includes `&block` as an argument, but I don't know why
+                return @array.to_enum(:delete_if) unless block_given?
+                bastardize
+
+                @backward_index, @current_index, @forward_index = -1, 0, 1
+                while @current_index < @array.size
+
+                    # Usage of binding is necessary since this current :delete_if
+                    # call might be operating inside several levels of nested
+                    # iteration. If we just used :delete_at here, those higher
+                    # iteration levels would not be able to adjust their indices
+                    # to account for the change in array size.
+                    if yield @array.at(@current_index)
+                        @progenitor_binding.eval "self.delete_at #{@current_index}"
+                    end
+
+                    @current_index  = @forward_index
+                    @forward_index  = @current_index + 1
+                    @backward_index = @current_index - 1
+                end
+
+                debastardize
+                self
+            end
+
             def reverse_each
                 return @array.to_enum(:reverse_each) unless block_given?
                 bastardize
@@ -336,7 +361,7 @@ class IterableArray
                 while @current_index < @array.size
                     # The following verbosity required so that @current_index will be
                     # evaluated after any modifications to it by the block.
-                    temp_value = yield(@array.at(@current_index))
+                    temp_value = yield(@array.at @current_index)
                     @array[@current_index] = temp_value
 
                     @current_index  = @forward_index
