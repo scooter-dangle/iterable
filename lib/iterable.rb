@@ -290,6 +290,14 @@ class IterableArray
                 self
             end
 
+            # Should delete_if be smarter / more magical than this?
+            # I had considered having it test for whether an element
+            # it is going to delete has already been deleted while
+            # it was yielded to the iteration block. Doing so would
+            # be something of a wild-goose chase but then so is this
+            # entire project. I don't know if making it more 'magical'
+            # would make its behavior more or less predictable to the
+            # end user.
             def delete_if        # Rubinius includes `&block` as an argument, but I don't know why
                 return @array.to_enum(:delete_if) unless block_given?
                 bastardize
