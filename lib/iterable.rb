@@ -22,7 +22,7 @@ class IterableArray
     @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :each_with_index, :select ]
 
     # @@hybrids contains methods that fit into the previous groups depending
-    # on the arguments passed.
+    # on the arguments passed. (Or depending on how dumb I am)
 
     @@hybrids   = [ :fill, :index ]
 
@@ -194,6 +194,11 @@ class IterableArray
 
                 IterableArray.new @array.shift(n)
             end
+
+            def reverse!
+                @array.reverse!
+                self
+            end
         end
     end
 
@@ -209,6 +214,17 @@ class IterableArray
                 out = []
                 [ n, @array.length ].min.times { out << self.delete_at(0) }
                 IterableArray.new out
+            end
+
+            def reverse!
+                @backward_index, @forward_index =
+                    @array.size - @forward_index  - 1,
+                    @array.size - @backward_index - 1
+
+                @current_index = @backward_index  + 1
+
+                @array.reverse!
+                self
             end
         end
     end
