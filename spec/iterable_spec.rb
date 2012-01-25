@@ -487,6 +487,18 @@ describe IterableArray do
                 @batting_history.should == [ :alice, :bob, :carrie, :bob, :alice ]
             end
         end
+
+        describe ':sort!' do
+            it do
+                @batting_order = [:bob, :darryl, :alice, :carrie]
+                @batting_order.each do |x|
+                    @batting_history << x
+                    @batting_order.sort! if x == :alice
+                end
+                @batting_order.should == [:alice, :bob, :carrie, :darryl]
+                @batting_history.should == [:bob, :darryl, :alice, :bob, :carrie, :darryl]
+            end
+        end
     end
 
     describe 'nested iteration' do
