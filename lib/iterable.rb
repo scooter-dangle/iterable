@@ -259,17 +259,22 @@ class IterableArray
                 return @array.to_enum(:each) unless block_given?
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    yield @array.at(@current_index)
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        yield @array.at(@current_index)
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             def each_index
@@ -494,5 +499,11 @@ class IterableArray
     def take_progenitor_binding progenitor_binding
         @progenitor_binding = progenitor_binding
         class << self; undef_method(:take_progenitor_binding); end
+    end
+
+    public
+    # Should probly go somewhere else, right?
+    def please_to_go_away_so_fast
+        throw :please_to_go_away_so_fast
     end
 end

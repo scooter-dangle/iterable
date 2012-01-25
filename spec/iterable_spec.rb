@@ -512,7 +512,7 @@ describe IterableArray do
             it do       # Case where we use a version of throw instead
                 @batting_order.each do |x|
                     @batting_history << x
-                    @batting_order.leave if x == :bob
+                    @batting_order.please_to_go_away_so_fast if x == :bob
                 end
                 @batting_order.instance_exec { @array.class }.should == Array
             end
