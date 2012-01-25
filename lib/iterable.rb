@@ -281,34 +281,44 @@ class IterableArray
                 return @array.to_enum(:each_index) unless block_given?
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    yield @current_index
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        yield @current_index
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             def each_with_index
                 return @array.to_enum(:each_with_index) unless block_given?
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    yield @array.at(@current_index), @current_index
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        yield @array.at(@current_index), @current_index
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             # Should delete_if be smarter / more magical than this?
@@ -323,43 +333,53 @@ class IterableArray
                 return @array.to_enum(:delete_if) unless block_given?
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
 
-                    # Usage of binding is necessary since this current :delete_if
-                    # call might be operating inside several levels of nested
-                    # iteration. If we just used :delete_at here, those higher
-                    # iteration levels would not be able to adjust their indices
-                    # to account for the change in array size.
-                    if yield @array.at(@current_index)
-                        @progenitor_binding.eval "self.delete_at #{@current_index}"
+                        # Usage of binding is necessary since this current :delete_if
+                        # call might be operating inside several levels of nested
+                        # iteration. If we just used :delete_at here, those higher
+                        # iteration levels would not be able to adjust their indices
+                        # to account for the change in array size.
+                        if yield @array.at(@current_index)
+                            @progenitor_binding.eval "self.delete_at #{@current_index}"
+                        end
+
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
                     end
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             def reverse_each
                 return @array.to_enum(:reverse_each) unless block_given?
                 bastardize
 
-                @current_index = @array.size - 1
-                @backward_index, @forward_index = @current_index - 1, @current_index + 1
-                while @current_index >= 0
-                    yield @array.at @current_index
+                catch :please_to_go_away_so_fast do
+                    @current_index = @array.size - 1
+                    @backward_index, @forward_index = @current_index - 1, @current_index + 1
+                    while @current_index >= 0
+                        yield @array.at @current_index
 
-                    @current_index  = @backward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @backward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             def map
@@ -367,17 +387,22 @@ class IterableArray
                 out = Array.new []
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    out << yield(@array.at(@current_index))
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        out << yield(@array.at(@current_index))
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return IterableArray.new out
                 end
 
                 debastardize
-                IterableArray.new out
+                nil
             end
 
             alias_method :collect, :map
@@ -386,20 +411,25 @@ class IterableArray
                 return to_enum(:map!) unless block_given?
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    # The following verbosity required so that @current_index will be
-                    # evaluated after any modifications to it by the block.
-                    temp_value = yield(@array.at @current_index)
-                    @array[@current_index] = temp_value
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        # The following verbosity required so that @current_index will be
+                        # evaluated after any modifications to it by the block.
+                        temp_value = yield(@array.at @current_index)
+                        @array[@current_index] = temp_value
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
+                    end
+
+                    debastardize
+                    return self
                 end
 
                 debastardize
-                self
+                nil
             end
 
             alias_method :collect!, :map!
@@ -408,28 +438,33 @@ class IterableArray
                 return @array.to_enum(:cycle, n) unless block_given?
                 bastardize
 
-                if n.equal? nil
-                    until @array.empty?
-                        @backward_index, @current_index, @forward_index = -1, 0, 1
-                        while @current_index < @array.size
-                            yield @array.at(@current_index)
+                catch :please_to_go_away_so_fast do
+                    if n.equal? nil
+                        until @array.empty?
+                            @backward_index, @current_index, @forward_index = -1, 0, 1
+                            while @current_index < @array.size
+                                yield @array.at(@current_index)
 
-                            @current_index  = @forward_index
-                            @forward_index  = @current_index + 1
-                            @backward_index = @current_index - 1
+                                @current_index  = @forward_index
+                                @forward_index  = @current_index + 1
+                                @backward_index = @current_index - 1
+                            end
+                        end
+                    else
+                        n.times do
+                            @backward_index, @current_index, @forward_index = -1, 0, 1
+                            while @current_index < @array.size
+                                yield @array.at(@current_index)
+
+                                @current_index  = @forward_index
+                                @forward_index  = @current_index + 1
+                                @backward_index = @current_index - 1
+                            end
                         end
                     end
-                else
-                    n.times do
-                        @backward_index, @current_index, @forward_index = -1, 0, 1
-                        while @current_index < @array.size
-                            yield @array.at(@current_index)
 
-                            @current_index  = @forward_index
-                            @forward_index  = @current_index + 1
-                            @backward_index = @current_index - 1
-                        end
-                    end
+                    debastardize
+                    return nil
                 end
 
                 debastardize
@@ -448,17 +483,22 @@ class IterableArray
                 end
                 bastardize
 
-                @backward_index, @current_index, @forward_index = -1, 0, 1
-                while @current_index < @array.size
-                    item = @array.at(@current_index)
-                    if yield item
-                        debastardize
-                        return @current_index
+                catch :please_to_go_away_so_fast do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        item = @array.at(@current_index)
+                        if yield item
+                            debastardize
+                            return @current_index
+                        end
+
+                        @current_index  = @forward_index
+                        @forward_index  = @current_index + 1
+                        @backward_index = @current_index - 1
                     end
 
-                    @current_index  = @forward_index
-                    @forward_index  = @current_index + 1
-                    @backward_index = @current_index - 1
+                    debastardize
+                    return nil
                 end
 
                 debastardize

@@ -501,7 +501,8 @@ describe IterableArray do
         end
 
         describe 'catching a break' do
-            it do       # Case where we use break and bad things hoppen
+            it do
+                # Case where we use break and bad things hoppen
                 @batting_order.each do |x|
                     @batting_history << x
                     break if x == :bob
@@ -509,7 +510,9 @@ describe IterableArray do
                 @batting_order.instance_exec { @array.class }.should == IterableArray
             end
 
-            it do       # Case where we use a version of throw instead
+            it do
+                # Case where we use a version of throw instead
+                # We should really be testing this for every iterator method, eh?
                 @batting_order.each do |x|
                     @batting_history << x
                     @batting_order.please_to_go_away_so_fast if x == :bob

@@ -35,3 +35,8 @@ h2. methods that iterate _and_ modify
 h2. :[]=
 
 It might be the case that I don't need to provide any special handling for @:[]=@ since it never deletes and will only affect the size of a non-empty array by appending onto the end. I'll be keeping an eye out for any cases where it would be necessary to implement it specially rather than just delegate it to @@array@.
+
+h2. :sort!
+
+This'll work...
+Assume x is the current index object in an array. We'll first run a test to see if it's unique in the array. If it's unique, then we can just find out where it ended up after the sort and then re-adjust the index accordingly. If it's not unique, we'll find out if it's the first/second/.../nth/.../last of it's kind in the array. And then after the sort, we'll set current index to that position of the items that are the same as x.
