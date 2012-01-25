@@ -499,6 +499,25 @@ describe IterableArray do
                 @batting_history.should == [:bob, :darryl, :alice, :bob, :carrie, :darryl]
             end
         end
+
+        describe 'catching a break' do
+            it do       # Case where we use break and bad things hoppen
+                @batting_order.each do |x|
+                    @batting_history << x
+                    break if x == :bob
+                end
+                @batting_order.instance_exec { @array.class }.should == IterableArray
+            end
+
+            it do       # Case where we use a version of throw instead
+                @batting_order.each do |x|
+                    @batting_history << x
+                    @batting_order.leave if x == :bob
+                end
+                @batting_order.instance_exec { @array.class }.should == Array
+            end
+        end
+
     end
 
     describe 'nested iteration' do
@@ -589,5 +608,24 @@ describe IterableArray do
             end
         end
 
+        describe ':sort! and :delete_if...together for the first time for your titillation' do
+            it do
+                @batting_order = [:bob, :darryl, :alice, :carrie]
+                @batting_order.each do |x|
+                    @batting_history << x
+                    if x == :alice
+                        @batting_order.delete_if do |x|
+                            @batting_history << x
+                            @batting_order.sort! if x == :alice
+                            x == :carrie
+                        end
+                    end
+                end
+                @batting_order.should == [:alice, :bob, :darryl]
+                @batting_history.should == [:bob, :darryl, :alice, :bob, :darryl, :alice, :bob, :carrie, :darryl]
+            end
+        end
+
     end
+
 end
