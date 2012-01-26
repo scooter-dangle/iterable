@@ -236,7 +236,8 @@ class IterableArray
                 return @array.sort! if @current_index >= @array.size
 
                 current_item = @array.at @current_index
-                if @array.to_a.count current_item == 1   # Get rid of this .to_a eventually
+                count = @array.to_a.count current_item   # Get rid of this .to_a eventually
+                if count == 1
                     @array.sort!
 
                     movement = @current_index - (@array.to_a.index current_item)
@@ -245,10 +246,15 @@ class IterableArray
                     @backward_index -= movement
                     return self
                 else
-                    # Do stuff here when there are more than one of the current item
+                    offset = @array.to_a[0...@current_index].count current_item
+                    @array.sort!
+
+                    movement = @current_index - (@array.to_a.index(current_item) + offset)
+                    @current_index  -= movement
+                    @forward_index  -= movement
+                    @backward_index -= movement
+                    return self
                 end
-
-
             end
         end
     end
