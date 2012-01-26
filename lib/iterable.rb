@@ -233,28 +233,18 @@ class IterableArray
             end
 
             def sort!
-                return @array.sort! if @current_index >= @array.size
+                return @array.sort! if @current_index >= @array.size or @current_index < 0
 
                 current_item = @array.at @current_index
-                count = @array.to_a.count current_item   # Get rid of this .to_a eventually
-                if count == 1
-                    @array.sort!
+                offset = @array.to_a[0...@current_index].count current_item
 
-                    movement = @current_index - (@array.to_a.index current_item)
-                    @current_index  -= movement
-                    @forward_index  -= movement
-                    @backward_index -= movement
-                    return self
-                else
-                    offset = @array.to_a[0...@current_index].count current_item
-                    @array.sort!
+                @array.sort!
 
-                    movement = @current_index - (@array.to_a.index(current_item) + offset)
-                    @current_index  -= movement
-                    @forward_index  -= movement
-                    @backward_index -= movement
-                    return self
-                end
+                movement = @current_index - (@array.to_a.index(current_item) + offset)
+                @current_index  -= movement
+                @forward_index  -= movement
+                @backward_index -= movement
+                self
             end
         end
     end
