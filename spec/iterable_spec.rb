@@ -489,14 +489,53 @@ describe IterableArray do
         end
 
         describe ':sort!' do
-            it do
-                @batting_order = [:bob, :darryl, :alice, :carrie]
-                @batting_order.each do |x|
-                    @batting_history << x
-                    @batting_order.sort! if x == :alice
+            describe 'basic' do
+                it do
+                    @batting_order = IterableArray.new [:bob, :darryl, :alice, :carrie]
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.sort! if x == :alice
+                    end
+                    @batting_order.should == [:alice, :bob, :carrie, :darryl]
+                    @batting_history.should == [:bob, :darryl, :alice, :bob, :carrie, :darryl]
                 end
-                @batting_order.should == [:alice, :bob, :carrie, :darryl]
-                @batting_history.should == [:bob, :darryl, :alice, :bob, :carrie, :darryl]
+            end
+
+            describe 'complex' do
+                before :each do
+                    @batting_order = IterableArray.new [:alice, :bob, :darryl, :bob, :darryl, :carrie, :bob]
+                    @bob_counter = 0
+                end
+
+                it 'first :bob' do
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @bob_counter += 1 if x == :bob
+                        @batting_order.sort! if @bob_counter == 1
+                    end
+
+                    @batting_history.should == [:alice, :bob, :bob, :bob, :carrie, :darryl, :darryl]
+                end
+
+                it 'second :bob' do
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @bob_counter += 1 if x == :bob
+                        @batting_order.sort! if @bob_counter == 2
+                    end
+
+                    @batting_history.should == [:alice, :bob, :darryl, :bob, :bob, :carrie, :darryl, :darryl]
+                end
+
+                it 'third :bob' do
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @bob_counter += 1 if x == :bob
+                        @batting_order.sort! if @bob_counter == 3
+                    end
+
+                    @batting_history.should == [:alice, :bob, :darryl, :bob, :darryl, :carrie, :bob, :carrie, :darryl, :darryl]
+                end
             end
         end
 
@@ -613,7 +652,7 @@ describe IterableArray do
 
         describe ':sort! and :delete_if...together for the first time for your titillation' do
             it do
-                @batting_order = [:bob, :darryl, :alice, :carrie]
+                @batting_order = IterableArray.new [:bob, :darryl, :alice, :carrie]
                 @batting_order.each do |x|
                     @batting_history << x
                     if x == :alice
@@ -625,7 +664,7 @@ describe IterableArray do
                     end
                 end
                 @batting_order.should == [:alice, :bob, :darryl]
-                @batting_history.should == [:bob, :darryl, :alice, :bob, :darryl, :alice, :bob, :carrie, :darryl]
+                @batting_history.should == [:bob, :darryl, :alice, :bob, :darryl, :alice, :bob, :carrie, :darryl, :bob, :darryl]
             end
         end
 

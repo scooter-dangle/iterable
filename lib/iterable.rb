@@ -199,6 +199,11 @@ class IterableArray
                 @array.reverse!
                 self
             end
+
+            def sort!
+                @array.sort!
+                self
+            end
         end
     end
 
@@ -225,6 +230,25 @@ class IterableArray
 
                 @array.reverse!
                 self
+            end
+
+            def sort!
+                return @array.sort! if @current_index >= @array.size
+
+                current_item = @array.at @current_index
+                if @array.to_a.count current_item == 1   # Get rid of this .to_a eventually
+                    @array.sort!
+
+                    movement = @current_index - (@array.to_a.index current_item)
+                    @current_index  -= movement
+                    @forward_index  -= movement
+                    @backward_index -= movement
+                    return self
+                else
+                    # Do stuff here when there are more than one of the current item
+                end
+
+
             end
         end
     end
