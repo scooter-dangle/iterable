@@ -562,14 +562,14 @@ describe IterableArray do
                     class Array
                         alias_method :old_shuffle!, :shuffle!
                         def shuffle!
-                            return ['bob', 'alice', 'carrie', 'darryl'] if self == ['alice', 'bob', 'carrie', 'darryl']
+                            return ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice'] if self == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
                             old_shuffle!
                         end
                     end
                 end
 
                 before :each do
-                    @batting_order_1 = IterableArray.new ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob']
+                    @batting_order_1 = IterableArray.new ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
                     @batting_order_2 = IterableArray.new @batting_order_1
                     @batting_order_3 = IterableArray.new @batting_order_1
                     @batting_history_1 = []
