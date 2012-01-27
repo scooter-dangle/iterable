@@ -488,58 +488,112 @@ describe IterableArray do
             end
         end
 
-        describe ':sort!' do
-            describe 'basic' do
+        describe ":sort! the bob's" do
+            describe 'one bob' do
                 it do
-                    @batting_order = IterableArray.new [:bob, :darryl, :alice, :carrie]
+                    @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
                     @batting_order.each do |x|
                         @batting_history << x
-                        @batting_order.sort! if x == :alice
+                        @batting_order.sort! if x == 'alice'
                     end
-                    @batting_order.should == [:alice, :bob, :carrie, :darryl]
-                    @batting_history.should == [:bob, :darryl, :alice, :bob, :carrie, :darryl]
+                    @batting_order.should == ['alice', 'bob', 'carrie', 'darryl']
+                    @batting_history.should == ['bob', 'darryl', 'alice', 'bob', 'carrie', 'darryl']
                 end
             end
 
-            describe 'complex' do
+            describe "multiple bob's" do
                 before :each do
-                    @batting_order = IterableArray.new [:alice, :bob, :darryl, :bob, :darryl, :carrie, :bob]
+                    @batting_order = IterableArray.new ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob']
                     @bob_counter = 0
                 end
 
-                it 'first :bob' do
+                it 'first bob' do
                     @batting_order.each do |x|
                         @batting_history << x
-                        @bob_counter += 1 if x == :bob
+                        @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 1
                     end
 
-                    @batting_history.should == [:alice, :bob, :bob, :bob, :carrie, :darryl, :darryl]
+                    @batting_history.should == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
                 end
 
-                it 'second :bob' do
+                it 'second bob' do
                     @batting_order.each do |x|
                         @batting_history << x
-                        @bob_counter += 1 if x == :bob
+                        @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 2
                     end
 
-                    @batting_history.should == [:alice, :bob, :darryl, :bob, :bob, :carrie, :darryl, :darryl]
+                    @batting_history.should == ['alice', 'bob', 'darryl', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
                 end
 
-                it 'third :bob' do
+                it 'third bob' do
                     @batting_order.each do |x|
                         @batting_history << x
-                        @bob_counter += 1 if x == :bob
+                        @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 3
                     end
 
-                    @batting_history.should == [:alice, :bob, :darryl, :bob, :darryl, :carrie, :bob, :carrie, :darryl, :darryl]
+                    @batting_history.should == ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob', 'carrie', 'darryl', 'darryl']
+                end
+            end
+        end
+
+        describe ":shuffle! the bob's" do
+            describe 'one bob' do
+                before :all do
+                    class Array
+                        alias_method :old_shuffle!, :shuffle!
+                        def shuffle!
+                            return ['bob', 'alice', 'carrie', 'darryl'] if self == ['alice', 'bob', 'carrie', 'darryl']
+                            old_shuffle!
+                        end
+                    end
+                end
+
+
+                it do
+
+                end
+            end
+
+            describe "multiple bob's" do
+                before :all do
+                    class Array
+                        alias_method :old_shuffle!, :shuffle!
+                        def shuffle!
+                            return ['bob', 'alice', 'carrie', 'darryl'] if self == ['alice', 'bob', 'carrie', 'darryl']
+                            old_shuffle!
+                        end
+                    end
+                end
+
+                before :each do
+                    @batting_order_1 = IterableArray.new ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob']
+                    @batting_order_2 = IterableArray.new @batting_order_1
+                    @batting_order_3 = IterableArray.new @batting_order_1
+                    @batting_history_1 = []
+                    @batting_history_2 = []
+                    @batting_history_3 = []
+                    @bob_counter = 0
+                end
+
+                it 'first bob' do
+                    @batting_order.each
+                end
+
+                it 'second bob' do
+
+                end
+
+                it 'third bob' do
+
                 end
             end
         end
 
         describe 'catching a break' do
+            # The following 2 tests are implementation-specific
             it do
                 # Case where we use break and bad things hoppen
                 @batting_order.each do |x|
@@ -652,19 +706,19 @@ describe IterableArray do
 
         describe ':sort! and :delete_if...together for the first time for your titillation' do
             it do
-                @batting_order = IterableArray.new [:bob, :darryl, :alice, :carrie]
+                @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
                 @batting_order.each do |x|
                     @batting_history << x
-                    if x == :alice
+                    if x == 'alice'
                         @batting_order.delete_if do |x|
                             @batting_history << x
-                            @batting_order.sort! if x == :alice
-                            x == :carrie
+                            @batting_order.sort! if x == 'alice'
+                            x == 'carrie'
                         end
                     end
                 end
-                @batting_order.should == [:alice, :bob, :darryl]
-                @batting_history.should == [:bob, :darryl, :alice, :bob, :darryl, :alice, :bob, :carrie, :darryl, :bob, :darryl]
+                @batting_order.should == ['alice', 'bob', 'darryl']
+                @batting_history.should == ['bob', 'darryl', 'alice', 'bob', 'darryl', 'alice', 'bob', 'carrie', 'darryl', 'bob', 'darryl']
             end
         end
 
