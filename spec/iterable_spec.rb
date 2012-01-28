@@ -103,6 +103,7 @@ describe IterableArray do
             ( @iter_ary * num  )        .should be_an_instance_of(IterableArray)
             @iter_ary.sort              .should be_an_instance_of(IterableArray)
             ( @iter_ary << num )        .should be_an_instance_of(IterableArray)
+            @iter_ary.concat([num])     .should be_an_instance_of(IterableArray)
             @iter_ary[1, 2]             .should be_an_instance_of(IterableArray)
             @iter_ary[1...num]          .should be_an_instance_of(IterableArray)
             @iter_ary.slice(1, 2)       .should be_an_instance_of(IterableArray)
@@ -116,6 +117,7 @@ describe IterableArray do
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
+            @iter_ary.sample            .should be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate work the same as array methods outside of iteration blocks" do
@@ -130,6 +132,9 @@ describe IterableArray do
 
             # :<<
             ( @iter_ary << num ).should == ( @ary << num)
+
+            # :concat
+            ( @iter_ary.concat [num] ).should == ( @ary.concat [num])
 
             # :<=>
             ( @iter_ary <=> @iter_ary_2 ).should == ( @ary <=> @ary_2 )
@@ -207,7 +212,7 @@ describe IterableArray do
             @num = 3
         end
 
-        it do
+        it ':delete_at' do
             @iter_ary_1.delete_at(1).should == @ary_1.delete_at(1)
             @iter_ary_1.should == @ary_1
 
@@ -218,12 +223,17 @@ describe IterableArray do
             @iter_ary_1.should == @ary_1
         end
 
-        it do
+        it ':shift' do
             @iter_ary_1.shift.should == @ary_1.shift
             @iter_ary_1.should == @ary_1
 
             @iter_ary_2.shift(2).should == @ary_2.shift(2)
             @iter_ary_2.should == @ary_2
+        end
+
+        it ':clear' do
+            @iter_ary_1.clear.should == @ary_1.clear
+            @iter_ary_1.should == @ary_1
         end
     end
 
@@ -440,6 +450,21 @@ describe IterableArray do
 
                 @caught.should be_true
                 @batting_order.should == [ :alice, :bob, :carrie, :eve ]
+            end
+
+            it 'exits after the array is cleared' do
+                catch :out_of_bound do
+                    @batting_order.cycle do |x|
+                        @batting_history << x
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                        @batting_order.clear if x == :carrie and @counter > 4
+                    end
+                    @caught = false
+                end
+
+                @batting_order.should == []
+                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie ]
             end
         end
 

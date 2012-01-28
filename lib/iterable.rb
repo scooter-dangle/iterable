@@ -13,11 +13,11 @@ class IterableArray
 
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
-    @@plain_accessors   = [ :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
-    @@special_accessors = [ :&, :|, :*, :+, :-, :[], :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
+    @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :<<, :shift, :shuffle!, :sort!, :reverse! ]
+    @@special_modifiers = [ :clear, :shift, :shuffle!, :sort!, :reverse! ]
 
     @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :each_with_index, :select ]
 
@@ -27,7 +27,7 @@ class IterableArray
     @@hybrids   = [ :fill, :index ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:frozen?, :concat, :unshift, :insert, :find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :keep_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :slice, :slice!, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :sample, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack]
+    # working:  Array#instance_methods(false) => [:unshift, :insert, :find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :keep_if, :reject, :reject!, :zip, :transpose, :replace, :slice!, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
 
     def_delegators :@array, *@@plain_accessors
@@ -70,6 +70,16 @@ class IterableArray
 
     def define_special_accessors
         class << self
+            def << arg
+                @array << arg
+                self
+            end
+
+            def concat arg
+                arg.each { |x| @array << x }
+                self
+            end
+
             def [](arg1, arg2=nil)
                 case arg1
 
@@ -156,6 +166,11 @@ class IterableArray
             alias_method :indices, :values_at
             alias_method :indexes, :values_at
 
+            def sample arg=nil
+                return IterableArray.new(@array.sample arg) unless arg == nil
+                IterableArray.new @array.sample
+            end
+
             # :join is defined here (instead of directly delegating it to
             # @array) since we might want to later define how it handles
             # an array that contains IterableArrays as elements.
@@ -192,8 +207,8 @@ class IterableArray
 
     def define_special_modifiers_noniterating
         class << self
-            def <<(arg)
-                @array << arg
+            def clear
+                @array.clear
                 self
             end
 
@@ -222,8 +237,11 @@ class IterableArray
 
     def define_special_modifiers_iterating
         class << self
-            def <<(arg) # Not yet defined
-                # @array << arg
+            def clear
+                @backward_index -= @current_index
+                @forward_index  -= @current_index
+                @current_index   = 0
+                @array.clear
             end
 
             def shift n = nil
