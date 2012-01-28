@@ -539,68 +539,66 @@ describe IterableArray do
             end
         end
 
-        describe ":shuffle! the bob's" do
-            describe 'one bob' do
-                before :all do
-                    class Array
-                        alias_method :old_shuffle!, :shuffle!
-                        def shuffle!
-                            if self == ['alice', 'bob', 'carrie', 'darryl']
-                                replace ['bob', 'alice', 'carrie', 'darryl']
-                                return self
-                            end
-                            old_shuffle!
+        describe ':shuffle! the bob\'s' do
+            it 'one bob' do
+                class Array
+                    alias_method :old_shuffle!, :shuffle!
+                    def shuffle!
+                        if self == ['alice', 'bob', 'carrie', 'darryl']
+                            replace ['bob', 'alice', 'carrie', 'darryl']
+                            Array.class_exec { alias_method :shuffle!, :old_shuffle! }
+                            return self
                         end
+                        old_shuffle!
                     end
                 end
 
 
-                it do
-                    @batting_order = IterableArray.new ['alice', 'bob', 'carrie', 'darryl']
-                    @batting_order.each do |x|
-                        @batting_history << x
-                        @batting_order.shuffle! if x == 'bob'
-                    end
-                    @batting_order.should == ['bob', 'alice', 'carrie', 'darryl']
-                    @batting_history.should == ['alice', 'bob', 'alice', 'carrie', 'darryl']
+                @batting_order = IterableArray.new ['alice', 'bob', 'carrie', 'darryl']
+                @batting_order.each do |x|
+                    @batting_history << x
+                    @batting_order.shuffle! if x == 'bob'
                 end
+
+                @batting_order.should == ['bob', 'alice', 'carrie', 'darryl']
+                @batting_history.should == ['alice', 'bob', 'alice', 'carrie', 'darryl']
             end
 
-            describe "multiple bob's" do
-                before :all do
-                    class Array
-                        alias_method :old_shuffle!, :shuffle!
-                        def shuffle!
-                            if self == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
-                                replace ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice']
-                                return self
-                            end
-                            old_shuffle!
+            it 'multiple bob\'s' do
+                class Array
+                    alias_method :old_shuffle!, :shuffle!
+                    def shuffle!
+                        if self == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
+                            replace ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice']
+                            Array.class_exec { alias_method :shuffle!, :old_shuffle! }
+                            return self
                         end
+                        old_shuffle!
+                    end
+
+                    alias_method :old_sample, :sample
+                    def sample
+                        Array.class_exec {alias_method :sample, :old_sample }
+                        at 2
                     end
                 end
 
-                before :each do
-                    @batting_order_1 = IterableArray.new ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
-                    @batting_order_2 = IterableArray.new @batting_order_1
-                    @batting_order_3 = IterableArray.new @batting_order_1
-                    @batting_history_1 = []
-                    @batting_history_2 = []
-                    @batting_history_3 = []
-                    @bob_counter = 0
+
+                @batting_order = IterableArray.new ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
+                @batting_history = []
+                @bob_counter = 0
+
+                @batting_order.each do |x|
+                    @batting_history << x
+                    @bob_counter += 1 if x == 'bob'
+                    if @bob_counter == 2
+                        @batting_order.shuffle!
+                        @bob_counter += 1
+                    end
                 end
 
-                it 'first bob' do
-                    @batting_order.each
-                end
-
-                it 'second bob' do
-
-                end
-
-                it 'third bob' do
-
-                end
+                @batting_order.should == ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice']
+                @batting_history.should == ['alice', 'bob', 'bob', 'alice']
             end
         end
 
