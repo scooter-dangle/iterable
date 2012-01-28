@@ -101,6 +101,7 @@ describe IterableArray do
             ( @iter_ary - @ary )        .should be_an_instance_of(IterableArray)
             ( @iter_ary | @ary )        .should be_an_instance_of(IterableArray)
             ( @iter_ary * num  )        .should be_an_instance_of(IterableArray)
+            @iter_ary.sort              .should be_an_instance_of(IterableArray)
             ( @iter_ary << num )        .should be_an_instance_of(IterableArray)
             @iter_ary[1, 2]             .should be_an_instance_of(IterableArray)
             @iter_ary[1...num]          .should be_an_instance_of(IterableArray)
@@ -113,6 +114,7 @@ describe IterableArray do
             @iter_ary.indexes((1..2))   .should be_an_instance_of(IterableArray)
             @iter_ary.first(3)          .should be_an_instance_of(IterableArray)
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
+            @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
         end
 
@@ -122,6 +124,9 @@ describe IterableArray do
             @ary_2 = [ 'c', 'd', 'e' ]
             @iter_ary_2 = IterableArray.new @ary_2
             num = 3
+
+            # :sort
+            @iter_ary.shuffle.sort.should == @ary.shuffle.sort
 
             # :<<
             ( @iter_ary << num ).should == ( @ary << num)
@@ -184,6 +189,12 @@ describe IterableArray do
             # :push
             @iter_ary.push(num).should == @ary.push(num)
             @iter_ary.should == @ary
+
+            # :shuffle
+            array_1, array_2 = [], []
+            6.times { array_1 << @iter_ary.shuffle }
+            6.times { array_2 <<      @ary.shuffle }
+            array_1.should_not == array_2
         end
     end
 
@@ -576,6 +587,7 @@ describe IterableArray do
                         old_shuffle!
                     end
 
+                    # Note: The use of Array#sample is implementation specific.
                     alias_method :old_sample, :sample
                     def sample
                         Array.class_exec {alias_method :sample, :old_sample }
