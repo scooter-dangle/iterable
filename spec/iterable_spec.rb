@@ -545,7 +545,10 @@ describe IterableArray do
                     class Array
                         alias_method :old_shuffle!, :shuffle!
                         def shuffle!
-                            return ['bob', 'alice', 'carrie', 'darryl'] if self == ['alice', 'bob', 'carrie', 'darryl']
+                            if self == ['alice', 'bob', 'carrie', 'darryl']
+                                replace ['bob', 'alice', 'carrie', 'darryl']
+                                return self
+                            end
                             old_shuffle!
                         end
                     end
@@ -553,7 +556,13 @@ describe IterableArray do
 
 
                 it do
-
+                    @batting_order = IterableArray.new ['alice', 'bob', 'carrie', 'darryl']
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.shuffle! if x == 'bob'
+                    end
+                    @batting_order.should == ['bob', 'alice', 'carrie', 'darryl']
+                    @batting_history.should == ['alice', 'bob', 'alice', 'carrie', 'darryl']
                 end
             end
 
@@ -562,7 +571,10 @@ describe IterableArray do
                     class Array
                         alias_method :old_shuffle!, :shuffle!
                         def shuffle!
-                            return ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice'] if self == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
+                            if self == ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
+                                replace ['carrie', 'bob', 'darryl', 'darryl', 'bob', 'bob', 'alice']
+                                return self
+                            end
                             old_shuffle!
                         end
                     end

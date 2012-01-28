@@ -204,6 +204,11 @@ class IterableArray
                 @array.sort!
                 self
             end
+
+            def shuffle!
+                @array.shuffle!
+                self
+            end
         end
     end
 
@@ -241,6 +246,24 @@ class IterableArray
                 @array.sort!
 
                 movement = @current_index - (@array.to_a.index(current_item) + offset)
+                @current_index  -= movement
+                @forward_index  -= movement
+                @backward_index -= movement
+                self
+            end
+
+            def shuffle!
+                return @array.shuffle! if @current_index >= @array.size or @current_index < 0
+
+                current_item = @array.at @current_index
+                count = @array.to_a.count current_item
+
+                @array.shuffle!
+
+                locations = []
+                @array.to_a.each_with_index { |item, index| locations << index if item == current_item }
+
+                movement = @current_index - locations.sample
                 @current_index  -= movement
                 @forward_index  -= movement
                 @backward_index -= movement
