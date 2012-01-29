@@ -354,6 +354,47 @@ describe IterableArray do
         end
     end
 
+    # holper methods
+    def eacher iterator_string=nil, &block
+        if iterator_string == nil
+            @batting_order.each do |x|
+                @batting_history << x
+                block.yield x
+            end
+        else
+            eval %{
+                @batting_order.#{ iterator_string } do |x|
+                    @batting_history << x
+                    block.yield x
+                end
+            }
+        end
+    end
+
+    def catch_and_eacher iterator_string=nil, &block
+        catch :out_of_bound do
+            if iterator_string == nil
+                @batting_order.each do |x|
+                    @batting_history << x
+                    block.yield x
+                    throw :out_of_bound if @counter > @bound
+                    @counter += 1
+                end
+            else
+                eval %{
+                    @batting_order.#{ iterator_string } do |x|
+                        @batting_history << x
+                        block.yield x
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                    end
+                }
+            end
+
+            @caught = false
+        end
+    end
+
     describe 'complex iteration' do
         before :all do
             @bound = 200
@@ -370,19 +411,19 @@ describe IterableArray do
 
         describe 'where only simple array element assignments are made' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order[@batting_order.index x] = :maurice if x == :carrie
                 end
+
                 @batting_order.should == [:alice, :bob, :maurice, :darryl, :eve]
                 @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
 
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order[@batting_order.index(x) + 1] = :maurice if x == :carrie
                 end
+
                 @batting_order.should == [:alice, :bob, :carrie, :maurice, :eve]
                 @batting_history.should == [:alice, :bob, :carrie, :maurice, :eve]
             end
@@ -390,15 +431,8 @@ describe IterableArray do
 
         describe ':insert' do
             it do
-                puts @batting_order
-                catch :out_of_bound do
-                    @batting_order.each do |x|
-                        @batting_history << x
-                        @batting_order.insert(4, :franny, :zooey) if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher do |x|
+                    @batting_order.insert(4, :franny, :zooey) if x == :darryl
                 end
 
                 @batting_order.should == [:alice, :bob, :carrie, :darryl, :franny, :zooey, :eve]
@@ -406,15 +440,8 @@ describe IterableArray do
             end
 
             it do
-                puts @batting_order
-                catch :out_of_bound do
-                    @batting_order.each do |x|
-                        @batting_history << x
-                        @batting_order.insert(2, :franny, :zooey) if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher do |x|
+                    @batting_order.insert(2, :franny, :zooey) if x == :darryl
                 end
 
                 @batting_order.should == [:alice, :bob, :franny, :zooey, :carrie, :darryl, :eve]
@@ -427,15 +454,9 @@ describe IterableArray do
             # has probably already been tested in the non-modifying
             # iteration section. Should I get rid of it?
             it do
-                catch :out_of_bound do
-                    @batting_order.cycle(1) do |x|
-                        @batting_history << x
-                        @batting_order.delete_at(@batting_order.index x) if @drop_batter
-                        @drop_batter = true if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher "cycle(1)" do |x|
+                    @batting_order.delete_at(@batting_order.index x) if @drop_batter
+                    @drop_batter = true if x == :darryl
                 end
 
                 @counter.should == 5
@@ -445,15 +466,9 @@ describe IterableArray do
             end
 
             it 'exits a finite cycle early when the array becomes empty' do
-                catch :out_of_bound do
-                    @batting_order.cycle(5) do |x|
-                        @batting_history << x
-                        @batting_order.delete_at(@batting_order.index x) if @drop_batter
-                        @drop_batter = true if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher 'cycle(5)' do |x|
+                    @batting_order.delete_at(@batting_order.index x) if @drop_batter
+                    @drop_batter = true if x == :darryl
                 end
 
                 @counter.should == 9
@@ -463,15 +478,9 @@ describe IterableArray do
             end
 
             it 'exits an infinite cycle when the array becomes empty' do
-                catch :out_of_bound do
-                    @batting_order.cycle do |x|
-                        @batting_history << x
-                        @batting_order.delete_at(@batting_order.index x) if @drop_batter
-                        @drop_batter = true if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher 'cycle' do |x|
+                    @batting_order.delete_at(@batting_order.index x) if @drop_batter
+                    @drop_batter = true if x == :darryl
                 end
 
                 @counter.should == 9
@@ -481,13 +490,8 @@ describe IterableArray do
             end
 
             it 'continues indefinitely for an infinite cycle when the array is modified but not emptied' do
-                catch :out_of_bound do
-                    @batting_order.cycle do |x|
-                        @batting_order.delete_at(@batting_order.index x) if x == :darryl
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                    @caught = false
+                catch_and_eacher 'cycle' do |x|
+                    @batting_order.delete_at(@batting_order.index x) if x == :darryl
                 end
 
                 @caught.should be_true
@@ -495,14 +499,8 @@ describe IterableArray do
             end
 
             it 'exits after the array is cleared' do
-                catch :out_of_bound do
-                    @batting_order.cycle do |x|
-                        @batting_history << x
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                        @batting_order.clear if x == :carrie and @counter > 4
-                    end
-                    @caught = false
+                catch_and_eacher 'cycle' do |x|
+                    @batting_order.clear if x == :carrie and @counter > 4
                 end
 
                 @batting_order.should == []
@@ -512,8 +510,7 @@ describe IterableArray do
 
         describe 'where a currently yielded element is deleted' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.delete_at(@batting_order.index x) if x == :carrie
                 end
                 @batting_order.should == [:alice, :bob, :darryl, :eve]
@@ -523,8 +520,7 @@ describe IterableArray do
 
         describe 'where an element after the currently yielded element is deleted' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.pop if x == :carrie
                 end
                 @batting_order.should == [:alice, :bob, :carrie, :darryl]
@@ -534,8 +530,7 @@ describe IterableArray do
 
         describe 'where an element before the currently yielded element is deleted' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.shift if x == :carrie
                 end
                 @batting_order.should == [:bob, :carrie, :darryl, :eve]
@@ -545,8 +540,7 @@ describe IterableArray do
 
         describe ':reverse!' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.reverse! if x == :darryl
                 end
                 @batting_order.should == [:eve, :darryl, :carrie, :bob, :alice]
@@ -554,8 +548,7 @@ describe IterableArray do
             end
 
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     if x == :carrie
                         @batting_order.delete_at(@batting_order.index x)
                         @batting_order.reverse!
@@ -570,8 +563,7 @@ describe IterableArray do
             describe 'one bob' do
                 it do
                     @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @batting_order.sort! if x == 'alice'
                     end
                     @batting_order.should == ['alice', 'bob', 'carrie', 'darryl']
@@ -586,8 +578,7 @@ describe IterableArray do
                 end
 
                 it 'first bob' do
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 1
                     end
@@ -596,8 +587,7 @@ describe IterableArray do
                 end
 
                 it 'second bob' do
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 2
                     end
@@ -606,8 +596,7 @@ describe IterableArray do
                 end
 
                 it 'third bob' do
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @bob_counter += 1 if x == 'bob'
                         @batting_order.sort! if @bob_counter == 3
                     end
@@ -633,8 +622,7 @@ describe IterableArray do
 
 
                 @batting_order = IterableArray.new ['alice', 'bob', 'carrie', 'darryl']
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.shuffle! if x == 'bob'
                 end
 
@@ -667,8 +655,7 @@ describe IterableArray do
                 @batting_history = []
                 @bob_counter = 0
 
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @bob_counter += 1 if x == 'bob'
                     if @bob_counter == 2
                         @batting_order.shuffle!
@@ -685,8 +672,7 @@ describe IterableArray do
             # The following 2 tests are implementation-specific
             it do
                 # Case where we use break and bad things hoppen
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     break if x == :bob
                 end
                 @batting_order.instance_exec { @array.class }.should == IterableArray
@@ -695,8 +681,7 @@ describe IterableArray do
             it do
                 # Case where we use a version of throw instead
                 # We should really be testing this for every iterator method, eh?
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     @batting_order.please_to_go_away_so_fast if x == :bob
                 end
                 @batting_order.instance_exec { @array.class }.should == Array
@@ -720,11 +705,9 @@ describe IterableArray do
         end
 
         it do
-            @batting_order.each do |x|
-                @batting_history << x
+            eacher do |x|
                 if x == :bob
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @batting_order.delete_at(@batting_order.index x) if x == :bob
                     end
                 end
@@ -733,11 +716,9 @@ describe IterableArray do
         end
 
         it do
-            @batting_order.each do |x|
-                @batting_history << x
+            eacher do |x|
                 if x == :carrie
-                    @batting_order.each do |x|
-                        @batting_history << x
+                    eacher do |x|
                         @batting_order.delete_at(@batting_order.index x) if x == :bob or x == :darryl
                     end
                 end
@@ -747,11 +728,9 @@ describe IterableArray do
 
         describe ':reverse_each' do
             it do
-                @batting_order.reverse_each do |x|
-                    @batting_history << x
+                eacher 'reverse_each' do |x|
                     if x == :carrie
-                        @batting_order.each do |x|
-                            @batting_history << x
+                        eacher do |x|
                             @batting_order.delete_at(@batting_order.index x) if x == :alice
                         end
                     end
@@ -760,15 +739,12 @@ describe IterableArray do
             end
 
             it do
-                @batting_order.reverse_each do |x|
-                    @batting_history << x
+                eacher 'reverse_each' do |x|
                     if x == :carrie
                         @batting_order.delete_at(@batting_order.index x)
-                        @batting_order.each do |x|
-                            @batting_history << x
+                        eacher do |x|
                             if x == :bob
-                                @batting_order.reverse_each do |x|
-                                    @batting_history << x
+                                eacher 'reverse_each' do |x|
                                     @batting_order.delete_at(@batting_order.index x)
                                     @batting_order.push(:eve) if x == :bob
                                 end
@@ -782,8 +758,7 @@ describe IterableArray do
 
         describe ':delete_if' do
             it do
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     if x == :carrie
                         @batting_order.delete_if { |x| @batting_history << x; x == :bob }
                     end
@@ -796,11 +771,9 @@ describe IterableArray do
         describe ':sort! and :delete_if...together for the first time for your titillation' do
             it do
                 @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
-                @batting_order.each do |x|
-                    @batting_history << x
+                eacher do |x|
                     if x == 'alice'
-                        @batting_order.delete_if do |x|
-                            @batting_history << x
+                        eacher 'delete_if' do |x|
                             @batting_order.sort! if x == 'alice'
                             x == 'carrie'
                         end
