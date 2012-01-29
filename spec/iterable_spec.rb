@@ -38,18 +38,18 @@ describe IterableArray do
 
     describe ':assoc and :rassoc' do
         it 'work like Array#assoc and Array#rassoc but return IterableArrays' do
-            @ary = [ 42, [ 'x', 'y', 'z' ], [ 0, 1, 2 ], IterableArray.new( [ :alpha, :beta, :gamma ] ) ]
+            @ary = [42, ['x', 'y', 'z'], [0, 1, 2], IterableArray.new( [:alpha, :beta, :gamma] )]
             @iter_ary = IterableArray.new @ary
 
             @iter_ary.assoc(0).should == @ary.assoc(0)
             @iter_ary.assoc(1).should == @ary.assoc(1)
-            @iter_ary.assoc(:alpha).should == [ :alpha, :beta, :gamma ]
+            @iter_ary.assoc(:alpha).should == [:alpha, :beta, :gamma]
             @iter_ary.assoc(:beta).should == nil
 
             @iter_ary.rassoc(0).should == @ary.rassoc(0)
             @iter_ary.rassoc(1).should == @ary.rassoc(1)
             @iter_ary.rassoc(:alpha).should == nil
-            @iter_ary.rassoc(:beta).should == [ :alpha, :beta, :gamma ]
+            @iter_ary.rassoc(:beta).should == [:alpha, :beta, :gamma]
         end
     end
 
@@ -57,14 +57,14 @@ describe IterableArray do
     # every time I do "___.should == ___"
     describe ':==' do
         it 'returns false for differing array content' do
-            @ary_1 = [ 0, 1, 2 ]
-            @iter_ary_1 = IterableArray.new [ 'a', 'b', 'c' ]
+            @ary_1 = [0, 1, 2]
+            @iter_ary_1 = IterableArray.new ['a', 'b', 'c']
             ( @iter_ary_1 == @ary_1 ).should be_false
             ( @ary_1 == @iter_ary_1 ).should be_false
         end
 
         it 'returns true if array content matches but classes differ' do
-            @ary_1 = [ 0, 1, 2 ]
+            @ary_1 = [0, 1, 2]
             @iter_ary_1 = IterableArray.new @ary_1
             ( @iter_ary_1 == @ary_1 ).should be_true
             ( @ary_1 == @iter_ary_1 ).should be_true
@@ -73,8 +73,8 @@ describe IterableArray do
 
 
     it ':eql? acts like a class-sensitive version of :==' do
-        @ary_1 = [ 0, 1, 2 ]
-        @ary_2 = [ 'a', 'b', 'c' ]
+        @ary_1 = [0, 1, 2]
+        @ary_2 = ['a', 'b', 'c']
         @iter_ary_1 = IterableArray.new @ary_1
         @iter_ary_2 = IterableArray.new @ary_1
         @iter_ary_3 = IterableArray.new @ary_2
@@ -87,14 +87,14 @@ describe IterableArray do
     describe 'instance methods' do
         if RUBY_VERSION >= '1.9'
             it 'do not include :nitems since :nitems is not in 1.9.x' do
-                @iter_ary = IterableArray.new [ 'a', 'b', 'c' ]
+                @iter_ary = IterableArray.new ['a', 'b', 'c']
                 @iter_ary.singleton_class.instance_methods.should_not include(:nitems)
             end
         end
 
         it 'return an InterableArray when the corresponding Array method would return an array' do
-            @iter_ary = IterableArray.new [ 'a', 'b', 'c', 'd' ]
-            @ary = [ 0, 1, 2, 3 ]
+            @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
+            @ary = [0, 1, 2, 3]
             num   = 3
             ( @iter_ary & @ary )        .should be_an_instance_of(IterableArray)
             ( @iter_ary + @ary )        .should be_an_instance_of(IterableArray)
@@ -117,13 +117,13 @@ describe IterableArray do
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
-            @iter_ary.sample            .should be_an_instance_of(IterableArray)
+            @iter_ary.sample(3)         .should be_an_instance_of(IterableArray)
         end
 
         it "that don't iterate work the same as array methods outside of iteration blocks" do
-            @ary = [ 'a', 'b', 'c', 'd' ]
+            @ary = ['a', 'b', 'c', 'd']
             @iter_ary = IterableArray.new @ary
-            @ary_2 = [ 'c', 'd', 'e' ]
+            @ary_2 = ['c', 'd', 'e']
             @iter_ary_2 = IterableArray.new @ary_2
             num = 3
 
@@ -195,6 +195,14 @@ describe IterableArray do
             @iter_ary.push(num).should == @ary.push(num)
             @iter_ary.should == @ary
 
+            # :insert
+            @iter_ary.insert(1, num, 'b').should == @ary.insert(1, num, 'b')
+            @iter_ary.should == @ary
+            @iter_ary.insert(-1, 8).should == @ary.insert(-1, 8)
+            @iter_ary.should == @ary
+            @iter_ary.insert(21, 8).should == @ary.insert(21, 8)
+            @iter_ary.should == @ary
+
             # :shuffle
             array_1, array_2 = [], []
             6.times { array_1 << @iter_ary.shuffle }
@@ -205,9 +213,9 @@ describe IterableArray do
 
     describe 'modifiers outside of iteration' do
         before :each do
-            @ary_1 = [ 'a', 'b', 'c', 'd' ]
+            @ary_1 = ['a', 'b', 'c', 'd']
             @iter_ary_1 = IterableArray.new @ary_1
-            @ary_2 = [ 'c', 'd', 'e' ]
+            @ary_2 = ['c', 'd', 'e']
             @iter_ary_2 = IterableArray.new @ary_2
             @num = 3
         end
@@ -262,7 +270,7 @@ describe IterableArray do
         end
 
         before :each do
-            @ary = [ 'a', 'b', 'c', 'd' ]
+            @ary = ['a', 'b', 'c', 'd']
             @iter_ary = IterableArray.new @ary
             @out_1, @out_2 = [], []
         end
@@ -273,10 +281,10 @@ describe IterableArray do
         end
 
 #        it 'is this test even working?' do
-#            @ary.should == [ 'a', 'b', 'c', 'd' ]
-#            @iter_ary.should == IterableArray.new([ 'a', 'b', 'c', 'd' ])
-#            @ary.each(&(appender @out_1)).should == [ 'a', 'b', 'c', 'd' ]
-#            @out_1.should == [ 'a', 'b', 'c', 'd' ]
+#            @ary.should == ['a', 'b', 'c', 'd']
+#            @iter_ary.should == IterableArray.new(['a', 'b', 'c', 'd'])
+#            @ary.each(&(appender @out_1)).should == ['a', 'b', 'c', 'd']
+#            @out_1.should == ['a', 'b', 'c', 'd']
 #        end
 
         it ':each' do
@@ -352,7 +360,7 @@ describe IterableArray do
         end
 
         before :each do
-            @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl, :eve ]
+            @batting_order = IterableArray.new [:alice, :bob, :carrie, :darryl, :eve]
             @batting_history = []
 
             @drop_batter = false
@@ -366,8 +374,8 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order[@batting_order.index x] = :maurice if x == :carrie
                 end
-                @batting_order.should == [ :alice, :bob, :maurice, :darryl, :eve ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.should == [:alice, :bob, :maurice, :darryl, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
 
             it do
@@ -375,8 +383,42 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order[@batting_order.index(x) + 1] = :maurice if x == :carrie
                 end
-                @batting_order.should == [ :alice, :bob, :carrie, :maurice, :eve ]
-                @batting_history.should == [ :alice, :bob, :carrie, :maurice, :eve ]
+                @batting_order.should == [:alice, :bob, :carrie, :maurice, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :maurice, :eve]
+            end
+        end
+
+        describe ':insert' do
+            it do
+                puts @batting_order
+                catch :out_of_bound do
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.insert(4, :franny, :zooey) if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                    end
+                    @caught = false
+                end
+
+                @batting_order.should == [:alice, :bob, :carrie, :darryl, :franny, :zooey, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :franny, :zooey, :eve]
+            end
+
+            it do
+                puts @batting_order
+                catch :out_of_bound do
+                    @batting_order.each do |x|
+                        @batting_history << x
+                        @batting_order.insert(2, :franny, :zooey) if x == :darryl
+                        throw :out_of_bound if @counter > @bound
+                        @counter += 1
+                    end
+                    @caught = false
+                end
+
+                @batting_order.should == [:alice, :bob, :franny, :zooey, :carrie, :darryl, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
         end
 
@@ -398,8 +440,8 @@ describe IterableArray do
 
                 @counter.should == 5
                 @caught.should be_false
-                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.should == [:alice, :bob, :carrie, :darryl]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
 
             it 'exits a finite cycle early when the array becomes empty' do
@@ -417,7 +459,7 @@ describe IterableArray do
                 @counter.should == 9
                 @caught.should be_false
                 @batting_order.should == []
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl]
             end
 
             it 'exits an infinite cycle when the array becomes empty' do
@@ -435,7 +477,7 @@ describe IterableArray do
                 @counter.should == 9
                 @caught.should be_false
                 @batting_order.should == []
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl ]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie, :darryl]
             end
 
             it 'continues indefinitely for an infinite cycle when the array is modified but not emptied' do
@@ -449,7 +491,7 @@ describe IterableArray do
                 end
 
                 @caught.should be_true
-                @batting_order.should == [ :alice, :bob, :carrie, :eve ]
+                @batting_order.should == [:alice, :bob, :carrie, :eve]
             end
 
             it 'exits after the array is cleared' do
@@ -464,7 +506,7 @@ describe IterableArray do
                 end
 
                 @batting_order.should == []
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie ]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve, :alice, :bob, :carrie]
             end
         end
 
@@ -474,8 +516,8 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order.delete_at(@batting_order.index x) if x == :carrie
                 end
-                @batting_order.should == [ :alice, :bob, :darryl, :eve ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.should == [:alice, :bob, :darryl, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
         end
 
@@ -485,8 +527,8 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order.pop if x == :carrie
                 end
-                @batting_order.should == [ :alice, :bob, :carrie, :darryl ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl ]
+                @batting_order.should == [:alice, :bob, :carrie, :darryl]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl]
             end
         end
 
@@ -496,8 +538,8 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order.shift if x == :carrie
                 end
-                @batting_order.should == [ :bob, :carrie, :darryl, :eve ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :eve ]
+                @batting_order.should == [:bob, :carrie, :darryl, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
         end
 
@@ -507,8 +549,8 @@ describe IterableArray do
                     @batting_history << x
                     @batting_order.reverse! if x == :darryl
                 end
-                @batting_order.should == [ :eve, :darryl, :carrie, :bob, :alice ]
-                @batting_history.should == [ :alice, :bob, :carrie, :darryl, :carrie, :bob, :alice ]
+                @batting_order.should == [:eve, :darryl, :carrie, :bob, :alice]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :carrie, :bob, :alice]
             end
 
             it do
@@ -519,8 +561,8 @@ describe IterableArray do
                         @batting_order.reverse!
                     end
                 end
-                @batting_order.should == [ :eve, :darryl, :bob, :alice ]
-                @batting_history.should == [ :alice, :bob, :carrie, :bob, :alice ]
+                @batting_order.should == [:eve, :darryl, :bob, :alice]
+                @batting_history.should == [:alice, :bob, :carrie, :bob, :alice]
             end
         end
 
@@ -669,7 +711,7 @@ describe IterableArray do
         end
 
         before :each do
-            @batting_order = IterableArray.new [ :alice, :bob, :carrie, :darryl ]
+            @batting_order = IterableArray.new [:alice, :bob, :carrie, :darryl]
             @batting_history = []
 
             @drop_batter = false
@@ -687,7 +729,7 @@ describe IterableArray do
                     end
                 end
             end
-            @batting_history.should == [ :alice, :bob, :alice, :bob, :carrie, :darryl, :carrie, :darryl ]
+            @batting_history.should == [:alice, :bob, :alice, :bob, :carrie, :darryl, :carrie, :darryl]
         end
 
         it do
@@ -700,7 +742,7 @@ describe IterableArray do
                     end
                 end
             end
-            @batting_history.should == [ :alice, :bob, :carrie, :alice, :bob, :carrie, :darryl ]
+            @batting_history.should == [:alice, :bob, :carrie, :alice, :bob, :carrie, :darryl]
         end
 
         describe ':reverse_each' do
@@ -714,7 +756,7 @@ describe IterableArray do
                         end
                     end
                 end
-                @batting_history.should == [ :darryl, :carrie, :alice, :bob, :carrie, :darryl, :bob ]
+                @batting_history.should == [:darryl, :carrie, :alice, :bob, :carrie, :darryl, :bob]
             end
 
             it do
@@ -734,7 +776,7 @@ describe IterableArray do
                         end
                     end
                 end
-                @batting_history.should == [ :darryl, :carrie, :alice, :bob, :darryl, :bob, :alice, :eve ]
+                @batting_history.should == [:darryl, :carrie, :alice, :bob, :darryl, :bob, :alice, :eve]
             end
         end
 
@@ -746,8 +788,8 @@ describe IterableArray do
                         @batting_order.delete_if { |x| @batting_history << x; x == :bob }
                     end
                 end
-                @batting_history.should == [ :alice, :bob, :carrie, :alice, :bob, :carrie, :darryl, :darryl ]
-                @batting_order.should == [ :alice, :carrie, :darryl ]
+                @batting_history.should == [:alice, :bob, :carrie, :alice, :bob, :carrie, :darryl, :darryl]
+                @batting_order.should == [:alice, :carrie, :darryl]
             end
         end
 
