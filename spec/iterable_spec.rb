@@ -116,6 +116,7 @@ describe IterableArray do
             @iter_ary.first(3)          .should be_an_instance_of(IterableArray)
             @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
+            @iter_ary.drop(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
             @iter_ary.sample(3)         .should be_an_instance_of(IterableArray)
         end
@@ -190,6 +191,9 @@ describe IterableArray do
             @iter_ary.index(obj).should == @ary.index(obj)
             obj = 'z'
             @iter_ary.index(obj).should == @ary.index(obj)
+
+            # :drop
+            @iter_ary.drop(num).should == @ary.drop(num)
             
             # :push
             @iter_ary.push(num).should == @ary.push(num)

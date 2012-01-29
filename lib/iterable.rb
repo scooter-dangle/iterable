@@ -14,20 +14,20 @@ class IterableArray
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :reverse! ]
 
-    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :each_with_index, :select ]
+    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index, :select ]
 
     # @@hybrids contains methods that fit into the previous groups depending
     # on the arguments passed. (Or depending on how dumb I am)
 
-    @@hybrids   = [ :fill, :index ]
+    @@hybrids   = [ :fill ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:unshift, :find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :keep_if, :reject, :reject!, :zip, :transpose, :replace, :slice!, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :pack]
+    # working:  Array#instance_methods(false) => [:unshift, :find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :keep_if, :reject, :reject!, :zip, :transpose, :replace, :slice!, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
 
     def_delegators :@array, *@@plain_accessors
@@ -94,6 +94,10 @@ class IterableArray
             end
 
             alias_method :slice, :[]
+
+            def drop n
+                IterableArray.new @array.drop n
+            end
 
             def first n = nil
                 return @array.first if n == nil
