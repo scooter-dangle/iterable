@@ -118,6 +118,7 @@ describe IterableArray do
             @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
             @iter_ary.drop(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
+            @iter_ary.unshift(num)      .should be_an_instance_of(IterableArray)
             @iter_ary.sample(3)         .should be_an_instance_of(IterableArray)
         end
 
@@ -194,6 +195,10 @@ describe IterableArray do
 
             # :drop
             @iter_ary.drop(num).should == @ary.drop(num)
+
+            # :unshift
+            @iter_ary.unshift(num).should == @ary.unshift(num)
+            @iter_ary.unshift(4, 6, 84).should == @ary.unshift(4, 6, 84)
             
             # :push
             @iter_ary.push(num).should == @ary.push(num)
@@ -449,6 +454,17 @@ describe IterableArray do
                 end
 
                 @batting_order.should == [:alice, :bob, :franny, :zooey, :carrie, :darryl, :eve]
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
+            end
+        end
+
+        describe ':unshift' do
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.unshift :voice, :of, :the, :cicada if x == :alice
+                end
+
+                @batting_order.should == [:voice, :of, :the, :cicada, :alice, :bob, :carrie, :darryl, :eve]
                 @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
             end
         end
