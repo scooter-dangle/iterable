@@ -92,7 +92,7 @@ describe IterableArray do
             end
         end
 
-        it 'return an InterableArray when the corresponding Array method would return an array' do
+        it 'return an IterableArray when the corresponding Array method would return an array' do
             @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
             @ary = [0, 1, 2, 3]
             num   = 3
@@ -689,25 +689,28 @@ describe IterableArray do
         end
 
         describe 'catching a break' do
-            # The following 2 tests are implementation-specific
             it do
-                # Case where we use break and bad things hoppen
-                eacher do |x|
+                result = eacher do |x|
                     break if x == :bob
                 end
-                @batting_order.instance_exec { @array.class }.should == IterableArray
+
+                @batting_order.instance_exec { @array.class }.should == Array
+                @batting_history.should == [:alice, :bob]
+                result.should == nil
             end
 
             it do
-                # Case where we use a version of throw instead
-                # We should really be testing this for every iterator method, eh?
-                eacher do |x|
-                    @batting_order.please_to_go_away_so_fast if x == :bob
+                result = catch :a_break do
+                    eacher do |x|
+                        throw :a_break if x == :bob
+                    end
                 end
+
                 @batting_order.instance_exec { @array.class }.should == Array
+                @batting_history.should == [:alice, :bob]
+                result.should == nil
             end
         end
-
     end
 
     describe 'nested iteration' do

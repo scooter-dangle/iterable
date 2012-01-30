@@ -306,10 +306,8 @@ class IterableArray
 
                 @array.sort!
 
-                movement = @current_index - (@array.to_a.index(current_item) + offset)
-                @current_index  -= movement
-                @forward_index  -= movement
-                @backward_index -= movement
+                sync_indices_by (@array.to_a.index(current_item) + offset)
+
                 self
             end
 
@@ -324,11 +322,17 @@ class IterableArray
                 locations = []
                 @array.to_a.each_with_index { |item, index| locations << index if item == current_item }
 
-                movement = @current_index - locations.sample
+                sync_indices_by locations.sample
+
+                self
+            end
+
+            private
+            def sync_indices_by value
+                movement = @current_index - value
                 @current_index  -= movement
                 @forward_index  -= movement
                 @backward_index -= movement
-                self
             end
         end
     end
@@ -359,70 +363,65 @@ class IterableArray
 
     def define_iterators
         class << self
+            private
+            def catch_a_break
+                result = nil
+                begin
+                    bastardize
+                    result = yield
+                ensure
+                    debastardize
+                end
+                result
+            end
+
+            def increment_indices
+                @current_index  = @forward_index
+                @forward_index  = @current_index + 1
+                @backward_index = @current_index - 1
+            end
+
+            public
             def each
                 return @array.to_enum(:each) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         yield @array.at(@current_index)
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             def each_index
                 return @array.to_enum(:each_index) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         yield @current_index
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             def each_with_index
                 return @array.to_enum(:each_with_index) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         yield @array.at(@current_index), @current_index
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             # Should delete_if be smarter / more magical than this?
@@ -435,9 +434,8 @@ class IterableArray
             # end user.
             def delete_if        # Rubinius includes `&block` as an argument, but I don't know why
                 return @array.to_enum(:delete_if) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
 
@@ -449,25 +447,17 @@ class IterableArray
                         if yield @array.at(@current_index)
                             @progenitor_binding.eval "self.delete_at #{@current_index}"
                         end
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             def reverse_each
                 return @array.to_enum(:reverse_each) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @current_index = @array.size - 1
                     @backward_index, @forward_index = @current_index - 1, @current_index + 1
                     while @current_index >= 0
@@ -478,80 +468,56 @@ class IterableArray
                         @backward_index = @current_index - 1
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             def map
                 return @array.dup unless block_given?
                 out = Array.new []
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         out << yield(@array.at(@current_index))
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return IterableArray.new out
+                    IterableArray.new out
                 end
-
-                debastardize
-                nil
             end
 
             alias_method :collect, :map
 
             def map!
                 return to_enum(:map!) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         # The following verbosity required so that @current_index will be
                         # evaluated after any modifications to it by the block.
                         temp_value = yield(@array.at @current_index)
                         @array[@current_index] = temp_value
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return self
+                    self
                 end
-
-                debastardize
-                nil
             end
 
             alias_method :collect!, :map!
 
             def cycle n = nil, &block
                 return @array.to_enum(:cycle, n) unless block_given?
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     if n.equal? nil
                         until @array.empty?
                             @backward_index, @current_index, @forward_index = -1, 0, 1
                             while @current_index < @array.size
                                 yield @array.at(@current_index)
-
-                                @current_index  = @forward_index
-                                @forward_index  = @current_index + 1
-                                @backward_index = @current_index - 1
+                                increment_indices
                             end
                         end
                     else
@@ -559,20 +525,13 @@ class IterableArray
                             @backward_index, @current_index, @forward_index = -1, 0, 1
                             while @current_index < @array.size
                                 yield @array.at(@current_index)
-
-                                @current_index  = @forward_index
-                                @forward_index  = @current_index + 1
-                                @backward_index = @current_index - 1
+                                increment_indices
                             end
                         end
                     end
 
-                    debastardize
-                    return nil
+                    nil
                 end
-
-                debastardize
-                nil
             end
 
             def index obj = :undefined
@@ -585,9 +544,8 @@ class IterableArray
                     return @array.index(obj) unless obj == :undefined
                     return @array.to_enum(:index)
                 end
-                bastardize
 
-                catch :please_to_go_away_so_fast do
+                catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
                         item = @array.at(@current_index)
@@ -595,18 +553,11 @@ class IterableArray
                             debastardize
                             return @current_index
                         end
-
-                        @current_index  = @forward_index
-                        @forward_index  = @current_index + 1
-                        @backward_index = @current_index - 1
+                        increment_indices
                     end
 
-                    debastardize
-                    return nil
+                    nil
                 end
-
-                debastardize
-                nil
             end
         end
     end
@@ -643,11 +594,5 @@ class IterableArray
     def take_progenitor_binding progenitor_binding
         @progenitor_binding = progenitor_binding
         class << self; undef_method(:take_progenitor_binding); end
-    end
-
-    public
-    # Should probly go somewhere else, right?
-    def please_to_go_away_so_fast
-        throw :please_to_go_away_so_fast
     end
 end
