@@ -3,6 +3,7 @@
 # module except that removing/unextending a module would require the mixology gem, which currently
 # does not work in Rubinius. :(
 
+require "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
 require 'forwardable'
 
 class IterableArray
@@ -17,7 +18,7 @@ class IterableArray
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse! ]
+    @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :swap, :swap_indices ]
 
     @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index, :select ]
 
@@ -246,6 +247,18 @@ class IterableArray
                 @array.insert 0, *args
                 self
             end
+
+            # This are super bad version. Please to fix up _so fast!_
+            def swap arg1, arg2
+                @array.swap arg1, arg2
+                self
+            end
+
+            # This are also such super bad version. Please to fix up _so fast!_
+            def swap_indices arg1, arg2
+                @array.swap_indices arg1, arg2
+                self
+            end
         end
     end
 
@@ -325,6 +338,20 @@ class IterableArray
                 sync_indices_by locations.sample
 
                 self
+            end
+
+            def swap arg1, arg2
+                index1 = self.index(arg1)
+                index2 = self.index(arg2)
+
+                swap_indices index1, index2
+            end
+
+            def swap_indices arg1, arg2
+                temp_holder = @current_index
+                sync_indices_by(arg1) if temp_holder == arg2
+                sync_indices_by(arg2) if temp_holder == arg1
+                @array.swap_indices arg1, arg2
             end
 
             private

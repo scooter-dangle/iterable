@@ -363,6 +363,22 @@ describe IterableArray do
         end
     end
 
+    describe 'non-array methods' do
+        before :each do
+            @ary = ['a', 'b', 'c', 'd']
+            @iter_ary = IterableArray.new @ary
+            @out_1, @out_2 = [], []
+        end
+
+        it ':swap' do
+            @iter_ary.swap('b', 'd').should == ['a', 'd', 'c', 'b']
+        end
+
+        it ':swap_indices' do
+            @iter_ary.swap_indices(1, 3).should == ['a', 'd', 'c', 'b']
+        end
+    end
+
     # holper methods
     def eacher iterator_string=nil, &block
         if iterator_string == nil
@@ -435,6 +451,58 @@ describe IterableArray do
 
                 @batting_order.should == [:alice, :bob, :carrie, :maurice, :eve]
                 @batting_history.should == [:alice, :bob, :carrie, :maurice, :eve]
+            end
+        end
+
+        describe ':swap' do
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap(:bob, :carrie) if x == :darryl
+                end
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
+            end
+
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap(:bob, :carrie) if x == :alice
+                end
+                @batting_history.should == [:alice, :carrie, :bob, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
+            end
+
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap(:bob, :carrie) if x == :bob
+                end
+                @batting_history.should == [:alice, :bob, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
+            end
+        end
+
+        describe ':swap_indices' do
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap_indices(1, 2) if x == :darryl
+                end
+                @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
+            end
+
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap_indices(1, 2) if x == :alice
+                end
+                @batting_history.should == [:alice, :carrie, :bob, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
+            end
+
+            it do
+                catch_and_eacher do |x|
+                    @batting_order.swap_indices(1, 2) if x == :bob
+                end
+                @batting_history.should == [:alice, :bob, :darryl, :eve]
+                @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
             end
         end
 
