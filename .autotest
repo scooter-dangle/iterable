@@ -2,7 +2,7 @@ require 'autotest/restart'
 require 'test_notifier/runner/autotest'
 
 Autotest.add_hook :initialize do |autotest|
-    %w{.git doc *.markdown *.swp}.each do |exception|
+    %w{.git doc *.markdown *.swp *.textile}.each do |exception|
         autotest.add_exception exception
     end
 end
