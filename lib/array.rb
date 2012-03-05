@@ -3,22 +3,31 @@ class Array
         IterableArray.new self
     end
 
-    # This are super bad version. Please to fix up _so fast!_
-    def swap arg1, arg2
-        index1 = self.index(arg1)
-        index2 = self.index(arg2)
-        swap_indices index1, index2
-    end
-
-    # This are also such super bad version. Please to fix up _so fast!_
-    def swap_indices arg1, arg2
-        # Hooray more mess!
-        # No! So sad!
+    def swap_2_indices! arg1, arg2
         temper = at(arg1)
         self[arg1] = at(arg2) 
         self[arg2] = temper
         self
     end
-end
+    protected :swap_2_indices!
 
-print [:a, :b, :c].swap(:b, :c)
+    def swap! *args
+        args.map! { |x| index x }
+        swap_indices *args
+    end
+
+    def swap_indices! *args
+        args.inject { |i1, i2| swap_2_indices!(i1, i2); i2 }
+        self
+    end
+    alias_method :swap_indexes!, :swap_indices!
+
+    def swap *args
+        dup.swap! *args
+    end
+
+    def swap_indices *args
+        dup.swap_indices! *args
+    end
+    alias_method :swap_indexes, :swap_indices
+end
