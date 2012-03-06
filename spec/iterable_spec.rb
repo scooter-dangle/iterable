@@ -454,10 +454,10 @@ describe IterableArray do
             end
         end
 
-        describe ':swap' do
+        describe ':swap!' do
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap(:bob, :carrie) if x == :darryl
+                    @batting_order.swap!(:bob, :carrie) if x == :darryl
                 end
                 @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
@@ -465,7 +465,7 @@ describe IterableArray do
 
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap(:bob, :carrie) if x == :alice
+                    @batting_order.swap!(:bob, :carrie) if x == :alice
                 end
                 @batting_history.should == [:alice, :carrie, :bob, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
@@ -473,17 +473,17 @@ describe IterableArray do
 
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap(:bob, :carrie) if x == :bob
+                    @batting_order.swap!(:bob, :carrie) if x == :bob
                 end
                 @batting_history.should == [:alice, :bob, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
             end
         end
 
-        describe ':swap_indices' do
+        describe ':swap_indices!' do
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap_indices(1, 2) if x == :darryl
+                    @batting_order.swap_indices!(1, 2) if x == :darryl
                 end
                 @batting_history.should == [:alice, :bob, :carrie, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
@@ -491,7 +491,7 @@ describe IterableArray do
 
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap_indices(1, 2) if x == :alice
+                    @batting_order.swap_indices!(1, 2) if x == :alice
                 end
                 @batting_history.should == [:alice, :carrie, :bob, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]
@@ -499,7 +499,7 @@ describe IterableArray do
 
             it do
                 catch_and_eacher do |x|
-                    @batting_order.swap_indices(1, 2) if x == :bob
+                    @batting_order.swap_indices!(1, 2) if x == :bob
                 end
                 @batting_history.should == [:alice, :bob, :darryl, :eve]
                 @batting_order.should == [:alice, :carrie, :bob, :darryl, :eve]

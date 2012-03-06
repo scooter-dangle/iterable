@@ -3,6 +3,7 @@
 # module except that removing/unextending a module would require the mixology gem, which currently
 # does not work in Rubinius. :(
 
+puts "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
 require "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
 require 'forwardable'
 
@@ -15,10 +16,10 @@ class IterableArray
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :swap, :swap_indices ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :swap, :swap_indices ]
+    @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :swap!, :swap_indices! ]
 
     @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index, :select ]
 
@@ -207,6 +208,14 @@ class IterableArray
             def shuffle
                 IterableArray.new @array.shuffle
             end
+
+            def swap *args
+                IterableArray.new @array.swap(*args)
+            end
+
+            def swap_indices *args
+                IterableArray.new @array.swap_indices(*args)
+            end
         end
     end
 
@@ -249,13 +258,13 @@ class IterableArray
             end
 
             # This are super bad version. Please to fix up _so fast!_
-            def swap arg1, arg2
+            def swap! arg1, arg2
                 @array.swap arg1, arg2
                 self
             end
 
             # This are also such super bad version. Please to fix up _so fast!_
-            def swap_indices arg1, arg2
+            def swap_indices! arg1, arg2
                 @array.swap_indices arg1, arg2
                 self
             end
@@ -340,14 +349,14 @@ class IterableArray
                 self
             end
 
-            def swap arg1, arg2
+            def swap! arg1, arg2
                 index1 = self.index(arg1)
                 index2 = self.index(arg2)
 
                 swap_indices index1, index2
             end
 
-            def swap_indices arg1, arg2
+            def swap_indices! arg1, arg2
                 temp_holder = @current_index
                 sync_indices_by(arg1) if temp_holder == arg2
                 sync_indices_by(arg2) if temp_holder == arg1

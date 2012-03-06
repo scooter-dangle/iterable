@@ -13,7 +13,7 @@ class Array
 
     def swap! *args
         args.map! { |x| index x }
-        swap_indices *args
+        swap_indices! *args
     end
 
     def swap_indices! *args
