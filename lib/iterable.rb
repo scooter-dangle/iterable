@@ -257,15 +257,13 @@ class IterableArray
                 self
             end
 
-            # This are super bad version. Please to fix up _so fast!_
-            def swap! arg1, arg2
-                @array.swap arg1, arg2
+            def swap! *args
+                @array.swap! *args
                 self
             end
 
-            # This are also such super bad version. Please to fix up _so fast!_
-            def swap_indices! arg1, arg2
-                @array.swap_indices arg1, arg2
+            def swap_indices! *args
+                @array.swap_indices! *args
                 self
             end
         end
@@ -349,18 +347,23 @@ class IterableArray
                 self
             end
 
-            def swap! arg1, arg2
-                index1 = self.index(arg1)
-                index2 = self.index(arg2)
-
-                swap_indices index1, index2
+            def swap! *args
+                args.map! { |x| index x }
+                swap_indices! *args
             end
 
-            def swap_indices! arg1, arg2
+            def swap_indices! *args
+                args.inject { |i1, i2| swap_2_indices!(i1, i2); i2 }
+                self
+            end
+            alias_method :swap_indexes!, :swap_indices!
+
+            protected
+            def swap_2_indices! arg1, arg2
                 temp_holder = @current_index
                 sync_indices_by(arg1) if temp_holder == arg2
                 sync_indices_by(arg2) if temp_holder == arg1
-                @array.swap_indices arg1, arg2
+                @array.swap_indices! arg1, arg2
             end
 
             private
