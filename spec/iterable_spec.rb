@@ -372,10 +372,22 @@ describe IterableArray do
 
         it ':swap' do
             @iter_ary.swap('b', 'd').should == ['a', 'd', 'c', 'b']
+            @iter_ary.should == @ary
         end
 
         it ':swap_indices' do
             @iter_ary.swap_indices(1, 3).should == ['a', 'd', 'c', 'b']
+            @iter_ary.should == @ary
+        end
+
+        it ':swap!' do
+            @iter_ary.swap!('b', 'd').should == ['a', 'd', 'c', 'b']
+            @iter_ary.should == ['a', 'd', 'c', 'b']
+        end
+
+        it ':swap_indices!' do
+            @iter_ary.swap_indices!(1, 3).should == ['a', 'd', 'c', 'b']
+            @iter_ary.should == ['a', 'd', 'c', 'b']
         end
     end
 
@@ -777,6 +789,29 @@ describe IterableArray do
                 @batting_order.instance_exec { @array.class }.should == Array
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
+            end
+        end
+
+        describe 'tracking' do
+            before :each do
+                @batting_order.push :eve
+            end
+
+            describe ':reverse_each' do
+                pending do
+                    eacher :reverse_each do |x|
+                        if x == :carrie
+                            @batting_order.delete_at(@batting_order.index x)
+                            @batting_order.swap! :darryl, :eve
+                        end
+                    end
+                end
+            end
+
+            describe ':reverse!' do
+                pending do
+
+                end
             end
         end
     end
