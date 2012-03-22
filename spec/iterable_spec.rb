@@ -372,22 +372,10 @@ describe IterableArray do
 
         it ':swap' do
             @iter_ary.swap('b', 'd').should == ['a', 'd', 'c', 'b']
-            @iter_ary.should == @ary
         end
 
         it ':swap_indices' do
             @iter_ary.swap_indices(1, 3).should == ['a', 'd', 'c', 'b']
-            @iter_ary.should == @ary
-        end
-
-        it ':swap!' do
-            @iter_ary.swap!('b', 'd').should == ['a', 'd', 'c', 'b']
-            @iter_ary.should == ['a', 'd', 'c', 'b']
-        end
-
-        it ':swap_indices!' do
-            @iter_ary.swap_indices!(1, 3).should == ['a', 'd', 'c', 'b']
-            @iter_ary.should == ['a', 'd', 'c', 'b']
         end
     end
 
