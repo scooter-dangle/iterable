@@ -793,6 +793,17 @@ describe IterableArray do
             end
 
             it do
+                eacher :reverse_each do |x|
+                    if x == :carrie
+                        @batting_order.delete_at(@batting_order.index x)
+                        @batting_order.swap! :bob, :alice
+                    end
+                end
+                @batting_order.should == [:bob, :alice, :darryl, :eve]
+                @batting_history.should == [:eve, :darryl, :carrie, :bob]
+            end
+
+            it do
                 eacher do |x|
                     if x == :carrie
                         @batting_order.delete_at(@batting_order.index x)
@@ -814,6 +825,9 @@ describe IterableArray do
                 end
                 @batting_order.should == [:eve, :darryl, :alice, :bob]
                 @batting_history.should == [:eve, :darryl, :carrie, :darryl, :eve]
+            end
+
+            pending 'toggle tracking' do
             end
         end
     end
