@@ -781,27 +781,39 @@ describe IterableArray do
         end
 
         describe 'tracking' do
-            before :each do
-                @batting_order.push :eve
-            end
-
-            describe ':reverse_each' do
-                it do
-                    eacher :reverse_each do |x|
-                        if x == :carrie
-                            @batting_order.delete_at(@batting_order.index x)
-                            @batting_order.swap! :darryl, :eve
-                        end
+            it do
+                eacher :reverse_each do |x|
+                    if x == :carrie
+                        @batting_order.delete_at(@batting_order.index x)
+                        @batting_order.swap! :darryl, :eve
                     end
-                    @batting_order.should == [:eve, :darryl, :bob, :alice]
-                    @batting_history.should == [:eve, :darryl, :carrie, :bob, :alice]
                 end
+                @batting_order.should == [:alice, :bob, :eve, :darryl]
+                @batting_history.should == [:eve, :darryl, :carrie, :bob, :alice]
             end
 
-            describe ':reverse!' do
-                pending do
-
+            it do
+                eacher do |x|
+                    if x == :carrie
+                        @batting_order.delete_at(@batting_order.index x)
+                        @batting_order.reverse!
+                        @batting_order.swap! :bob, :alice
+                    end
                 end
+                @batting_order.should == [:eve, :darryl, :alice, :bob]
+                @batting_history.should == [:alice, :bob, :carrie, :bob]
+            end
+
+            it do
+                eacher :reverse_each do |x|
+                    if x == :carrie
+                        @batting_order.delete_at(@batting_order.index x)
+                        @batting_order.reverse!
+                        @batting_order.swap! :bob, :alice
+                    end
+                end
+                @batting_order.should == [:eve, :darryl, :alice, :bob]
+                @batting_history.should == [:eve, :darryl, :carrie, :darryl, :eve]
             end
         end
     end
@@ -899,7 +911,5 @@ describe IterableArray do
                 @batting_history.should == ['bob', 'darryl', 'alice', 'bob', 'darryl', 'alice', 'bob', 'carrie', 'darryl', 'bob', 'darryl']
             end
         end
-
     end
-
 end
