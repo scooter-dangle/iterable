@@ -798,13 +798,15 @@ describe IterableArray do
             end
 
             describe ':reverse_each' do
-                pending do
+                it do
                     eacher :reverse_each do |x|
                         if x == :carrie
                             @batting_order.delete_at(@batting_order.index x)
                             @batting_order.swap! :darryl, :eve
                         end
                     end
+                    @batting_order.should == [:eve, :darryl, :bob, :alice]
+                    @batting_history.should == [:eve, :darryl, :carrie, :bob, :alice]
                 end
             end
 
