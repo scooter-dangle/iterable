@@ -513,12 +513,12 @@ class IterableArray
 
             def map
                 return @array.dup unless block_given?
-                out = Array.new []
+                out = []
 
                 catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
-                        out << yield(@array.at(@current_index))
+                        out << yield(@array.at @current_index)
                         increment_indices
                     end
 
