@@ -45,7 +45,11 @@ class IterableArray
         define_special_modifiers_noniterating
     end
 
-    def bastardize
+    def bastardize tracking = :right
+        @tracking = case tracking
+                    when :right then  0.5
+                    when :left  then -0.5
+                    end
         @array = self.new_with_binding @array
         undefine_methods @@iterators
         undefine_methods @@special_accessors
@@ -59,6 +63,7 @@ class IterableArray
     end
 
     def debastardize
+        @tracking = nil
         @array = @array.to_a
         undefine_methods @@plain_modifiers
         undefine_methods @@special_modifiers
@@ -305,10 +310,19 @@ class IterableArray
 
             def reverse!
                 @backward_index, @forward_index =
-                    @array.size - @forward_index  - 1,
-                    @array.size - @backward_index - 1
+                    @array.size - 1 - @forward_index,
+                    @array.size - 1 - @backward_index
 
-                @current_index = @backward_index  + 1
+                # @current_index = @backward_index  + 1
+                @current_index = @array.size - 1 - @current_index
+
+                @current_index = case @current_index
+                                 when @backward_index then @forward_index
+                                 when @forward_index  then @backward_index
+                                 else                      @current_index
+                                 end
+
+                toggle_tracking
 
                 @array.reverse!
                 self
@@ -369,6 +383,10 @@ class IterableArray
                 @forward_index  -= movement
                 @backward_index -= movement
             end
+            
+            def toggle_tracking
+                @tracking *= -1
+            end
         end
     end
 
@@ -385,11 +403,9 @@ class IterableArray
                 index += @array.size if index < 0
                 return nil if index < 0 or index >= @array.size
 
-                @forward_index -= 1 if index < @forward_index
-                if index < @current_index
-                    @current_index -= 1
-                    @backward_index -= 1
-                end
+                @forward_index -= 1  if index < @forward_index
+                @current_index -= 1  if index < @current_index - @tracking
+                @backward_index -= 1 if index < @backward_index
 
                 @array.delete_at index
             end
@@ -493,6 +509,7 @@ class IterableArray
                 return @array.to_enum(:reverse_each) unless block_given?
 
                 catch_a_break do
+                    toggle_tracking
                     @current_index = @array.size - 1
                     @backward_index, @forward_index = @current_index - 1, @current_index + 1
                     while @current_index >= 0

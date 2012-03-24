@@ -883,9 +883,9 @@ describe IterableArray do
             it do
                 eacher 'reverse_each' do |x|
                     if x == :carrie
-                        @batting_order.delete_at(@batting_order.index x)
-                        eacher do |x|
-                            if x == :bob
+                        @batting_order.delete_at(@batting_order.index x)  # [:alice, :bob, <- :darryl]
+                        eacher do |x|  # [ -> :alice, :bob, :darryl]
+                            if x == :bob  # [:alice, -> :bob, :darryl]
                                 eacher 'reverse_each' do |x|
                                     @batting_order.delete_at(@batting_order.index x)
                                     @batting_order.push(:eve) if x == :bob
@@ -894,7 +894,8 @@ describe IterableArray do
                         end
                     end
                 end
-                @batting_history.should == [:darryl, :carrie, :alice, :bob, :darryl, :bob, :alice, :eve]
+                @batting_order.should == [:eve]
+                @batting_history.should == [:darryl, :carrie, :alice, :bob, :darryl, :bob, :alice, :eve, :eve]
             end
         end
 
