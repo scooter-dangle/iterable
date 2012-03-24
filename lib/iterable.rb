@@ -367,8 +367,8 @@ class IterableArray
             end
 
             private
-            def sync_indices_by value
-                movement = @current_index - value
+            def sync_indices_by new_index
+                movement = @current_index - new_index
                 @current_index  -= movement
                 @forward_index  -= movement
                 @backward_index -= movement
