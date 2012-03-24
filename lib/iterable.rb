@@ -293,11 +293,7 @@ class IterableArray
                                              # so that any possible index error is raised
                                              # before modifying the indices.
 
-                if index <= @current_index
-                    @current_index  += items.size
-                    @backward_index += items.size
-                    @forward_index  += items.size
-                end
+                sync_indices_by(@current_index + items.size) if index <= @current_index
 
                 self
             end
