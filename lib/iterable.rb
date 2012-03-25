@@ -3,7 +3,6 @@
 # module except that removing/unextending a module would require the mixology gem, which currently
 # does not work in Rubinius. :(
 
-puts "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
 require "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
 require 'forwardable'
 
