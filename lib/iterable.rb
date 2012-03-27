@@ -237,8 +237,8 @@ class IterableArray
                 IterableArray.new @array.shift(n)
             end
 
-            def insert index, *items
-                @array.insert index, *items
+            def insert location, *items
+                @array.insert location, *items
                 self
             end
 
@@ -291,14 +291,14 @@ class IterableArray
                 IterableArray.new out
             end
 
-            def insert index, *items
-                index = size + index if index < 0
+            def insert location, *items
+                location = size + location if location < 0
 
-                @array.insert index, *items  # I put this here rather than at the end
-                                             # so that any possible index error is raised
+                @array.insert location, *items  # I put this here rather than at the end
+                                             # so that any possible location error is raised
                                              # before modifying the indices.
 
-                sync_indices_by(@current_index + items.size) if index <= @current_index
+                sync_indices_by(@current_index + items.size) if location <= @current_index
 
                 self
             end
@@ -350,7 +350,7 @@ class IterableArray
                 @array.shuffle!
 
                 locations = []
-                @array.to_a.each_with_index { |item, index| locations << index if item == current_item }
+                @array.to_a.each_with_index { |item, location| locations << location if item == current_item }
 
                 sync_indices_by locations.sample
 
@@ -398,16 +398,16 @@ class IterableArray
 #            def push value
 #            end
 
-            def delete_at index
+            def delete_at location
                 # Flip to positive and weed out out of bounds
-                index += @array.size if index < 0
-                return nil if index < 0 or index >= @array.size
+                location += @array.size if location < 0
+                return nil if location < 0 or location >= @array.size
 
-                @forward_index -= 1  if index < @forward_index
-                @current_index -= 1  if index < @current_index - @tracking
-                @backward_index -= 1 if index < @backward_index
+                @forward_index -= 1  if location < @forward_index
+                @current_index -= 1  if location < @current_index - @tracking
+                @backward_index -= 1 if location < @backward_index
 
-                @array.delete_at index
+                @array.delete_at location
             end
         end
     end
