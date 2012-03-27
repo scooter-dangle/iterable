@@ -63,6 +63,7 @@ class IterableArray
 
     def debastardize
         @tracking = nil
+        @backward_index, @current_index, @forward_index = nil, nil, nil
         @array = @array.to_a
         undefine_methods @@plain_modifiers
         undefine_methods @@special_modifiers
@@ -601,8 +602,9 @@ class IterableArray
                     while @current_index < @array.size
                         item = @array.at(@current_index)
                         if yield item
+                            out = @current_index
                             debastardize
-                            return @current_index
+                            return out
                         end
                         increment_indices
                     end
