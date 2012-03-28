@@ -253,7 +253,12 @@ class IterableArray
                 self
             end
 
+            # In progress.. not working..
             # def slice! n, length = 1
+            #     out =
+            #         n.singleton_class.ancestors.include? Range ?
+            #         @array.slice! n : @array.slice! n, length
+            #     out
             # end
 
             def unshift *args
