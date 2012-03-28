@@ -14,8 +14,8 @@ class IterableArray
 
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
-    @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :empty? ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :join, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :swap, :swap_indices ]
+    @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty? ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :swap, :swap_indices ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :swap!, :swap_indices! ]
@@ -116,6 +116,18 @@ class IterableArray
                 IterableArray.new @array.last(n)
             end
 
+            # What should I use for the default argument here?
+            # (What if someone really wants to push `nil` onto the array?)
+            def push obj = nil
+                @array.push obj unless obj == nil
+                self
+            end
+
+            # It looks like Array#assoc and Array#rassoc return
+            # Array versions of their elements when they find a
+            # match. I'm not sure why that is... You'd think it
+            # would be more duck-typish to maintain the object's
+            # class, right? I dunno why it has to be so sad.
             def assoc obj
                 each do |x|
                     if x.respond_to? :at and x.at(0) == obj
@@ -126,6 +138,7 @@ class IterableArray
                 nil
             end
 
+            # See note above assoc.
             def rassoc obj
                 each do |elem|
                     if elem.respond_to? :at and elem.at(1) == obj
@@ -182,28 +195,11 @@ class IterableArray
                 IterableArray.new @array.sample
             end
 
-            # :join is defined here (instead of directly delegating it to
-            # @array) since we might want to later define how it handles
-            # an array that contains IterableArrays as elements.
-            def join sep=nil
-                @array.join(sep)
-            end
-
             # :eql? returns true only when array contents are the same and
             # both objects are IterableArray instances
             def eql?(arg)
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
-            end
-
-            # Don't yet have any cases where push should be treated
-            # specially during iteration, although I'll need to keep an
-            # eye on it.
-            # Also, what should I use for the default argument here?
-            # (What if someone really wants to push `nil` onto the array?)
-            def push obj = nil
-                @array.push obj unless obj == nil
-                self
             end
 
             def sort
@@ -384,6 +380,7 @@ class IterableArray
                 @backward_index -= movement
             end
             
+            # Need to add some minimal documentation on tracking.
             def toggle_tracking
                 @tracking *= -1
             end
@@ -392,22 +389,24 @@ class IterableArray
 
     def define_plain_modifiers
         class << self
-#            def pop
-#            end
-
-#            def push value
-#            end
-
             def delete_at location
                 # Flip to positive and weed out out of bounds
                 location += @array.size if location < 0
                 return nil if location < 0 or location >= @array.size
 
-                @forward_index -= 1  if location < @forward_index
-                @current_index -= 1  if location < @current_index - @tracking
+                @forward_index  -= 1 if location < @forward_index
+                @current_index  -= 1 if location < @current_index - @tracking
                 @backward_index -= 1 if location < @backward_index
 
                 @array.delete_at location
+            end
+
+            def pop n = 1
+                return delete_at(size - 1) if n == 1
+
+                out = IterableArray.new []
+                n.times { out.unshift pop }
+                out
             end
         end
     end

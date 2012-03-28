@@ -37,6 +37,8 @@ describe IterableArray do
     end
 
     describe ':assoc and :rassoc' do
+        # This test are super stupid. No point for it. Please
+        # to get rid of so fast. Mebbeh.
         it 'work like Array#assoc and Array#rassoc but return IterableArrays' do
             @ary = [42, ['x', 'y', 'z'], [0, 1, 2], IterableArray.new( [:alpha, :beta, :gamma] )]
             @iter_ary = IterableArray.new @ary
@@ -252,6 +254,11 @@ describe IterableArray do
             @iter_ary_1.clear.should == @ary_1.clear
             @iter_ary_1.should == @ary_1
         end
+
+        it ':pop' do
+            @iter_ary_1.pop.should == @ary_1.pop
+            @iter_ary_1.should == @ary_1
+        end
     end
 
     describe 'non-modifying iteration' do
@@ -451,6 +458,26 @@ describe IterableArray do
 
                 @batting_order.should == [:alice, :bob, :carrie, :maurice, :eve]
                 @batting_history.should == [:alice, :bob, :carrie, :maurice, :eve]
+            end
+        end
+
+        describe :pop do
+            it do
+                @ary = @batting_order.to_a
+                eacher do |x|
+                    @batting_order.pop.should == @ary.pop
+                    break
+                end
+                @batting_order.should == @ary
+            end
+
+            it do
+                @ary = @batting_order.to_a
+                eacher do |x|
+                    @batting_order.pop(3).should == @ary.pop(3)
+                    break
+                end
+                @batting_order.should == @ary
             end
         end
 
