@@ -253,6 +253,9 @@ class IterableArray
                 self
             end
 
+            # def slice! n, length = 1
+            # end
+
             def unshift *args
                 @array.insert 0, *args
                 self

@@ -384,6 +384,11 @@ describe IterableArray do
                 @iter_ary.slice!(1).should == @ary.slice!(1)
                 @iter_ary.should == @ary
             end
+
+            it do
+                @iter_ary.slice!(2, 10).should == @ary.slice!(2, 10)
+                @iter_ary.should == @ary
+            end
         end
     end
 
