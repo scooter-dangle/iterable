@@ -368,6 +368,23 @@ describe IterableArray do
                 check_outs
             end
         end
+
+        describe ':slice!' do
+            it do
+                @iter_ary.slice!(2..3).should == @ary.slice!(2..3)
+                @iter_ary.should == @ary
+            end
+
+            it do
+                @iter_ary.slice!(-3, 2).should == @ary.slice!(-3, 2)
+                @iter_ary.should == @ary
+            end
+
+            it do
+                @iter_ary.slice!(1).should == @ary.slice!(1)
+                @iter_ary.should == @ary
+            end
+        end
     end
 
     describe 'non-array methods' do
