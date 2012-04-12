@@ -3,7 +3,7 @@
 # module except that removing/unextending a module would require the mixology gem, which currently
 # does not work in Rubinius. :(
 
-require "#{File.dirname(File.expand_path(__FILE__))}/array.rb"
+require "#{File.dirname(File.expand_path __FILE__)}/array.rb"
 require 'forwardable'
 
 class IterableArray
@@ -656,3 +656,4 @@ class IterableArray
         class << self; undef_method(:take_progenitor_binding); end
     end
 end
+

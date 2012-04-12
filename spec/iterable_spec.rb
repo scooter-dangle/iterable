@@ -1,4 +1,4 @@
-require File.join(File.split(File.dirname __FILE__)[0], 'lib', 'iterable.rb')
+require "#{File.expand_path File.dirname __FILE__}/../lib/iterable.rb"
 
 
 describe IterableArray do
