@@ -258,6 +258,10 @@ class IterableArray
             #     out
             # end
 
+            def slice! *args
+                IterableArray.new @array.slice! *args
+            end
+
             def unshift *args
                 @array.insert 0, *args
                 self
