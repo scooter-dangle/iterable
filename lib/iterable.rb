@@ -250,14 +250,6 @@ class IterableArray
                 self
             end
 
-            # In progress.. not working..
-            # def slice! n, length = 1
-            #     out =
-            #         n.singleton_class.ancestors.include? Range ?
-            #         @array.slice! n : @array.slice! n, length
-            #     out
-            # end
-
             def slice! *args
                 IterableArray.new @array.slice! *args
             end
@@ -300,13 +292,35 @@ class IterableArray
                 location = size + location if location < 0
 
                 @array.insert location, *items  # I put this here rather than at the end
-                                             # so that any possible location error is raised
-                                             # before modifying the indices.
+                                                # so that any possible location error is raised
+                                                # before modifying the indices.
 
                 sync_indices_by(@current_index + items.size) if location <= @current_index
 
                 self
             end
+
+            # UNFINISHED
+#            def slice! start, length=:undefined
+#                if length.equal? :undefined
+#                    if start.kind_of? Range
+#                        length = start.to_a.length
+#                        return IterableArray.new([]) if length == 0
+#                        start = start.begin
+#
+#                    else
+#                        # Wrong... need to include negative indices
+#                        if (0...@array.length).include? start
+#                            IterableArray.new [delete_at start]
+#                        else
+#                            IterableArray.new []
+#                        end
+#                    end
+#                else
+#                    out = Array.new length
+#                    IterableArray.new(out.map { delete_at start })
+#                end
+#            end
 
             def unshift *args
                 insert 0, *args
