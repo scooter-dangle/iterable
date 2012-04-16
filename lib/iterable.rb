@@ -44,12 +44,9 @@ class IterableArray
         define_special_modifiers_noniterating
     end
 
-    def bastardize tracking = :right
-        @tracking = case tracking
-                    when :right then  0.5
-                    when :left  then -0.5
-                    end
+    def bastardize
         @array = self.new_with_binding @array
+        @tracking = 0.5
         undefine_methods @@iterators
         undefine_methods @@special_accessors
         undefine_methods @@special_modifiers
