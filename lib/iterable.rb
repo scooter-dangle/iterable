@@ -251,7 +251,11 @@ class IterableArray
             end
 
             def slice! *args
-                IterableArray.new @array.slice! *args
+                if args.length == 2 or args.at(1).kind_of? Range
+                    IterableArray.new @array.slice!(*args)
+                else
+                    @array.slice!(*args)
+                end
             end
 
             def unshift *args
@@ -300,27 +304,28 @@ class IterableArray
                 self
             end
 
-            # UNFINISHED
-#            def slice! start, length=:undefined
-#                if length.equal? :undefined
-#                    if start.kind_of? Range
-#                        length = start.to_a.length
-#                        return IterableArray.new([]) if length == 0
-#                        start = start.begin
-#
-#                    else
-#                        # Wrong... need to include negative indices
-#                        if (0...@array.length).include? start
-#                            IterableArray.new [delete_at start]
-#                        else
-#                            IterableArray.new []
-#                        end
-#                    end
-#                else
-#                    out = Array.new length
-#                    IterableArray.new(out.map { delete_at start })
-#                end
-#            end
+            def slice! start, length=:undefined
+                if length.equal? :undefined
+                    if start.kind_of? Range
+                        out = IterableArray.new @array.slice(start)
+                        first, last = start.first, start.last
+                        first += @array.length if first < 0
+                        last  += @array.length if last  < 0
+                        if first <= last
+                            length = last - first
+                            length += 1 unless start.exclude_end?
+                            length.times { delete_at first }
+                        end
+                    else
+                        out = delete_at start
+                    end
+                else
+                    out = IterableArray.new @array.slice(start, length)
+                    start += @array.length if start < 0
+                    length.times { delete_at start }
+                end
+                out
+            end
 
             def unshift *args
                 insert 0, *args
