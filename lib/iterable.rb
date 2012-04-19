@@ -20,7 +20,9 @@ class IterableArray
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :slice!, :swap!, :swap_indices! ]
 
-    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :count, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index, :select ]
+    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index ]
+    # iterators that can be easily implemented in terms of #each
+    # :select, :count
 
     # @@hybrids contains methods that fit into the previous groups depending
     # on the arguments passed. (Or depending on how dumb I am)
@@ -460,6 +462,21 @@ class IterableArray
             end
 
             public
+
+            def select
+                return @array.to_enum(:select) unless block_given?
+                out = []
+                each { |x| out << x if yield x }
+                IterableArray.new out
+            end
+
+            def select!
+                return @array.to_enum(:select) unless block_given?
+                changes = []
+                each_with_index { |item, index| @progenitor_binding.eval "delete_at #{index}" unless yield item }
+                self
+            end
+
             def each
                 return @array.to_enum(:each) unless block_given?
 
