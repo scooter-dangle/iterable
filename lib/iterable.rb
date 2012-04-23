@@ -509,6 +509,7 @@ class IterableArray
             public
 
             # untested
+            # currently does not work exactly right
             def select
                 return @array.to_enum(:select) unless block_given?
                 out = []
