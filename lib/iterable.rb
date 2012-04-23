@@ -15,12 +15,12 @@ class IterableArray
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty? ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :swap, :swap_indices ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :swap, :swap_indices, :take, :uniq ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :slice!, :swap!, :swap_indices! ]
+    @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
-    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :each_with_index, :select!, :select, :count ]
+    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :select!, :select, :count ]
 
     # @@hybrids contains methods that fit into the previous groups depending
     # on the arguments passed. (Or depending on how dumb I am)
@@ -28,7 +28,7 @@ class IterableArray
     @@hybrids   = [ :fill ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :keep_if, :reject, :reject!, :zip, :transpose, :replace, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :pack]
+    # working:  Array#instance_methods(false) => [:find_index, :rindex, :rotate, :rotate!, :sort_by!, :select!, :reject, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take_while, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
 
     def_delegators :@array, *@@plain_accessors
@@ -36,8 +36,8 @@ class IterableArray
 
     private
 
-    def initialize array = []
-        @array = Array.new array
+    def initialize *args
+        @array = Array.new *args
         @progenitor_binding = binding
         define_iterators
         define_special_accessors
@@ -118,6 +118,11 @@ class IterableArray
             def push obj = nil
                 @array.push obj unless obj == nil
                 self
+            end
+
+            # untested
+            def compact
+                IterableArray.new @array.compact
             end
 
             # It looks like Array#assoc and Array#rassoc return
@@ -214,11 +219,27 @@ class IterableArray
             def swap_indices *args
                 IterableArray.new @array.swap_indices(*args)
             end
+
+            # untested
+            def take n
+                IterableArray.new @array.take(n)
+            end
+
+            # untested
+            def uniq
+                IterableArray.new @array.uniq
+            end
         end
     end
 
     def define_special_modifiers_noniterating
         class << self
+            # untested
+            def compact!
+                @array.compact!
+                self
+            end
+
             def clear
                 @array.clear
                 self
@@ -272,6 +293,12 @@ class IterableArray
                 @array.swap_indices! *args
                 self
             end
+
+            # untested
+            def uniq!
+                @array.uniq!
+                self
+            end
         end
     end
 
@@ -282,6 +309,12 @@ class IterableArray
                 @forward_index  -= @current_index
                 @current_index   = 0
                 @array.clear
+            end
+
+            # untested
+            def compact!
+                delete_if &:nil?
+                self
             end
 
             def shift n = nil
@@ -392,6 +425,20 @@ class IterableArray
             end
             alias_method :swap_indexes!, :swap_indices!
 
+            # untested
+            def uniq!
+                basket = []
+                delete_if do |x| 
+                    if basket.include? x
+                        true
+                    else
+                        basket << x
+                        false
+                    end
+                end
+                self
+            end
+
             protected
             def swap_2_indices! arg1, arg2
                 temp_holder = @current_index
@@ -461,6 +508,7 @@ class IterableArray
 
             public
 
+            # untested
             def select
                 return @array.to_enum(:select) unless block_given?
                 out = []
@@ -468,11 +516,31 @@ class IterableArray
                 IterableArray.new out
             end
 
+            # untested
             def select!
                 return @array.to_enum(:select) unless block_given?
-                changes = []
-                each_with_index { |item, index| @progenitor_binding.eval "delete_at #{index}" unless yield item }
+                original = @array.to_a.dup
+                delete_if { |x| not yield x }
+                return nil if self == original
                 self
+            end
+
+            # untested
+            def keep_if
+                return @array.to_enum(:keep_if) unless block_given?
+                delete_if { |x| not yield x }
+            end
+
+            # untested
+            def count arg = :undefined
+                if arg == :undefined
+                    return @array.length  unless block_given?
+                    counter = 0
+                    each { |x| counter += 1 if yield x }
+                    counter
+                else
+                    @array.to_a.count arg
+                end
             end
 
             def each
@@ -545,6 +613,15 @@ class IterableArray
 
                     self
                 end
+            end
+
+            # untested
+            def reject!
+                return @array.to_enum(:reject!) unless block_given?
+                original = @array.to_a.dup
+                delete_if { |x| yield x }
+                return nil if self == original
+                self
             end
 
             def reverse_each
