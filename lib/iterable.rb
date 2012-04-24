@@ -20,7 +20,7 @@ class IterableArray
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
-    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :count ]
+    @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count ]
 
     # @@hybrids contains methods that fit into the previous groups depending
     # on the arguments passed. (Or depending on how dumb I am)
@@ -28,7 +28,7 @@ class IterableArray
     @@hybrids   = [ :fill ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:find_index, :rindex, :rotate, :rotate!, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :take_while, :pack]
+    # working:  Array#instance_methods(false) => [:find_index, :rindex, :rotate, :rotate!, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
 
     def_delegators :@array, *@@plain_accessors
@@ -509,7 +509,6 @@ class IterableArray
             public
 
             # untested
-            # currently does not work exactly right
             def select
                 return @array.to_enum(:select) unless block_given?
                 out = []
@@ -626,7 +625,6 @@ class IterableArray
             end
 
             # untested
-            # currently does not work exactly right
             def reject
                 return @array.to_enum(:reject) unless block_given?
                 out = []
@@ -651,6 +649,14 @@ class IterableArray
 
                     self
                 end
+            end
+
+            # untested
+            def take_while
+                return @array.to_enum(:take_while) unless block_given?
+                out = []
+                each { |x| break unless yield x; out << x }
+                IterableArray.new out
             end
 
             def map
