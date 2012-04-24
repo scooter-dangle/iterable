@@ -182,11 +182,11 @@ class IterableArray
             end
 
             def values_at *args
-                out = []
+                out = IterableArray.new
                 args.each do |arg|
                     out += @array.values_at(arg)
                 end
-                IterableArray.new out
+                out
             end
 
             alias_method :indices, :values_at
@@ -202,6 +202,11 @@ class IterableArray
             def eql?(arg)
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
+            end
+
+            # untested
+            def rotate n = 1
+                IterableArray.new @array.rotate(n)
             end
 
             def sort
@@ -320,9 +325,9 @@ class IterableArray
             def shift n = nil
                 return self.delete_at(0) if n == nil
 
-                out = []
+                out = IterableArray.new
                 [ n, @array.length ].min.times { out << self.delete_at(0) }
-                IterableArray.new out
+                out
             end
 
             def insert location, *items
@@ -376,7 +381,7 @@ class IterableArray
                 @current_index = case @current_index
                                  when @backward_index then @forward_index
                                  when @forward_index  then @backward_index
-                                 else                      @current_index
+                                                      else @current_index
                                  end
 
                 toggle_tracking
@@ -511,9 +516,9 @@ class IterableArray
             # untested
             def select
                 return @array.to_enum(:select) unless block_given?
-                out = []
+                out = IterableArray.new
                 each { |x| out << x if yield x }
-                IterableArray.new out
+                out
             end
 
             # untested
@@ -627,9 +632,9 @@ class IterableArray
             # untested
             def reject
                 return @array.to_enum(:reject) unless block_given?
-                out = []
+                out = IterableArray.new
                 each { |x| out << x unless yield x }
-                IterableArray.new out
+                out
             end
 
             def reverse_each
@@ -654,14 +659,14 @@ class IterableArray
             # untested
             def take_while
                 return @array.to_enum(:take_while) unless block_given?
-                out = []
+                out = IterableArray.new
                 each { |x| break unless yield x; out << x }
-                IterableArray.new out
+                out
             end
 
             def map
                 return @array.dup unless block_given?
-                out = []
+                out = IterableArray.new
 
                 catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
@@ -670,7 +675,7 @@ class IterableArray
                         increment_indices
                     end
 
-                    IterableArray.new out
+                    out
                 end
             end
 
