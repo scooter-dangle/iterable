@@ -18,7 +18,7 @@ class IterableArray
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :slice!, :swap!, :swap_indices!, :uniq! ]
+    @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
     @@iterators = [ :delete_if, :each, :reverse_each, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count ]
 
@@ -28,7 +28,7 @@ class IterableArray
     @@hybrids   = [ :fill ]
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:find_index, :rindex, :rotate!, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :pack]
+    # working:  Array#instance_methods(false) => [:find_index, :rindex, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
 
     def_delegators :@array, *@@plain_accessors
@@ -266,6 +266,12 @@ class IterableArray
                 self
             end
 
+            # untested
+            def rotate! n = 1
+                @array.rotate! n
+                self
+            end
+
             def sort!
                 @array.sort!
                 self
@@ -388,6 +394,15 @@ class IterableArray
 
                 @array.reverse!
                 self
+            end
+
+            # partially tested (not tested nested)
+            def rotate! n = 1
+                n %= size
+                return self if n == 0
+                new_index = (@current_index - n) % size
+                sync_indices_by new_index
+                @array.rotate! n
             end
 
             def sort!

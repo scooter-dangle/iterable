@@ -508,6 +508,25 @@ describe IterableArray do
             end
         end
 
+        # best one evarr!
+        describe 'juggling with #each and #rotate!' do
+            it do
+                @batting_order = IterableArray.new (:a..:d).to_a
+                continue_sans_rotation = true
+                @bound = 18
+                catch_and_eacher do |x|
+                    if continue_sans_rotation then
+                        continue_sans_rotation = false
+                    else
+                        @batting_order.rotate!  # and roll! w00t!
+                    end
+                end
+                output = []
+                5.times { output += (:a..:d).to_a }
+                @batting_history.should == output
+            end
+        end
+
         describe ':swap!' do
             it do
                 catch_and_eacher do |x|
