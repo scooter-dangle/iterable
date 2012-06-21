@@ -16,16 +16,13 @@ class IterableArray
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty? ]
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq ]
+    # TODO :reverse
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
-    @@iterators = [ :delete_if, :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count ]
-
-    # @@hybrids contains methods that fit into the previous groups depending
-    # on the arguments passed. (Or depending on how dumb I am)
-
-    @@hybrids   = [ :fill ]
+    @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill ]
+    # TODO :combination, :drop_while, :fill
 
     # The following two lines are supposed to help me keep track of progress.
     # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :permutation, :repeated_permutation, :repeated_combination, :product, :pack]
@@ -540,6 +537,13 @@ class IterableArray
             end
 
             public
+
+            # untested and incomplete
+            def fill *args    # obj=nil, start_or_range=nil, lengther=nil
+                return @array.fill *args unless block_given?
+
+                #TODO implement iteration-aware fill if block_given?
+            end
 
             # untested
             def select
