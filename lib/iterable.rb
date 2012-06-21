@@ -16,7 +16,6 @@ class IterableArray
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty? ]
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq ]
-    # TODO :reverse
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
@@ -200,6 +199,11 @@ class IterableArray
             def eql?(arg)
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
+            end
+
+            # untested
+            def reverse
+                IterableArray.new @array.reverse
             end
 
             # untested
