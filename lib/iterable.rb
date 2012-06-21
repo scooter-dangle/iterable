@@ -497,6 +497,18 @@ class IterableArray
                 @array.delete_at location
             end
 
+            # currently untested
+            def delete obj
+                n = count obj
+                if n == 0
+                    return yield(obj) if block_given?
+                    nil
+                else
+                    n.times { delete_at index obj }
+                    obj
+                end
+            end
+
             def pop n = 1
                 return delete_at(size - 1) if n == 1
 
