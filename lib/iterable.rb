@@ -153,23 +153,23 @@ class IterableArray
             # def nitems
             # end
 
-            def &(arg)
+            def & arg
                 IterableArray.new(@array & arg.to_a)
             end
 
-            def |(arg)
+            def | arg
                 IterableArray.new(@array | arg.to_a)
             end
 
-            def +(arg)
+            def + arg
                 IterableArray.new(@array + arg)
             end
 
-            def -(arg)
+            def - arg
                 IterableArray.new(@array - arg)
             end
 
-            def *(arg)
+            def * arg
                 return IterableArray.new @array * arg if arg.kind_of? Fixnum
                 @array * arg
             end
@@ -182,7 +182,7 @@ class IterableArray
             def values_at *args
                 out = IterableArray.new
                 args.each do |arg|
-                    out += @array.values_at(arg)
+                    out += @array.values_at arg
                 end
                 out
             end
@@ -197,7 +197,7 @@ class IterableArray
 
             # :eql? returns true only when array contents are the same and
             # both objects are IterableArray instances
-            def eql?(arg)
+            def eql? arg
                 (arg.class == IterableArray) and
                     (self == arg.to_a)
             end
