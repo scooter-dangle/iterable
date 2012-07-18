@@ -34,7 +34,7 @@ class IterableArray
     private
 
     def initialize *args
-        @array = Array.new *args
+        @array = SwappyArray.new *args
         @progenitor_binding = binding
         define_iterators
         define_special_accessors

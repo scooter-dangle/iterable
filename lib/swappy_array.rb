@@ -1,4 +1,4 @@
-class Array
+class SwappyArray < Array
     def to_iter
         IterableArray.new self
     end
