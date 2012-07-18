@@ -3,7 +3,7 @@
 # module except that removing/unextending a module would require the mixology gem, which currently
 # does not work in Rubinius. :(
 
-require "#{File.dirname(File.expand_path __FILE__)}/array.rb"
+require "#{File.dirname(File.expand_path __FILE__)}/swappy_array.rb"
 require 'forwardable'
 
 class IterableArray
