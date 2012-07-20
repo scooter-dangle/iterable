@@ -1,4 +1,4 @@
-require "#{File.expand_path File.dirname __FILE__}/../lib/iterable.rb"
+require "#{File.expand_path File.dirname __FILE__}/../bin/iterable.rb"
 
 
 describe IterableArray do
