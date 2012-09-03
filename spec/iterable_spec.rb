@@ -1012,6 +1012,12 @@ describe IterableArray do
         end
 
         describe ':permutation' do
+            it 'acts like the normal feller from Array in the absence of modification' do
+                @ary_1.permutation 3 do |item| @happy_holder << item end
+                @iter_ary_1.permutation 3 do |item| @cozy_container << item end
+                @happy_holder.should == @cozy_container
+            end
+
             it 'does not yield permutations containing deleted array elements' do
                 @iter_ary_1.permutation 3 do |item|
                     @cozy_container += item
@@ -1025,6 +1031,12 @@ describe IterableArray do
         end
 
         describe ':combination' do
+            it 'acts like the normal feller from Array in the absence of modification' do
+                @ary_1.combination 3 do |item| @happy_holder << item end
+                @iter_ary_1.combination 3 do |item| @cozy_container << item end
+                @happy_holder.should == @cozy_container
+            end
+
             it 'does not yield combinations containing deleted array elements' do
                 @iter_ary_1.combination 3 do |item|
                     @cozy_container += item

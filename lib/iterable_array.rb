@@ -818,6 +818,12 @@ class IterableArray
                 return @array.to_enum(:permutation, n) unless block_given?
 
                 catch_a_break do
+                    # following line is just to test to see if it's hanging
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    set = generate_permutations self, n
+                    set.each do |item|
+                        yield item
+                    end
                 end
             end
 
@@ -825,7 +831,26 @@ class IterableArray
                 return @array.to_enum(:combination, n) unless block_given?
 
                 catch_a_break do
+                    # following line is just to test to see if it's hanging
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    set = generate_combinations self, n
+                    set.each do |item|
+                        yield item
+                    end
                 end
+            end
+
+            private
+            def generate_permutations ary, n
+                out = []
+                ary.permutation n do |item|; out << item end
+                out
+            end
+
+            def generate_combinations ary, n
+                out = []
+                ary.combination n do |item|; out << item end
+                out
             end
         end
     end
