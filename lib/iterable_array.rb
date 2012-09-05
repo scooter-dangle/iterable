@@ -818,9 +818,13 @@ class IterableArray
                 return @array.to_enum(:permutation, n) unless block_given?
 
                 catch_a_break do
-                    set = generate_permutations self.to_a.dup, n
-                    set.each do |item|
-                        yield item
+                    queue = generate_permutations self.to_a.dup, n
+                    history = []
+                    until queue.empty?
+                        history.push queue.shift
+                        previous = to_a.sort
+                        yield history.last
+                        queue = diff_handler queue, history, previous unless to_a.sort == previous
                     end
                 end
             end
@@ -829,9 +833,13 @@ class IterableArray
                 return @array.to_enum(:combination, n) unless block_given?
 
                 catch_a_break do
-                    set = generate_combinations self.to_a.dup, n
-                    set.each do |item|
-                        yield item
+                    queue = generate_combinations self.to_a.dup, n
+                    history = []
+                    until queue.empty?
+                        history.push queue.shift
+                        previous = to_a.sort
+                        yield history.last
+                        queue = diff_handler queue, history, previous unless to_a.sort == previous
                     end
                 end
             end
@@ -847,6 +855,12 @@ class IterableArray
                 out = []
                 ary.combination n do |item| out << item end
                 out
+            end
+
+            def diff_handler queue, history, previous
+                # TODO: Look for array diff-handling gem or look at converting these arrays to sets
+                # dummy return
+                queue
             end
         end
     end
