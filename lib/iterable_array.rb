@@ -861,6 +861,7 @@ class IterableArray
             def diff_handler queue, history, previous, type
                 # TODO: Look for array diff-handling gem or look at converting these arrays to sets
                 # dummy return
+                new_queue = queue
                 queue
             end
         end
