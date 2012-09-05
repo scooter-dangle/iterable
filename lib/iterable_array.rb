@@ -824,7 +824,7 @@ class IterableArray
                         history.push queue.shift
                         previous = to_a.sort
                         yield history.last
-                        queue = diff_handler queue, history, previous unless to_a.sort == previous
+                        queue = diff_handler queue, history, previous, :permutation unless to_a.sort == previous
                     end
                 end
             end
@@ -839,7 +839,7 @@ class IterableArray
                         history.push queue.shift
                         previous = to_a.sort
                         yield history.last
-                        queue = diff_handler queue, history, previous unless to_a.sort == previous
+                        queue = diff_handler queue, history, previous, :combination unless to_a.sort == previous
                     end
                 end
             end
@@ -857,7 +857,8 @@ class IterableArray
                 out
             end
 
-            def diff_handler queue, history, previous
+            # only for :permutation/:combination and their cousins
+            def diff_handler queue, history, previous, type
                 # TODO: Look for array diff-handling gem or look at converting these arrays to sets
                 # dummy return
                 queue
