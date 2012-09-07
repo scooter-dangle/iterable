@@ -4,8 +4,8 @@ class SwappyArray < Array
     end
 
     def swap_2_indices! arg1, arg2
-        temper = at(arg1)
-        self[arg1] = at(arg2) 
+        temper = at arg1
+        self[arg1] = at arg2
         self[arg2] = temper
         self
     end
@@ -17,7 +17,7 @@ class SwappyArray < Array
     end
 
     def swap_indices! *args
-        args.inject { |i1, i2| swap_2_indices!(i1, i2); i2 }
+        args.inject { |i1, i2| swap_2_indices! i1, i2; i2 }
         self
     end
     alias_method :swap_indexes!, :swap_indices!
@@ -30,4 +30,14 @@ class SwappyArray < Array
         dup.swap_indices! *args
     end
     alias_method :swap_indexes, :swap_indices
+
+    def move_from from, hash_to
+        element = delete_at from
+        insert hash_to[:to], element
+    end
+
+    def move element, hash_to
+        delete_at index element
+        insert hash_to[:to], element
+    end
 end
