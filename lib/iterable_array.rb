@@ -477,7 +477,7 @@ class IterableArray
                 @forward_index  -= movement
                 @backward_index -= movement
             end
-            
+
             # Need to add some minimal documentation on tracking.
             def toggle_tracking
                 @tracking *= -1
