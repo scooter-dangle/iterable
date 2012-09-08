@@ -37,7 +37,7 @@ b.equal? a
 #=> false
 ````
 
-* If you need to move an element in an `IterableArray` to a different location during iteration, use `#swap!` or `#swap_indices!` rather than a combination of `#delete_at` and `#insert`. Modification methods generally have to be atomic for logical iteration-awareness to be preserved.
+* If you need to move an element in an `IterableArray` to a different location during iteration, use `#move`, `#move_from`, `#swap!`, or `#swap_indices!` rather than a combination of `#delete_at` and `#insert`. Modification methods generally have to be atomic for logical iteration-awareness to be preserved.
 
 * When an `Array` instance method would return an `Array`, the corresponding `IterableArray` instance method generally returns an `IterableArray`.
 
