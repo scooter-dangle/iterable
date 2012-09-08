@@ -814,32 +814,36 @@ class IterableArray
                 end
             end
 
+            # Currently only defined for arrays `a` where `a.uniq == a`
             def permutation n = @array.size
                 return @array.to_enum(:permutation, n) unless block_given?
+                @backward_index, @current_index, @forward_index = 0, 0, 0
 
                 catch_a_break do
-                    queue = generate_permutations self.to_a.dup, n
+                    queue = generate_permutations to_a.dup, n
                     history = []
                     until queue.empty?
                         history.push queue.shift
                         previous = to_a.sort
                         yield history.last
-                        queue = diff_handler queue, history, previous, :permutation unless to_a.sort == previous
+                        queue = diff_handler queue, history, previous, :permutation, n unless to_a.sort == previous
                     end
                 end
             end
 
+            # Currently only defined for arrays `a` where `a.uniq == a`
             def combination n
                 return @array.to_enum(:combination, n) unless block_given?
+                @backward_index, @current_index, @forward_index = 0, 0, 0
 
                 catch_a_break do
-                    queue = generate_combinations self.to_a.dup, n
+                    queue = generate_combinations to_a, n
                     history = []
                     until queue.empty?
                         history.push queue.shift
                         previous = to_a.sort
                         yield history.last
-                        queue = diff_handler queue, history, previous, :combination unless to_a.sort == previous
+                        queue = diff_handler queue, history, previous, :combination, n unless to_a.sort == previous
                     end
                 end
             end
@@ -858,10 +862,33 @@ class IterableArray
             end
 
             # only for :permutation/:combination and their cousins
-            def diff_handler queue, history, previous, type
-                # TODO: Look for array diff-handling gem or look at converting these arrays to sets
-                # dummy return
-                new_queue = queue
+            def diff_handler queue, history, previous, type, n
+                deleted_items = previous - self
+                new_items = self - previous
+                queue = remove_deleted_items queue, deleted_items
+                queue = add_new_items queue, history, new_items, type, n
+                queue
+            end
+
+            # only for :permutation/:combination and their cousins
+            def add_new_items queue, history, items, type, n
+                new_elements =
+                    case type
+                    when :permutation
+                        generate_permutations to_a, n
+                    when :combination
+                        generate_combinations to_a, n
+                    end
+                new_elements -= history
+                queue += new_elements
+                queue
+            end
+
+            # only for :permutation/:combination and their cousins
+            def remove_deleted_items queue, items
+                items.each do |item|
+                    queue.delete_if { |x| x.include? item }
+                end
                 queue
             end
         end

@@ -1003,7 +1003,7 @@ describe IterableArray do
 
     describe 'lost-cause methods' do
         before :all do
-            @target = @ary_1[2]
+            @target = :c
             @ferigner = :q
         end
 
@@ -1035,11 +1035,12 @@ describe IterableArray do
 
             it 'yields permutations containing added array elements' do
                 @iter_ary_1.permutation 3 do |item|
-                    @cozy_container += item
+                    @cozy_container += item if @counter <= 5
                     @happy_holder += item if @counter > 5
                     @iter_ary_1.unshift @ferigner if @counter == 5
                     @counter += 1
                 end
+                @iter_ary_1.include?(@ferigner).should be_true
                 @cozy_container.include?(@ferigner).should be_false
                 @happy_holder.include?(@ferigner).should be_true
             end
@@ -1065,11 +1066,12 @@ describe IterableArray do
 
             it 'yields combinations containing added array elements' do
                 @iter_ary_1.combination 3 do |item|
-                    @cozy_container += item
+                    @cozy_container += item if @counter <= 5
                     @happy_holder += item if @counter > 5
                     @iter_ary_1.unshift @ferigner if @counter == 5
                     @counter += 1
                 end
+                @iter_ary_1.include?(@ferigner).should be_true
                 @cozy_container.include?(@ferigner).should be_false
                 @happy_holder.include?(@ferigner).should be_true
             end
