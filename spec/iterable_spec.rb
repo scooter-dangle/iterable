@@ -1001,7 +1001,7 @@ describe IterableArray do
         end
     end
 
-    describe 'lost-cause methods' do
+    describe 'comb-perm methods' do
         before :all do
             @target = :c
             @ferigner = :q
@@ -1015,66 +1015,75 @@ describe IterableArray do
             @counter = 0
         end
 
-        describe ':permutation' do
-            it 'acts like the normal feller from Array in the absence of modification' do
-                @ary_1.permutation 3 do |item| @happy_holder << item end
-                @iter_ary_1.permutation 3 do |item| @cozy_container << item end
-                @happy_holder.should == @cozy_container
-            end
-
-            it 'does not yield permutations containing deleted array elements' do
-                @iter_ary_1.permutation 3 do |item|
-                    @cozy_container += item
-                    @happy_holder += item if @counter > 5
-                    @iter_ary_1.delete @target if @counter == 5
-                    @counter += 1
+        comb_perm_template = ->(methd) do
+            describe methd.to_s do
+                it 'acts like the normal feller from Array in the absence of modification' do
+                    @ary_1.method(methd)[3, &(->(item) { @happy_holder << item })]
+                    @iter_ary_1.method(methd)[3, &(->(item) { @cozy_container << item })]
+                    @happy_holder.should == @cozy_container
                 end
-                @cozy_container.include?(@target).should be_true
-                @happy_holder.include?(@target).should be_false
-            end
 
-            it 'yields permutations containing added array elements' do
-                @iter_ary_1.permutation 3 do |item|
-                    @cozy_container += item if @counter <= 5
-                    @happy_holder += item if @counter > 5
-                    @iter_ary_1.unshift @ferigner if @counter == 5
-                    @counter += 1
+                it "does not yield #{methd}s containing deleted array elements" do
+                    @iter_ary_1.method(methd)[3, &(->(item) do
+                        @cozy_container += item
+                        @happy_holder += item if @counter > 5
+                        @iter_ary_1.delete @target if @counter == 5
+                        @counter += 1
+                    end)]
+                    @cozy_container.include?(@target).should be_true
+                    @happy_holder.include?(@target).should be_false
                 end
-                @iter_ary_1.include?(@ferigner).should be_true
-                @cozy_container.include?(@ferigner).should be_false
-                @happy_holder.include?(@ferigner).should be_true
+
+                it "yields #{methd}s containing added array elements" do
+                    @iter_ary_1.method(methd)[3, &(->(item) do
+                        @cozy_container += item if @counter <= 5
+                        @happy_holder += item if @counter > 5
+                        @iter_ary_1.unshift @ferigner if @counter == 5
+                        @counter += 1
+                    end)]
+                    @iter_ary_1.include?(@ferigner).should be_true
+                    @cozy_container.include?(@ferigner).should be_false
+                    @happy_holder.include?(@ferigner).should be_true
+                end
             end
         end
 
-        describe ':combination' do
-            it 'acts like the normal feller from Array in the absence of modification' do
-                @ary_1.combination 3 do |item| @happy_holder << item end
-                @iter_ary_1.combination 3 do |item| @cozy_container << item end
-                @happy_holder.should == @cozy_container
-            end
+        [
+            :permutation,
+            :combination,
+            :repeated_permutation,
+            :repeated_combination
+        ].each { |methd| comb_perm_template[methd] }
 
-            it 'does not yield combinations containing deleted array elements' do
-                @iter_ary_1.combination 3 do |item|
-                    @cozy_container += item
-                    @happy_holder += item if @counter > 5
-                    @iter_ary_1.delete @target if @counter == 5
-                    @counter += 1
-                end
-                @cozy_container.include?(@target).should be_true
-                @happy_holder.include?(@target).should be_false
-            end
-
-            it 'yields combinations containing added array elements' do
-                @iter_ary_1.combination 3 do |item|
-                    @cozy_container += item if @counter <= 5
-                    @happy_holder += item if @counter > 5
-                    @iter_ary_1.unshift @ferigner if @counter == 5
-                    @counter += 1
-                end
-                @iter_ary_1.include?(@ferigner).should be_true
-                @cozy_container.include?(@ferigner).should be_false
-                @happy_holder.include?(@ferigner).should be_true
-            end
-        end
+#        describe ':combination' do
+#            it 'acts like the normal feller from Array in the absence of modification' do
+#                @ary_1.combination 3 do |item| @happy_holder << item end
+#                @iter_ary_1.combination 3 do |item| @cozy_container << item end
+#                @happy_holder.should == @cozy_container
+#            end
+#
+#            it 'does not yield combinations containing deleted array elements' do
+#                @iter_ary_1.combination 3 do |item|
+#                    @cozy_container += item
+#                    @happy_holder += item if @counter > 5
+#                    @iter_ary_1.delete @target if @counter == 5
+#                    @counter += 1
+#                end
+#                @cozy_container.include?(@target).should be_true
+#                @happy_holder.include?(@target).should be_false
+#            end
+#
+#            it 'yields combinations containing added array elements' do
+#                @iter_ary_1.combination 3 do |item|
+#                    @cozy_container += item if @counter <= 5
+#                    @happy_holder += item if @counter > 5
+#                    @iter_ary_1.unshift @ferigner if @counter == 5
+#                    @counter += 1
+#                end
+#                @iter_ary_1.include?(@ferigner).should be_true
+#                @cozy_container.include?(@ferigner).should be_false
+#                @happy_holder.include?(@ferigner).should be_true
+#            end
+#        end
     end
 end
