@@ -843,9 +843,10 @@ class IterableArray
                     queue = comb_perm_generator methd, to_a, n
                     history = []
                     until queue.empty?
-                        history.push queue.shift
+                        element = queue.shift
                         previous = to_a.sort
-                        yield history.last
+                        yield element
+                        history.push element
                         queue = diff_handler queue, history, previous, methd, n unless to_a.sort == previous
                     end
                     self
@@ -859,17 +860,17 @@ class IterableArray
             end
 
             # only for :permutation/:combination and their cousins
-            def diff_handler queue, history, previous, type, n
+            def diff_handler queue, history, previous, methd, n
                 deleted_items = previous - self
                 new_items = self - previous
                 queue = remove_deleted_items queue, deleted_items
-                queue = add_new_items queue, history, new_items, type, n
+                queue = add_new_items queue, history, new_items, methd, n
                 queue
             end
 
             # only for :permutation/:combination and their cousins
-            def add_new_items queue, history, items, type, n
-                new_elements = comb_perm_generator type, to_a, n
+            def add_new_items queue, history, items, methd, n
+                new_elements = comb_perm_generator methd, to_a, n
                 new_elements -= history
                 queue += new_elements
                 queue
