@@ -20,8 +20,8 @@ class IterableArray
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
-    @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, ]
-    # TODO :drop_while, :fill, :repeated_permutation, :repeated_combination
+    @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
+    # TODO :drop_while, :fill,
 
     # The following two lines are supposed to help me keep track of progress.
     # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :repeated_permutation, :repeated_combination, :product, :pack]
@@ -815,49 +815,46 @@ class IterableArray
             end
 
             # Currently only defined for arrays `a` where `a.uniq == a`
-            def permutation n = @array.size
-                return @array.to_enum(:permutation, n) unless block_given?
-                @backward_index, @current_index, @forward_index = 0, 0, 0
-
-                catch_a_break do
-                    queue = generate_permutations to_a.dup, n
-                    history = []
-                    until queue.empty?
-                        history.push queue.shift
-                        previous = to_a.sort
-                        yield history.last
-                        queue = diff_handler queue, history, previous, :permutation, n unless to_a.sort == previous
-                    end
-                end
+            def permutation n = @array.size, &block
+                comb_perm_helper :permutation, n, &block
             end
 
             # Currently only defined for arrays `a` where `a.uniq == a`
-            def combination n
-                return @array.to_enum(:combination, n) unless block_given?
+            def combination n, &block
+                comb_perm_helper :combination, n, &block
+            end
+
+            # Currently only defined for arrays `a` where `a.uniq == a`
+            def repeated_permutation n = @array.size, &block
+                comb_perm_helper :repeated_permutation, n, &block
+            end
+
+            # Currently only defined for arrays `a` where `a.uniq == a`
+            def repeated_combination n, &block
+                comb_perm_helper :repeated_combination, n, &block
+            end
+
+            private
+            def comb_perm_helper methd, n
+                return @array.to_enum(methd, n) unless block_given?
                 @backward_index, @current_index, @forward_index = 0, 0, 0
 
                 catch_a_break do
-                    queue = generate_combinations to_a, n
+                    queue = comb_perm_generator methd, to_a, n
                     history = []
                     until queue.empty?
                         history.push queue.shift
                         previous = to_a.sort
                         yield history.last
-                        queue = diff_handler queue, history, previous, :combination, n unless to_a.sort == previous
+                        queue = diff_handler queue, history, previous, methd, n unless to_a.sort == previous
                     end
+                    self
                 end
             end
 
-            private
-            def generate_permutations ary, n
+            def comb_perm_generator methd, ary, n
                 out = []
-                ary.permutation n do |item| out << item end
-                out
-            end
-
-            def generate_combinations ary, n
-                out = []
-                ary.combination n do |item| out << item end
+                ary.method(methd)[ n, &( ->(item) { out << item } ) ]
                 out
             end
 
@@ -872,13 +869,7 @@ class IterableArray
 
             # only for :permutation/:combination and their cousins
             def add_new_items queue, history, items, type, n
-                new_elements =
-                    case type
-                    when :permutation
-                        generate_permutations to_a, n
-                    when :combination
-                        generate_combinations to_a, n
-                    end
+                new_elements = comb_perm_generator type, to_a, n
                 new_elements -= history
                 queue += new_elements
                 queue
