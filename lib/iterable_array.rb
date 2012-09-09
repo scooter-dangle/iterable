@@ -21,7 +21,7 @@ class IterableArray
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, ]
-    # TODO :combination, :drop_while, :fill
+    # TODO :drop_while, :fill, :repeated_permutation, :repeated_combination
 
     # The following two lines are supposed to help me keep track of progress.
     # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :repeated_permutation, :repeated_combination, :product, :pack]
