@@ -21,7 +21,7 @@ class IterableArray
     @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
-    # TODO :drop_while, :fill,
+    # TODO :fill, :drop_while,
 
     # The following two lines are supposed to help me keep track of progress.
     # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :product, :pack]
@@ -546,8 +546,31 @@ class IterableArray
             # untested and incomplete
             def fill *args    # obj=nil, start_or_range=nil, lengther=nil
                 return @array.fill *args unless block_given?
-
                 #TODO implement iteration-aware fill if block_given?
+                ender = -> { length }
+                unless args.empty?
+                    fst = args.at(0)
+                    if fst.kind_of? Range
+                        starter = fst.first
+                        ender = fst.exclude_end? ?
+                                -> { fst.last - 1 } :
+                                -> { fst.last }
+                    else
+                    end
+                end
+            end
+
+            # untested and incomplete
+            def drop_while
+                return @array.to_enum :drop_while unless block_given?
+
+                out = IterableArray.new
+                dropping = true
+                each do |x|
+                    dropping = yield x if dropping
+                    out << x unless dropping
+                end
+                out
             end
 
             # untested
