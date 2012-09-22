@@ -9,8 +9,8 @@ require 'forwardable'
 class IterableArray
     extend Forwardable
 
-    # Probably won't be able to take advantage of Enumerable :(
-    # include Enumerable
+    # Most Enumerable instance methods have not been tested to ensure atomic modification
+    include Enumerable
 
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
 
