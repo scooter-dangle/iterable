@@ -31,13 +31,13 @@ class SwappyArray < Array
     end
     alias_method :swap_indexes, :swap_indices
 
-    def move_from from, hash_to
+    def move_from from, to
         element = delete_at from
-        insert hash_to[:to], element
+        insert to, element
     end
 
-    def move element, hash_to
+    def move element, to
         delete_at index element
-        insert hash_to[:to], element
+        insert to, element
     end
 end
