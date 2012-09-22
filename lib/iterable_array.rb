@@ -878,7 +878,9 @@ class IterableArray
 
             def comb_perm_generator methd, ary, n
                 out = []
-                ary.method(methd)[ n, &( ->(item) { out << item } ) ]
+                ary.method(methd)[ n, &(->(item) {
+                    out << item
+                }) ]
                 out
             end
 
