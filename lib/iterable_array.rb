@@ -19,8 +19,7 @@ class IterableArray
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ] +
-        @@iterator_specials
+    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
     # TODO :fill, :drop_while,
@@ -46,23 +45,25 @@ class IterableArray
     def bastardize
         @array = self.new_with_binding @array
         @tracking = 0.5
-        undefine_methods @@iterators
-        undefine_methods @@special_accessors
-        undefine_methods @@special_modifiers
+        undefine_methods *@@iterators
+        undefine_methods *@@special_accessors
+        undefine_methods *@@special_modifiers
         class << self
             def_delegators :@array, *@@special_accessors
             def_delegators :@array, *@@iterators
         end
         define_plain_modifiers
         define_special_modifiers_iterating
+        define_iterator_specials
     end
 
     def debastardize
         @tracking = nil
         @backward_index, @current_index, @forward_index = nil, nil, nil
         @array = @array.to_a
-        undefine_methods @@plain_modifiers
-        undefine_methods @@special_modifiers
+        undefine_methods *@@plain_modifiers
+        undefine_methods *@@special_modifiers
+        undefine_methods *@@iterator_specials
         class << self
             def_delegators :@array, *@@plain_modifiers
         end
@@ -509,7 +510,11 @@ class IterableArray
                 @forward_index  -= movement
                 @backward_index -= movement
             end
+        end
+    end
 
+    def define_iterator_specials
+        class << self
             # specials
             # TODO: either ensure that the following methods are being undefined
             # during #debastardize or make them private... currently they aren't
@@ -540,6 +545,7 @@ class IterableArray
                             when :aft  then @tracking.abs * -1
                             when :fore then @tracking.abs
                             end
+                tracking
             end
         end
     end
@@ -883,12 +889,7 @@ class IterableArray
                 catch_a_break do
                     @backward_index, @current_index, @forward_index = -1, 0, 1
                     while @current_index < @array.size
-                        item = @array.at(@current_index)
-                        if yield item
-                            out = @current_index
-                            debastardize
-                            return out
-                        end
+                        return @current_index if yield @array.at(@current_index)
                         increment_indices
                     end
 
@@ -970,16 +971,15 @@ class IterableArray
         end
     end
 
-    def undefine_methods ary
+    def undefine_methods *ary
         ary.each do |meth|
-            class << self
+            singleton_class.class_exec {
                 begin
                     undef_method meth
-                rescue  # Don't want to have to worry about trying to
-                        # undefine a method that isn't there. This should be
-                        # unnecessary once I've defined all the methods.
+                rescue # begin/rescue should be unnecessary once I've defined all the methods
+                    print "undef_method failed for #{meth}\n"
                 end
-            end
+            }
         end
     end
 
