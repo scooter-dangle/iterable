@@ -13,12 +13,14 @@ class IterableArray
     include Enumerable
 
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
+    @@iterator_specials = [:tracking, :tracking=, :invert_tracking,]
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :entries, :member?, ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :compact!, :insert, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq! ]
+    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ] +
+        @@iterator_specials
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
     # TODO :fill, :drop_while,
@@ -358,7 +360,7 @@ class IterableArray
                                                 # so that any possible location error is raised
                                                 # before modifying the indices.
 
-                sync_indices_by(@current_index + items.size) if location <= @current_index
+                center_indices_at(@current_index + items.size) if location <= @current_index
 
                 self
             end
@@ -372,11 +374,11 @@ class IterableArray
             # untested
             def move_from from, to
                 if from == @current_index then
-                    sync_indices_by to
+                    center_indices_at to
                 elsif from < @current_index and to >= @current_index
-                    sync_indices_by(@current_index - 1)
+                    center_indices_at(@current_index - 1)
                 elsif from > @current_index and to <= @current_index
-                    sync_indices_by(@current_index + 1)
+                    center_indices_at(@current_index + 1)
                 end
                 @array.move_from from, to
             end
@@ -423,7 +425,7 @@ class IterableArray
                                                       else @current_index
                                  end
 
-                toggle_tracking
+                invert_tracking
 
                 @array.reverse!
                 self
@@ -434,7 +436,7 @@ class IterableArray
                 n %= size
                 return self if n == 0
                 new_index = (@current_index - n) % size
-                sync_indices_by new_index
+                center_indices_at new_index
                 @array.rotate! n
             end
 
@@ -446,7 +448,7 @@ class IterableArray
 
                 @array.sort!
 
-                sync_indices_by (@array.to_a.index(current_item) + offset)
+                center_indices_at (@array.to_a.index(current_item) + offset)
 
                 self
             end
@@ -462,7 +464,7 @@ class IterableArray
                 locations = []
                 @array.to_a.each_with_index { |item, location| locations << location if item == current_item }
 
-                sync_indices_by locations.sample
+                center_indices_at locations.sample
 
                 self
             end
@@ -495,22 +497,46 @@ class IterableArray
             protected
             def swap_2_indices! arg1, arg2
                 temp_holder = @current_index
-                sync_indices_by(arg1) if temp_holder == arg2
-                sync_indices_by(arg2) if temp_holder == arg1
+                center_indices_at(arg1) if temp_holder == arg2
+                center_indices_at(arg2) if temp_holder == arg1
                 @array.swap_indices! arg1, arg2
             end
 
             private
-            def sync_indices_by new_index
+            def center_indices_at new_index
                 movement = @current_index - new_index
                 @current_index  -= movement
                 @forward_index  -= movement
                 @backward_index -= movement
             end
 
+            # specials
+            # TODO: either ensure that the following methods are being undefined
+            # during #debastardize or make them private... currently they aren't
+            # being undefined.
+            # TODO: Also, these currently fail in a nested iteration block if they're
+            # called from the main instance of IterableArray...they'll only affect
+            # the outermost iteration block when called by a user (but they should
+            # work fine when called internally)
+            public
             # Need to add some minimal documentation on tracking.
-            def toggle_tracking
+            def invert_tracking
                 @tracking *= -1
+                tracking
+            end
+
+            def tracking
+                case @tracking
+                when -0.5 then :aft
+                when  0.5 then :fore
+                end
+            end
+
+            def tracking= orient
+                @tracking = case orient
+                            when :aft  then -0.5
+                            when :fore then  0.5
+                            end
             end
         end
     end
@@ -734,7 +760,7 @@ class IterableArray
                     return @array.to_enum(:rindex) unless block_given?
 
                     catch_a_break do
-                        toggle_tracking
+                        invert_tracking
                         @current_index = @array.size - 1
                         @backward_index, @forward_index = @current_index - 1, @current_index + 1
                         while @current_index >= 0
@@ -755,7 +781,7 @@ class IterableArray
                 return @array.to_enum(:reverse_each) unless block_given?
 
                 catch_a_break do
-                    toggle_tracking
+                    invert_tracking
                     @current_index = @array.size - 1
                     @backward_index, @forward_index = @current_index - 1, @current_index + 1
                     while @current_index >= 0
@@ -945,7 +971,7 @@ class IterableArray
         ary.each do |meth|
             class << self
                 begin
-                    undef_method(meth)
+                    undef_method meth
                 rescue  # Don't want to have to worry about trying to
                         # undefine a method that isn't there. This should be
                         # unnecessary once I've defined all the methods.
@@ -972,7 +998,7 @@ class IterableArray
 
     def take_progenitor_binding progenitor_binding
         @progenitor_binding = progenitor_binding
-        class << self; undef_method(:take_progenitor_binding); end
+        class << self; undef_method :take_progenitor_binding; end
     end
 end
 
