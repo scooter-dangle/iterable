@@ -13,16 +13,17 @@ class IterableArray
     include Enumerable
 
     # attr_accessor :array  # For testing purposes only! And even then, what are you doing?!
-    @@iterator_specials = [:tracking, :tracking=, :invert_tracking,]
+
+    @@iterator_specials = [ :tracking, :tracking=, :invert_tracking, ]
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :entries, :member?, ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, :pop ]
     @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
-    # TODO :fill, :drop_while,
+    # TODO :find_index, :sort_by!, :zip, :transpose, :replace,
 
     # The following two lines are supposed to help me keep track of progress.
     # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :product, :pack]
@@ -101,6 +102,11 @@ class IterableArray
 
             def drop n
                 IterableArray.new @array.drop n
+            end
+
+            # untested
+            def dup
+                IterableArray.new @array.to_a.dup
             end
 
             def first n = nil
@@ -608,24 +614,52 @@ class IterableArray
 
             public
 
-            # untested and incomplete
+            # untested and not a pretty sight in general
+            # When used without a block, `#fill` is not iteration aware
+            # as its default behavior is similar to that of `#replace`---
+            # which is a clobberor.
             def fill *args    # obj=nil, start_or_range=nil, lengther=nil
                 return @array.fill *args unless block_given?
-                #TODO implement iteration-aware fill if block_given?
-                ender = -> { length }
-                unless args.empty?
-                    fst = args.at(0)
-                    if fst.kind_of? Range
-                        starter = fst.first
-                        ender = fst.exclude_end? ?
-                                -> { fst.last - 1 } :
-                                -> { fst.last }
-                    else
+
+                #######################
+                # Argument processing #
+                #######################
+                args[0] = 0 if args.empty?
+
+                raise ArgumentError if
+                    args.size > 2 or
+                    (args.first.kind_of? Range and args.size != 1)
+
+                if args.first.kind_of? Range then
+                    args[1] = args.first.exclude_end? ?
+                              args.first.last - 1 :
+                              args.first.last
+                    args[0] = args.first.first
+                end
+
+                ##################################################
+                # Translating argument array to iteration bounds #
+                ##################################################
+                starter = args.first
+                the_final = args.at 1
+                ender = -> { the_final or length }
+
+                #############
+                # Iteration #
+                #############
+                catch_a_break do
+                    @current_index = starter
+                    @backward_index, @forward_index = @current_index - 1, @current_index + 1
+                    while @current_index < ender[]
+                        index_to_fill = @current_index
+                        self[index_to_fill] = yield @current_index
+                        increment_indices
                     end
+                    self
                 end
             end
 
-            # untested and incomplete
+            # untested
             def drop_while
                 return @array.to_enum :drop_while unless block_given?
 
