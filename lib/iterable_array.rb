@@ -16,11 +16,11 @@ class IterableArray
 
     @@iterator_specials = [ :tracking, :tracking=, :invert_tracking, ]
 
-    @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :entries, :member?, ]
+    @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :member?, ]
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
 
-    @@plain_modifiers   = [ :delete, :delete_at, :pop ]
-    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
+    @@plain_modifiers   = [ :delete, :delete_at, ]
+    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
     # TODO :find_index, :sort_by!, :zip, :transpose, :replace,
@@ -285,6 +285,11 @@ class IterableArray
                 self
             end
 
+            def pop n = nil
+                return @array.pop if n.nil?
+                IterableArray.new(@array.pop n)
+            end
+
             def reverse!
                 @array.reverse!
                 self
@@ -416,6 +421,14 @@ class IterableArray
             def unshift *args
                 insert 0, *args
                 self
+            end
+
+            def pop n = nil
+                return delete_at(size - 1) if n.nil?
+
+                out = IterableArray.new []
+                n.times { out.unshift pop }
+                out
             end
 
             def reverse!
@@ -582,13 +595,7 @@ class IterableArray
                 end
             end
 
-            def pop n = 1
-                return delete_at(size - 1) if n == 1
 
-                out = IterableArray.new []
-                n.times { out.unshift pop }
-                out
-            end
         end
     end
 
