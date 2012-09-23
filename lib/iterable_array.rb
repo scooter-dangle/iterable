@@ -520,22 +520,25 @@ class IterableArray
             # work fine when called internally)
             public
             # Need to add some minimal documentation on tracking.
+            # untested
             def invert_tracking
                 @tracking *= -1
                 tracking
             end
 
+            # untested
             def tracking
-                case @tracking
-                when -0.5 then :aft
-                when  0.5 then :fore
+                case @tracking < 0
+                when true  then :aft
+                when false then :fore
                 end
             end
 
+            # untested
             def tracking= orient
                 @tracking = case orient
-                            when :aft  then -0.5
-                            when :fore then  0.5
+                            when :aft  then @tracking.abs * -1
+                            when :fore then @tracking.abs
                             end
             end
         end
