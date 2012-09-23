@@ -264,6 +264,18 @@ class IterableArray
                 self
             end
 
+            # untested
+            def move element, to
+                @array.move element, to
+                self
+            end
+
+            # untested
+            def move_from from, to
+                @array.move_from from, to
+                self
+            end
+
             def reverse!
                 @array.reverse!
                 self
@@ -349,6 +361,24 @@ class IterableArray
                 sync_indices_by(@current_index + items.size) if location <= @current_index
 
                 self
+            end
+
+            # untested
+            def move element, to
+                from = index element
+                move_from from, to
+            end
+
+            # untested
+            def move_from from, to
+                if from == @current_index then
+                    sync_indices_by to
+                elsif from < @current_index and to >= @current_index
+                    sync_indices_by(@current_index - 1)
+                elsif from > @current_index and to <= @current_index
+                    sync_indices_by(@current_index + 1)
+                end
+                @array.move_from from, to
             end
 
             def slice! start, length=:undefined
