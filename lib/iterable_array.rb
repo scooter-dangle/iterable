@@ -1035,12 +1035,6 @@ class IterableArray
         end
     end
 
-    # :method_missing should probably be disabled during testing. Is
-    # there a more elegant / built-in way to do this?
-#    def method_missing  method, *args, &block 
-#        @array.send( method, *args, &block )
-#    end
-
     protected
 
     # Necessary for allowing nested iteration with modifying iterators (like
