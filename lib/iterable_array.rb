@@ -1025,13 +1025,7 @@ class IterableArray
 
     def undefine_methods *ary
         ary.each do |meth|
-            singleton_class.class_exec {
-                begin
-                    undef_method meth
-                rescue # begin/rescue should be unnecessary once I've defined all the methods
-                    print "undef_method failed for #{meth}\n"
-                end
-            }
+            singleton_class.class_exec { undef_method meth }
         end
     end
 
