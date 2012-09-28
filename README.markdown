@@ -47,5 +47,7 @@ b.equal? a
 
 * I'm writing it for 1.9.3 while it's in development.
 
+* Some modifier methods (e.g. `#replace`, `#fill` (when used without a block)) are really just clobberors. They clobber the contents of the array and don't lend to keeping track of 'who left off where'. Iteration will continue with whatever index was calculated through the use of the iteration-aware modifiers.
+
 * No more bullets.
 

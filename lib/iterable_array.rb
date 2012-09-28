@@ -17,16 +17,17 @@ class IterableArray
     @@iterator_specials = [ :tracking, :tracking=, :invert_tracking, ]
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :member?, ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :rotate, :swap, :swap_indices, :take, :uniq, ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, ]
     @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
-    @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
-    # TODO :find_index, :sort_by!, :zip, :transpose, :replace,
+    @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :find_index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
+    # TODO :sort_by!, :zip, :transpose,
+    # possible implementation of :sort_by! would be to prevent it from being a special iterator but just treat it like :sort!, as a modifier
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:find_index, :sort_by!, :zip, :transpose, :replace, :flatten, :flatten!, :product, :pack]
+    # working:  Array#instance_methods(false) => [:sort_by!, :zip, :transpose, :flatten, :flatten!, :product, :pack]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
     # Enumerable methods not covered by Array => [:sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before]
 
@@ -219,6 +220,12 @@ class IterableArray
             # untested
             def rotate n = 1
                 IterableArray.new @array.rotate(n)
+            end
+
+            # untested
+            def replace *args
+                @array.replace *args
+                self
             end
 
             def sort
@@ -937,6 +944,10 @@ class IterableArray
                     nil
                 end
             end
+
+            # Have not tested aliased iterators to ensure
+            # maximal efficacitic beneficial results
+            alias_method :find_index, :index
 
             # Currently only defined for arrays `a` where `a.uniq == a`
             def permutation n = @array.size, &block
