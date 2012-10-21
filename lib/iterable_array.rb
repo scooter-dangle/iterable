@@ -5,6 +5,7 @@
 # Or the remix gem, maybe.
 
 require "#{File.dirname(File.expand_path __FILE__)}/swappy_array.rb"
+require "#{File.dirname(File.expand_path __FILE__)}/../../ruby/remix/lib/remix"
 require 'forwardable'
 
 class IterableArray
@@ -43,30 +44,39 @@ class IterableArray
     def bastardize
         @array = self.new_with_binding @array
         @tracking = 0.5
-        class << self
-            def_delegators :@array, *@@special_accessors
-            def_delegators :@array, *@@iterators
-        end
-        define_plain_modifiers
-        define_special_modifiers_iterating
-        define_iterator_specials
+        extend self.class::SpecialAccessorsIterating
+        extend self.class::IteratorsIterating
+        extend self.class::PlainModifiers
+        extend self.class::SpecialModifiersIterating
+        extend self.class::IteratorSpecials
     end
 
     def debastardize
         @tracking = nil
         @backward_index, @current_index, @forward_index = nil, nil, nil
         @array = @array.to_a
-        remove_methods *@@special_accessors
-        remove_methods *@@iterators
-        remove_methods *@@plain_modifiers
-        remove_methods *@@special_modifiers
-        remove_methods *@@iterator_specials
+        unextend self.class::SpecialAccessorsIterating, true
+        unextend self.class::IteratorsIterating, true
+        unextend self.class::PlainModifiers, true
+        unextend self.class::SpecialModifiersIterating, true
+        unextend self.class::IteratorSpecials, true
     end
 
     public
 
-    # include self::SpecialAccessors
-    # module SpecialAccessors
+    module SpecialAccessorsIterating
+        extend Forwardable
+        @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :uniq, ]
+        def_delegators :@array, *@@special_accessors
+    end
+
+    module IteratorsIterating
+        extend Forwardable
+        @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :find_index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, ]
+        def_delegators :@array, *@@iterators
+    end
+
+    module SpecialAccessors
         def << arg
             @array << arg
             self
@@ -244,10 +254,9 @@ class IterableArray
         def uniq
             IterableArray.new @array.uniq
         end
-    # end # SpecialAccessors
+    end # SpecialAccessors
 
-    # include self::SpecialModifiersNoniterating
-    # module SpecialModifiersNoniterating
+    module SpecialModifiersNoniterating
         # untested
         def compact!
             @array.compact!
@@ -336,267 +345,258 @@ class IterableArray
             @array.uniq!
             self
         end
-    # end # SpecialModifiersNoniterating
+    end # SpecialModifiersNoniterating
 
-    def define_special_modifiers_iterating
-        class << self
-            def clear
-                @backward_index -= @current_index
-                @forward_index  -= @current_index
-                @current_index   = 0
-                @array.clear
+    module SpecialModifiersIterating
+        def clear
+            @backward_index -= @current_index
+            @forward_index  -= @current_index
+            @current_index   = 0
+            @array.clear
+        end
+
+        # untested
+        def compact!
+            delete_if &:nil?
+            self
+        end
+
+        def shift n = nil
+            return self.delete_at(0) if n == nil
+
+            out = IterableArray.new
+            [ n, @array.length ].min.times { out << self.delete_at(0) }
+            out
+        end
+
+        def insert location, *items
+            location = size + location if location < 0
+
+            @array.insert location, *items  # I put this here rather than at the end
+                                            # so that any possible location error is raised
+                                            # before modifying the indices.
+
+            center_indices_at(@current_index + items.size) if location <= @current_index
+
+            self
+        end
+
+        # untested
+        def move element, to
+            from = index element
+            move_from from, to
+        end
+
+        # untested
+        def move_from from, to
+            if from == @current_index then
+                center_indices_at to
+            elsif from < @current_index and to >= @current_index
+                center_indices_at(@current_index - 1)
+            elsif from > @current_index and to <= @current_index
+                center_indices_at(@current_index + 1)
             end
+            @array.move_from from, to
+        end
 
-            # untested
-            def compact!
-                delete_if &:nil?
-                self
-            end
-
-            def shift n = nil
-                return self.delete_at(0) if n == nil
-
-                out = IterableArray.new
-                [ n, @array.length ].min.times { out << self.delete_at(0) }
-                out
-            end
-
-            def insert location, *items
-                location = size + location if location < 0
-
-                @array.insert location, *items  # I put this here rather than at the end
-                                                # so that any possible location error is raised
-                                                # before modifying the indices.
-
-                center_indices_at(@current_index + items.size) if location <= @current_index
-
-                self
-            end
-
-            # untested
-            def move element, to
-                from = index element
-                move_from from, to
-            end
-
-            # untested
-            def move_from from, to
-                if from == @current_index then
-                    center_indices_at to
-                elsif from < @current_index and to >= @current_index
-                    center_indices_at(@current_index - 1)
-                elsif from > @current_index and to <= @current_index
-                    center_indices_at(@current_index + 1)
+        def slice! start, length=:undefined
+            if length.equal? :undefined
+                if start.kind_of? Range
+                    out = IterableArray.new @array.slice(start)
+                    first, last = start.first, start.last
+                    first += @array.length if first < 0
+                    last  += @array.length if last  < 0
+                    if first <= last
+                        length = last - first
+                        length += 1 unless start.exclude_end?
+                        length.times { delete_at first }
+                    end
+                else
+                    out = delete_at start
                 end
-                @array.move_from from, to
+            else
+                out = IterableArray.new @array.slice(start, length)
+                start += @array.length if start < 0
+                length.times { delete_at start }
             end
+            out
+        end
 
-            def slice! start, length=:undefined
-                if length.equal? :undefined
-                    if start.kind_of? Range
-                        out = IterableArray.new @array.slice(start)
-                        first, last = start.first, start.last
-                        first += @array.length if first < 0
-                        last  += @array.length if last  < 0
-                        if first <= last
-                            length = last - first
-                            length += 1 unless start.exclude_end?
-                            length.times { delete_at first }
+        def unshift *args
+            insert 0, *args
+            self
+        end
+
+        def pop n = nil
+            return delete_at(size - 1) if n.nil?
+
+            out = IterableArray.new []
+            n.times { out.unshift pop }
+            out
+        end
+
+        def reverse!
+            @backward_index, @forward_index =
+                @array.size - 1 - @forward_index,
+                @array.size - 1 - @backward_index
+
+            # @current_index = @backward_index  + 1
+            @current_index = @array.size - 1 - @current_index
+
+            @current_index = case @current_index
+                             when @backward_index then @forward_index
+                             when @forward_index  then @backward_index
+                                                  else @current_index
+                             end
+
+            invert_tracking
+
+            @array.reverse!
+            self
+        end
+
+        # partially tested (not tested nested)
+        def rotate! n = 1
+            n %= size
+            return self if n == 0
+            new_index = (@current_index - n) % size
+            center_indices_at new_index
+            @array.rotate! n
+        end
+
+        def sort!
+            return @array.sort! if @current_index >= @array.size or @current_index < 0
+
+            current_item = @array.at @current_index
+            offset = @array.to_a[0...@current_index].count current_item
+
+            @array.sort!
+
+            center_indices_at (@array.to_a.index(current_item) + offset)
+
+            self
+        end
+
+        def shuffle!
+            return @array.shuffle! if @current_index >= @array.size or @current_index < 0
+
+            current_item = @array.at @current_index
+            count = @array.to_a.count current_item
+
+            @array.shuffle!
+
+            locations = []
+            @array.to_a.each_with_index { |item, location| locations << location if item == current_item }
+
+            center_indices_at locations.sample
+
+            self
+        end
+
+        def swap! *args
+            args.map! { |x| index x }
+            swap_indices! *args
+        end
+
+        def swap_indices! *args
+            args.inject { |i1, i2| swap_2_indices!(i1, i2); i2 }
+            self
+        end
+        alias_method :swap_indexes!, :swap_indices!
+
+        # untested
+        def uniq!
+            basket = []
+            delete_if do |x| 
+                if basket.include? x
+                    true
+                else
+                    basket << x
+                    false
+                end
+            end
+            self
+        end
+
+        protected
+        def swap_2_indices! arg1, arg2
+            temp_holder = @current_index
+            center_indices_at(arg1) if temp_holder == arg2
+            center_indices_at(arg2) if temp_holder == arg1
+            @array.swap_indices! arg1, arg2
+        end
+
+        private
+        def center_indices_at new_index
+            movement = @current_index - new_index
+            @current_index  -= movement
+            @forward_index  -= movement
+            @backward_index -= movement
+        end
+    end
+
+    module IteratorSpecials
+        # specials
+        # TODO: either ensure that the following methods are being undefined
+        # during #debastardize or make them private... currently they aren't
+        # being undefined.
+        # TODO: Also, these currently fail in a nested iteration block if they're
+        # called from the main instance of IterableArray...they'll only affect
+        # the outermost iteration block when called by a user (but they should
+        # work fine when called internally)
+        public
+        # Need to add some minimal documentation on tracking.
+        # untested
+        def invert_tracking
+            @tracking *= -1
+            tracking
+        end
+
+        # untested
+        def tracking
+            case @tracking < 0
+            when true  then :aft
+            when false then :fore
+            end
+        end
+
+        # untested
+        def tracking= orient
+            @tracking = case orient
+                        when :aft  then @tracking.abs * -1
+                        when :fore then @tracking.abs
                         end
-                    else
-                        out = delete_at start
-                    end
-                else
-                    out = IterableArray.new @array.slice(start, length)
-                    start += @array.length if start < 0
-                    length.times { delete_at start }
-                end
-                out
-            end
+            tracking
+        end
+    end
 
-            def unshift *args
-                insert 0, *args
-                self
-            end
+    module PlainModifiers
+        def delete_at location
+            # Flip to positive and weed out out of bounds
+            location += @array.size if location < 0
+            return nil if location < 0 or location >= @array.size
 
-            def pop n = nil
-                return delete_at(size - 1) if n.nil?
+            @forward_index  -= 1 if location < @forward_index
+            @current_index  -= 1 if location < @current_index - @tracking
+            @backward_index -= 1 if location < @backward_index
 
-                out = IterableArray.new []
-                n.times { out.unshift pop }
-                out
-            end
+            @array.delete_at location
+        end
 
-            def reverse!
-                @backward_index, @forward_index =
-                    @array.size - 1 - @forward_index,
-                    @array.size - 1 - @backward_index
-
-                # @current_index = @backward_index  + 1
-                @current_index = @array.size - 1 - @current_index
-
-                @current_index = case @current_index
-                                 when @backward_index then @forward_index
-                                 when @forward_index  then @backward_index
-                                                      else @current_index
-                                 end
-
-                invert_tracking
-
-                @array.reverse!
-                self
-            end
-
-            # partially tested (not tested nested)
-            def rotate! n = 1
-                n %= size
-                return self if n == 0
-                new_index = (@current_index - n) % size
-                center_indices_at new_index
-                @array.rotate! n
-            end
-
-            def sort!
-                return @array.sort! if @current_index >= @array.size or @current_index < 0
-
-                current_item = @array.at @current_index
-                offset = @array.to_a[0...@current_index].count current_item
-
-                @array.sort!
-
-                center_indices_at (@array.to_a.index(current_item) + offset)
-
-                self
-            end
-
-            def shuffle!
-                return @array.shuffle! if @current_index >= @array.size or @current_index < 0
-
-                current_item = @array.at @current_index
-                count = @array.to_a.count current_item
-
-                @array.shuffle!
-
-                locations = []
-                @array.to_a.each_with_index { |item, location| locations << location if item == current_item }
-
-                center_indices_at locations.sample
-
-                self
-            end
-
-            def swap! *args
-                args.map! { |x| index x }
-                swap_indices! *args
-            end
-
-            def swap_indices! *args
-                args.inject { |i1, i2| swap_2_indices!(i1, i2); i2 }
-                self
-            end
-            alias_method :swap_indexes!, :swap_indices!
-
-            # untested
-            def uniq!
-                basket = []
-                delete_if do |x| 
-                    if basket.include? x
-                        true
-                    else
-                        basket << x
-                        false
-                    end
-                end
-                self
-            end
-
-            protected
-            def swap_2_indices! arg1, arg2
-                temp_holder = @current_index
-                center_indices_at(arg1) if temp_holder == arg2
-                center_indices_at(arg2) if temp_holder == arg1
-                @array.swap_indices! arg1, arg2
-            end
-
-            private
-            def center_indices_at new_index
-                movement = @current_index - new_index
-                @current_index  -= movement
-                @forward_index  -= movement
-                @backward_index -= movement
+        # currently untested
+        def delete obj
+            n = count obj
+            if n == 0
+                return yield(obj) if block_given?
+                nil
+            else
+                n.times { delete_at index obj }
+                obj
             end
         end
     end
 
-    def define_iterator_specials
-        class << self
-            # specials
-            # TODO: either ensure that the following methods are being undefined
-            # during #debastardize or make them private... currently they aren't
-            # being undefined.
-            # TODO: Also, these currently fail in a nested iteration block if they're
-            # called from the main instance of IterableArray...they'll only affect
-            # the outermost iteration block when called by a user (but they should
-            # work fine when called internally)
-            public
-            # Need to add some minimal documentation on tracking.
-            # untested
-            def invert_tracking
-                @tracking *= -1
-                tracking
-            end
-
-            # untested
-            def tracking
-                case @tracking < 0
-                when true  then :aft
-                when false then :fore
-                end
-            end
-
-            # untested
-            def tracking= orient
-                @tracking = case orient
-                            when :aft  then @tracking.abs * -1
-                            when :fore then @tracking.abs
-                            end
-                tracking
-            end
-        end
-    end
-
-    def define_plain_modifiers
-        class << self
-            def delete_at location
-                # Flip to positive and weed out out of bounds
-                location += @array.size if location < 0
-                return nil if location < 0 or location >= @array.size
-
-                @forward_index  -= 1 if location < @forward_index
-                @current_index  -= 1 if location < @current_index - @tracking
-                @backward_index -= 1 if location < @backward_index
-
-                @array.delete_at location
-            end
-
-            # currently untested
-            def delete obj
-                n = count obj
-                if n == 0
-                    return yield(obj) if block_given?
-                    nil
-                else
-                    n.times { delete_at index obj }
-                    obj
-                end
-            end
-
-
-        end
-    end
-
-    # include self::Iterators
-    # module Iterators
+    module Iterators
         private
         def catch_a_break
             result = nil
@@ -1009,7 +1009,7 @@ class IterableArray
             end
             queue
         end
-    # end # Iterators
+    end # Iterators
 
     def remove_methods *ary
         ary.each do |meth|
@@ -1031,5 +1031,9 @@ class IterableArray
         @progenitor_binding = progenitor_binding
         class << self; undef_method :take_progenitor_binding; end
     end
+
+    include self::SpecialAccessors
+    include self::Iterators
+    include self::SpecialModifiersNoniterating
 end
 
