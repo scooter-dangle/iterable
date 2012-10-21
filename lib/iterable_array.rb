@@ -39,17 +39,17 @@ class IterableArray
     def initialize *args
         @array = SwappyArray.new *args
         @progenitor_binding = binding
-        define_iterators
-        define_special_accessors
-        define_special_modifiers_noniterating
+        # define_iterators
+        # define_special_accessors
+        # define_special_modifiers_noniterating
     end
 
     def bastardize
         @array = self.new_with_binding @array
         @tracking = 0.5
-        undefine_methods *@@iterators
-        undefine_methods *@@special_accessors
-        undefine_methods *@@special_modifiers
+        # remove_methods *@@iterators
+        # remove_methods *@@special_accessors
+        # remove_methods *@@special_modifiers
         class << self
             def_delegators :@array, *@@special_accessors
             def_delegators :@array, *@@iterators
@@ -63,19 +63,23 @@ class IterableArray
         @tracking = nil
         @backward_index, @current_index, @forward_index = nil, nil, nil
         @array = @array.to_a
-        undefine_methods *@@plain_modifiers
-        undefine_methods *@@special_modifiers
-        undefine_methods *@@iterator_specials
-        class << self
-            def_delegators :@array, *@@plain_modifiers
-        end
-        define_special_accessors
-        define_special_modifiers_noniterating
-        define_iterators
+        remove_methods *@@special_accessors
+        remove_methods *@@iterators
+        remove_methods *@@plain_modifiers
+        remove_methods *@@special_modifiers
+        remove_methods *@@iterator_specials
+        # class << self
+        #     def_delegators :@array, *@@plain_modifiers
+        # end
+        # define_special_accessors
+        # define_special_modifiers_noniterating
+        # define_iterators
     end
 
-    def define_special_accessors
-        class << self
+    public
+
+    # def define_special_accessors
+    #     class << self
             def << arg
                 @array << arg
                 self
@@ -139,7 +143,7 @@ class IterableArray
             # would be more duck-typish to maintain the object's
             # class, right? I dunno why it has to be so sad.
             def assoc obj
-                each do |x|
+                @array.each do |x|
                     if x.respond_to? :at and x.at(0) == obj
                         return x
                     end
@@ -150,7 +154,7 @@ class IterableArray
 
             # See note above assoc.
             def rassoc obj
-                each do |elem|
+                @array.each do |elem|
                     if elem.respond_to? :at and elem.at(1) == obj
                         return elem
                     end
@@ -253,11 +257,11 @@ class IterableArray
             def uniq
                 IterableArray.new @array.uniq
             end
-        end
-    end
+    #     end
+    # end
 
-    def define_special_modifiers_noniterating
-        class << self
+    # def define_special_modifiers_noniterating
+    #     class << self
             # untested
             def compact!
                 @array.compact!
@@ -346,8 +350,8 @@ class IterableArray
                 @array.uniq!
                 self
             end
-        end
-    end
+    #     end
+    # end
 
     def define_special_modifiers_iterating
         class << self
@@ -606,8 +610,8 @@ class IterableArray
         end
     end
 
-    def define_iterators
-        class << self
+    # def define_iterators
+    #     class << self
             private
             def catch_a_break
                 result = nil
@@ -1020,12 +1024,12 @@ class IterableArray
                 end
                 queue
             end
-        end
-    end
+    #     end
+    # end
 
-    def undefine_methods *ary
+    def remove_methods *ary
         ary.each do |meth|
-            singleton_class.class_exec { undef_method meth }
+            singleton_class.class_exec { remove_method meth }
         end
     end
 
