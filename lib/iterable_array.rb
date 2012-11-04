@@ -201,8 +201,8 @@ class IterableArray
         end
 
         # untested
-        def flatten
-            IterableArray.new @array.flatten
+        def flatten *arg
+            IterableArray.new @array.flatten(*arg)
         end
 
         # untested
