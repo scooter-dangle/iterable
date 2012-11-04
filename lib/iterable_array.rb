@@ -956,6 +956,19 @@ class IterableArray
             end
         end
 
+        # untested
+        def product *arrays
+            return IterableArray.new @array.product(*arrays) unless block_given?
+
+            each do |x|
+                basket = [x].product *arrays
+                # means of skipping a whole chunk of yields
+                catch :product_next do
+                    basket.each { |y| yield IterableArray.new y }
+                end
+            end
+        end
+
         # Currently only defined for arrays `a` where `a.uniq == a`
         def permutation n = @array.size, &block
             comb_perm_helper :permutation, n, &block
