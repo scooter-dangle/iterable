@@ -459,7 +459,7 @@ class IterableArray
             end
 
             def sort!
-                return @array.sort! if @current_index >= @array.size or @current_index < 0
+                return @array.sort! unless @current_index.between? 0, @array.size.pred
 
                 current_item = @array.at @current_index
                 offset = @array.to_a[0...@current_index].count current_item
@@ -472,7 +472,7 @@ class IterableArray
             end
 
             def shuffle!
-                return @array.shuffle! if @current_index >= @array.size or @current_index < 0
+                return @array.shuffle! unless @current_index.between? 0, @array.size.pred
 
                 current_item = @array.at @current_index
                 count = @array.to_a.count current_item
@@ -501,7 +501,7 @@ class IterableArray
             # untested
             def uniq!
                 basket = []
-                delete_if do |x| 
+                delete_if do |x|
                     if basket.include? x
                         true
                     else
@@ -515,8 +515,8 @@ class IterableArray
             protected
             def swap_2_indices! arg1, arg2
                 temp_holder = @current_index
-                center_indices_at(arg1) if temp_holder == arg2
-                center_indices_at(arg2) if temp_holder == arg1
+                center_indices_at arg1 if temp_holder == arg2
+                center_indices_at arg2 if temp_holder == arg1
                 @array.swap_indices! arg1, arg2
             end
 
@@ -572,7 +572,7 @@ class IterableArray
             def delete_at location
                 # Flip to positive and weed out out of bounds
                 location += @array.size if location < 0
-                return nil if location < 0 or location >= @array.size
+                return nil unless location.between? 0, @array.size.pred
 
                 @forward_index  -= 1 if location < @forward_index
                 @current_index  -= 1 if location < @current_index - @tracking
