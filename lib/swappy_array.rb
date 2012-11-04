@@ -3,6 +3,10 @@ class SwappyArray < Array
         IterableArray.new self
     end
 
+    def to_a
+        self
+    end
+
     def swap_2_indices! arg1, arg2
         temper = at arg1
         self[arg1] = at arg2

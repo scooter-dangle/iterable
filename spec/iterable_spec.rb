@@ -835,7 +835,8 @@ describe IterableArray do
                     break if x == :bob
                 end
 
-                @batting_order.instance_exec { @array.class }.should == Array
+                @batting_order.instance_exec { @array.kind_of? Array }.should be_true
+                @batting_order.instance_exec { @array.kind_of? IterableArray }.should be_false
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
             end
@@ -847,7 +848,8 @@ describe IterableArray do
                     end
                 end
 
-                @batting_order.instance_exec { @array.class }.should == Array
+                @batting_order.instance_exec { @array.kind_of? Array }.should be_true
+                @batting_order.instance_exec { @array.kind_of? IterableArray }.should be_false
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
             end
