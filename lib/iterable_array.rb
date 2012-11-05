@@ -19,14 +19,10 @@ class IterableArray
     @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :flatten, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :transpose, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, ]
-    @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :sort_by!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
+    @@special_modifiers = [ :clear, :compact!, :flatten!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :sort_by!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :find_index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, :product, :zip, ]
-    # TODO :flatten!,
 
-    # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:flatten!, ]
-    # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
     # Enumerable methods not covered by Array => [:sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before]
 
     def_delegators :@array, *@@plain_accessors
@@ -409,6 +405,16 @@ class IterableArray
                 @array.move_from from, to
             end
 
+            # untested
+            def flatten! level = -1
+                return self if level.zero?
+                @forward_index = to_a[0...@forward_index].flatten(level).size
+                @backward_index = @forward_index - 1
+                @current_index = (@backward_index + 0.5 + @tracking).to_int
+                @array.flatten! level
+                self
+            end
+
             def slice! start, length=:undefined
                 if length.equal? :undefined
                     if start.kind_of? Range
@@ -468,7 +474,7 @@ class IterableArray
             # partially tested (not tested nested)
             def rotate! n = 1
                 n %= size
-                return self if n == 0
+                return self if n.zero?
                 new_index = (@current_index - n) % size
                 center_indices_at new_index
                 @array.rotate! n
@@ -623,16 +629,14 @@ class IterableArray
             # currently untested
             def delete obj
                 n = count obj
-                if n == 0
-                    return yield(obj) if block_given?
+                if n.zero?
+                    return yield obj if block_given?
                     nil
                 else
                     n.times { delete_at index obj }
                     obj
                 end
             end
-
-
         end
     end
 
