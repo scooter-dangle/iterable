@@ -16,16 +16,16 @@ class IterableArray
     @@iterator_specials = [ :tracking, :tracking=, :invert_tracking, ]
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :member?, :pack, ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :flatten, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :uniq, ]
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :flatten, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :transpose, :uniq, ]
 
     @@plain_modifiers   = [ :delete, :delete_at, ]
     @@special_modifiers = [ :clear, :compact!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :sort_by!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
 
     @@iterators = [ :each, :reverse_each, :rindex, :collect, :collect!, :map, :map!, :combination, :cycle, :delete_if, :drop_while, :each_index, :index, :find_index, :keep_if, :each_with_index, :reject!, :reject, :select!, :select, :take_while, :count, :fill, :permutation, :repeated_permutation, :repeated_combination, :product, :zip, ]
-    # TODO :transpose,
+    # TODO :flatten!,
 
     # The following two lines are supposed to help me keep track of progress.
-    # working:  Array#instance_methods(false) => [:transpose, :flatten!, ]
+    # working:  Array#instance_methods(false) => [:flatten!, ]
     # original: Array#instance_methods(false) => [:inspect, :to_s, :to_a, :to_ary, :frozen?, :==, :eql?, :hash, :[], :[]=, :at, :fetch, :first, :last, :concat, :<<, :push, :pop, :shift, :unshift, :insert, :each, :each_index, :reverse_each, :length, :size, :empty?, :find_index, :index, :rindex, :join, :reverse, :reverse!, :rotate, :rotate!, :sort, :sort!, :sort_by!, :collect, :collect!, :map, :map!, :select, :select!, :keep_if, :values_at, :delete, :delete_at, :delete_if, :reject, :reject!, :zip, :transpose, :replace, :clear, :fill, :include?, :<=>, :slice, :slice!, :assoc, :rassoc, :+, :*, :-, :&, :|, :uniq, :uniq!, :compact, :compact!, :flatten, :flatten!, :count, :shuffle!, :shuffle, :sample, :cycle, :permutation, :combination, :repeated_permutation, :repeated_combination, :product, :take, :take_while, :drop, :drop_while, :pack]
     # Enumerable methods not covered by Array => [:sort_by, :grep, :find, :detect, :find_all, :flat_map, :collect_concat, :inject, :reduce, :partition, :group_by, :all?, :any?, :one?, :none?, :min, :max, :minmax, :min_by, :max_by, :minmax_by, :each_entry, :each_slice, :each_cons, :each_with_object, :chunk, :slice_before]
 
@@ -239,6 +239,16 @@ class IterableArray
         # untested
         def take n
             IterableArray.new @array.take(n)
+        end
+
+        # untested
+        # Note: All internal arrays will also be IterableArrays.
+        # Any point at all to this? One doubts...
+        def transpose
+            # So. Pointless. Blerg.
+            IterableArray.new(@array.transpose.map do |x|
+                IterableArray.new x
+            end)
         end
 
         # untested
