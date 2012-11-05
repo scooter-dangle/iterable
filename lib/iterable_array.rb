@@ -410,7 +410,7 @@ class IterableArray
                 return self if level.zero?
                 @forward_index = to_a[0...@forward_index].flatten(level).size
                 @backward_index = @forward_index - 1
-                @current_index = (@backward_index + 0.5 + @tracking).to_int
+                @current_index = (@backward_index + @tracking.abs + @tracking).to_int
                 @array.flatten! level
                 self
             end
