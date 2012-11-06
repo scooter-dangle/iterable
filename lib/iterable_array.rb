@@ -4,7 +4,7 @@
 # does not work in Rubinius. :(
 # Or the remix gem, maybe.
 
-require "#{File.dirname(File.expand_path __FILE__)}/swappy_array.rb"
+require_relative './swappy_array.rb'
 require 'forwardable'
 
 class IterableArray
