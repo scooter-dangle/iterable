@@ -1,4 +1,4 @@
-require_relative '../bin/iterable.rb'
+require_relative '../lib/iterable.rb'
 
 
 describe IterableArray do
