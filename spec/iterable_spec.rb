@@ -135,10 +135,10 @@ describe IterableArray do
             @iter_ary.shuffle.sort.should == @ary.shuffle.sort
 
             # :<<
-            ( @iter_ary << num ).should == ( @ary << num)
+            ( @iter_ary << num ).should == ( @ary << num )
 
             # :concat
-            ( @iter_ary.concat [num] ).should == ( @ary.concat [num])
+            ( @iter_ary.concat [num] ).should == ( @ary.concat [num] )
 
             # :<=>
             ( @iter_ary <=> @iter_ary_2 ).should == ( @ary <=> @ary_2 )
@@ -146,19 +146,19 @@ describe IterableArray do
             ( @iter_ary <=> @iter_ary ).should == ( @ary <=> @ary )
 
             # :&
-            ( @iter_ary_2 & @ary ).should == ( @ary_2 & @ary)
+            ( @iter_ary_2 & @ary ).should == ( @ary_2 & @ary )
 
             # :|
-            ( @iter_ary_2 | @ary ).should == ( @ary_2 | @ary)
+            ( @iter_ary_2 | @ary ).should == ( @ary_2 | @ary )
 
             # :+
-            ( @iter_ary + @ary ).should == ( @ary + @ary)
+            ( @iter_ary + @ary ).should == ( @ary + @ary )
 
             # :-
-            ( @iter_ary_2 - @ary ).should == ( @ary_2 - @ary)
+            ( @iter_ary_2 - @ary ).should == ( @ary_2 - @ary )
 
             # :+
-            ( @iter_ary + @ary ).should == ( @ary + @ary)
+            ( @iter_ary + @ary ).should == ( @ary + @ary )
 
             # :[]
             @iter_ary[num].should == @ary[num]

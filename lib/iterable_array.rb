@@ -44,7 +44,7 @@ class IterableArray
         end
         define_plain_modifiers
         define_special_modifiers_iterating
-        define_iterator_specials
+        # define_iterator_specials
     end
 
     def debastardize
@@ -55,7 +55,7 @@ class IterableArray
         remove_methods *@@iterators
         remove_methods *@@plain_modifiers
         remove_methods *@@special_modifiers
-        remove_methods *@@iterator_specials
+        # remove_methods *@@iterator_specials
     end
 
     public
@@ -575,8 +575,8 @@ class IterableArray
         end
     end
 
-    def define_iterator_specials
-        class << self
+    # def define_iterator_specials
+    #     class << self
             # specials
             # TODO: either ensure that the following methods are being undefined
             # during #debastardize or make them private... currently they aren't
@@ -586,11 +586,16 @@ class IterableArray
             # the outermost iteration block when called by a user (but they should
             # work fine when called internally)
             public
-            # Need to add some minimal documentation on tracking.
             # untested
             def invert_tracking
                 @tracking *= -1
                 tracking
+            end
+
+            # Need to add some minimal documentation on tracking.
+            # untested
+            def invert_tracking_at nesting_level = -1
+                direct_to nesting_level, &:invert_tracking
             end
 
             # untested
@@ -602,6 +607,11 @@ class IterableArray
             end
 
             # untested
+            def tracking_at nesting_level = -1
+                direct_to nesting_level, &:tracking
+            end
+
+            # untested
             def tracking= orient
                 @tracking = case orient
                             when :aft  then @tracking.abs * -1
@@ -609,8 +619,30 @@ class IterableArray
                             end
                 tracking
             end
-        end
-    end
+
+            # untested
+            def tracking_at= orient, nesting_level = -1
+                direct_to nesting_level do |obj|
+                    obj.tracking = orient
+                end
+            end
+
+            protected
+            # untested
+            def direct_to nesting_level
+                yield case
+                      when nesting_level == 0
+                          self
+                      when nesting_level < 0
+                          @array.kind_of? Array ?
+                              direct_to(0) :
+                              @array.direct_to(-1)
+                      else
+                          @array.direct_to(nesting_level - 1)
+                      end
+            end
+    #     end
+    # end
 
     def define_plain_modifiers
         class << self
