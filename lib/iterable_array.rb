@@ -17,8 +17,11 @@ require_relative './iterable_array/plain_modifiers.rb'
 class IterableArray
     extend Forwardable
 
+    # For some reason, treating the following 2
+    # groups of methods as modules breaks my tests.
     # include self::SpecialAccessors
     # include self::Iterators
+
     include self::IteratorSpecials
     include self::SpecialModifiersNoniterating
     # include self::SpecialModifiersIterating
