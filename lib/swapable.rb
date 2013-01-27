@@ -1,4 +1,4 @@
-class SwappyArray < Array
+module Swapable
     def to_iter
         IterableArray.new self
     end
@@ -27,11 +27,11 @@ class SwappyArray < Array
     alias_method :swap_indexes!, :swap_indices!
 
     def swap *args
-        dup.swap! *args
+        dup.extend(Swapable).swap! *args
     end
 
     def swap_indices *args
-        dup.swap_indices! *args
+        dup.extend(Swapable).swap_indices! *args
     end
     alias_method :swap_indexes, :swap_indices
 

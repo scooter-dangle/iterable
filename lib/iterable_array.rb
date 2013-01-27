@@ -5,7 +5,7 @@
 # Or the remix gem, maybe.
 require 'forwardable'
 
-require_relative './swappy_array.rb'
+require_relative './swapable.rb'
 require_relative './iterable_array/special_accessors.rb'
 require_relative './iterable_array/iterators.rb'
 require_relative './iterable_array/iterator_specials.rb'
@@ -48,7 +48,7 @@ class IterableArray
     private
 
     def initialize *args
-        @array = SwappyArray.new *args
+        @array = Array.new(*args).extend Swapable
         @progenitor_binding = binding
     end
 
