@@ -1,10 +1,10 @@
 desc 'Build gem from gemspec'
-task :gem_build do
+task :build do
     sh %{gem build *.gemspec}
 end
 
 desc 'Increment minor version number'
-task :gem_incr do
+task :incr do
     str = IO.read 'iterable.gemspec'
     str.gsub!(/(
                    \. version [^\n]*
@@ -25,12 +25,12 @@ task :gem_incr do
 end
 
 desc 'Install gem'
-task :gem_install do
+task :install do
     sh %{gem uninstall iterable}
     sh %{gem install --local --prerelease --no-ri --no-rdoc *.gem}
 end
 
 desc 'Build and install gem from gemspec and cleanup'
-task gem: [:gem_incr, :gem_build, :gem_install] do
+task gem: [:incr, :build, :install] do
     sh %{rm *.gem}
 end
