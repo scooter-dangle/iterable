@@ -121,9 +121,10 @@ class IterableArray
         alias_method :indices, :values_at
         alias_method :indexes, :values_at
 
+        # TODO need Mspec test...ran into problems with this one
         def sample arg = nil
-            return IterableArray.new(@array.sample arg) unless arg == nil
-            IterableArray.new @array.sample
+            return IterableArray.new(@array.sample arg) unless arg.nil?
+            @array.sample
         end
 
         # :eql? returns true only when array contents are the same and
