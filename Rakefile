@@ -31,6 +31,6 @@ task :install do
 end
 
 desc 'Build and install gem from gemspec and cleanup'
-task gem: [:incr, :build, :install] do
+task gem: [:build, :install] do
     sh %{rm *.gem}
 end
