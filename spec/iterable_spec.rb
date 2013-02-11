@@ -8,7 +8,7 @@ describe IterableArray do
         @iter_ary.class.should == IterableArray
     end
 
-    pending 'responds to every Array instance method' do # MAYbe...
+    it 'responds to every Array instance method' do # MAYbe...
         @iter_ary = IterableArray.new
         Array.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
