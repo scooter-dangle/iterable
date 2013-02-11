@@ -34,6 +34,12 @@ class IterableArray
             self
         end
 
+        # untested
+        def flatten! level = -1
+            @array.flatten! level
+            self
+        end
+
         def pop n = nil
             return @array.pop if n.nil?
             IterableArray.new(@array.pop n)
