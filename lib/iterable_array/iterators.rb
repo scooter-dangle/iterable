@@ -293,7 +293,7 @@ class IterableArray
             return @array.to_enum(:cycle, n) unless block_given?
 
             catch_a_break do
-                if n.equal? nil
+                if n.nil?
                     until @array.empty?
                         @backward_index, @current_index, @forward_index = -1, 0, 1
                         while @current_index < @array.size

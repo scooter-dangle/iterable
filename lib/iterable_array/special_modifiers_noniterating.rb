@@ -12,8 +12,7 @@ class IterableArray
         end
 
         def shift n = nil
-            return @array.shift if n == nil
-
+            return @array.shift if n.nil?
             IterableArray.new @array.shift(n)
         end
 
