@@ -511,7 +511,7 @@ describe IterableArray do
         # best one evarr!
         describe 'juggling with #each and #rotate!' do
             it do
-                @batting_order = IterableArray.new (:a..:d).to_a
+                @batting_order = IterableArray.new [*:a..:d]
                 continue_sans_rotation = true
                 @bound = 18
                 catch_and_eacher do |x|
@@ -522,7 +522,7 @@ describe IterableArray do
                     end
                 end
                 output = []
-                5.times { output += (:a..:d).to_a }
+                5.times { output += [*:a..:d] }
                 @batting_history.should == output
             end
         end
@@ -1010,7 +1010,7 @@ describe IterableArray do
         end
 
         before :each do
-            @ary_1 = (:a..:e).to_a
+            @ary_1 = [*:a..:e]
             @iter_ary_1 = IterableArray.new @ary_1
             @happy_holder = []
             @cozy_container = []
