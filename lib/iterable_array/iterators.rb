@@ -2,14 +2,10 @@ class IterableArray
     # module Iterators
         private
         def catch_a_break
-            result = nil
-            begin
-                bastardize
-                result = yield
-            ensure
-                debastardize
-            end
-            result
+            bastardize
+            yield
+        ensure
+            debastardize
         end
 
         def increment_indices
