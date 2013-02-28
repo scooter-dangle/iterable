@@ -1,10 +1,15 @@
 module Swapable
+    # to_iter doesn't really belong in Swapable
     def to_iter
         IterableArray.new self
     end
 
     def to_a
         self
+    end
+    
+    def dup
+        (super).extend Swapable
     end
 
     def swap_2_indices! arg1, arg2
@@ -27,11 +32,11 @@ module Swapable
     alias_method :swap_indexes!, :swap_indices!
 
     def swap *args
-        dup.extend(Swapable).swap! *args
+        dup.swap! *args
     end
 
     def swap_indices *args
-        dup.extend(Swapable).swap_indices! *args
+        dup.swap_indices! *args
     end
     alias_method :swap_indexes, :swap_indices
 
