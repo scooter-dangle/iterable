@@ -289,27 +289,24 @@ class IterableArray
             return @array.to_enum(:cycle, n) unless block_given?
 
             catch_a_break do
-                if n.nil?
-                    until @array.empty?
-                        @backward_index, @current_index, @forward_index = -1, 0, 1
-                        while @current_index < @array.size
-                            yield @array.at(@current_index)
-                            increment_indices
-                        end
-                    end
-                else
-                    n.times do
-                        @backward_index, @current_index, @forward_index = -1, 0, 1
-                        while @current_index < @array.size
-                            yield @array.at(@current_index)
-                            increment_indices
-                        end
+                cycle_conditional_helper n do
+                    @backward_index, @current_index, @forward_index = -1, 0, 1
+                    while @current_index < @array.size
+                        yield @array.at(@current_index)
+                        increment_indices
                     end
                 end
 
                 nil
             end
         end
+        
+        def cycle_conditional_helper n, &block
+            n.nil? ?
+                yield until @array.empty? :
+                n.times { yield }
+        end
+        private :cycle_conditional_helper
 
         def index obj = :undefined
             unless block_given?
