@@ -303,7 +303,7 @@ class IterableArray
         
         def cycle_conditional_helper n, &block
             n.nil? ?
-                yield until @array.empty? :
+                (yield until @array.empty?) :
                 n.times { yield }
         end
         private :cycle_conditional_helper
