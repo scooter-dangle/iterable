@@ -172,7 +172,7 @@ class IterableArray
                     # iteration levels would not be able to adjust their indices
                     # to account for the change in array size.
                     if yield @array.at(@current_index)
-                        @progenitor_binding.eval "self.delete_at #{@current_index}"
+                        @progenitor.send :delete_at, @current_index
                     end
                     increment_indices
                 end

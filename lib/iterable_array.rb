@@ -46,11 +46,11 @@ class IterableArray
 
     def initialize *args
         @array = Array.new(*args).extend Swapable
-        @progenitor_binding = binding
+        @progenitor = self
     end
 
     def bastardize
-        @array = self.new_with_binding @array
+        @array = self.new_with_progenitor @array
         @tracking = 0.5
         class << self
             def_delegators :@array, *@@special_accessors
@@ -80,15 +80,19 @@ class IterableArray
 
     # Necessary for allowing nested iteration with modifying iterators (like
     # :delete_if)
-    def new_with_binding array
+    # TODO - After refactoring to be a reference to the progenitor itself
+    # rather than a binding, need to simplify this... overly complex right
+    # now for what it does...
+    def new_with_progenitor array
         iter_ary = IterableArray.new array
-        iter_ary.take_progenitor_binding @progenitor_binding
+        iter_ary.take_progenitor @progenitor
         iter_ary
     end
 
-    def take_progenitor_binding progenitor_binding
-        @progenitor_binding = progenitor_binding
-        class << self; undef_method :take_progenitor_binding; end
+    # Not sure this method is worth the trouble
+    def take_progenitor progenitor
+        @progenitor = progenitor
+        class << self; undef_method :take_progenitor; end
     end
 end
 
