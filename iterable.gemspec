@@ -1,7 +1,7 @@
 require 'date'
 Gem::Specification.new do |o|
     o                .name = 'iterable'
-    o             .version = '0.0.7.pre'
+    o             .version = '0.0.9.pre'
     o              .author = 'Scott L Steele'
     o             .license = ''
     o                .date = Date.today.to_s
