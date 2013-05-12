@@ -24,13 +24,25 @@ task :incr do
     File.write 'iterable.gemspec', str
 end
 
+desc 'Uninstall gem'
+task :uninstall do
+    sh %{gem uninstall iterable}
+end
+
 desc 'Install gem'
 task :install do
-    sh %{gem uninstall iterable}
     sh %{gem install --local --prerelease --no-ri --no-rdoc *.gem}
 end
 
 desc 'Build and install gem from gemspec and cleanup'
-task gem: [:build, :install] do
+task gem: [:build, :uninstall, :install] do
     sh %{rm *.gem}
 end
+
+desc 'Run tests'
+task :test do
+    sh %{rspec}
+end
+
+task default: [:build, :install, :test]
+
