@@ -2,6 +2,8 @@ h2. @progenitor_binding
 
 Probly should refactor @#take_progenitor_binding@ and @#new_with_binding@ binding into a class method. No point for them to be convoluted instance methods. Makes for confusing code when @#bastardize@ calls @@array = self.new_with_binding@
 
+NOTE: These methods have changed. I now just pass the original IterableArray down the object/iteration chain rather than a binding. I think I originally used bindings because I was a n00b and didn't fully trust the difference between references to objects and the objects themselves.
+
 h2. tracking
 
 Currently, if the yielded element of the array is deleted during the iteration block, the element immediately to the right of that element will be followed in the event that the order of the elements in the array is altered.
@@ -11,7 +13,3 @@ This means that the next element to be yielded is given priority when going forw
 I'll be fixing this by adding a tracking instance variable that will result in the *next* element being followed whether we're traversing the array forward or backward.
 
 If I get that set up correctly, I might also add a method to allow the user to toggle between next-element and previous-element tracking.
-
-h2. :[]=
-
-It might be the case that I don't need to provide any special handling for @:[]=@ since it never deletes and will only affect the size of a non-empty array by appending onto the end. I'll be keeping an eye out for any cases where it would be necessary to implement it specially rather than just delegate it to @@array@.
