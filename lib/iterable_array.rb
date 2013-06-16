@@ -5,6 +5,8 @@
 # Or the remix gem, maybe.
 require 'forwardable'
 
+require_relative './iterable_array/version.rb'
+
 require_relative './swapable.rb'
 require_relative './iterable_array/special_accessors.rb'
 require_relative './iterable_array/iterators.rb'
