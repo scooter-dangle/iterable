@@ -1,7 +1,10 @@
+$:.unshift File.expand_path('../lib', __FILE__)
 require 'date'
+require 'iterable_array/version'
+
 Gem::Specification.new do |o|
     o                .name = 'iterable'
-    o             .version = '0.0.9.pre'
+    o             .version = IterableArray::VERSION
     o              .author = 'Scott L Steele'
     o             .license = ''
     o                .date = Date.today.to_s

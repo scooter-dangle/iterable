@@ -5,15 +5,15 @@ end
 
 desc 'Increment minor version number'
 task :incr do
-    str = IO.read 'iterable.gemspec'
-    str.gsub!(/(
-                   \. version [^\n]*
-                   ('|")
+    str = IO.read 'lib/iterable_array/version.rb'
+    str.gsub!(/(#1
+                   VERSION [^\n]*
+                   ('|")#2
                    \d{1,} \.
                    \d{1,} \.
                )
-               (\d{1,})
-               (
+               (\d{1,})#3
+               (#4
                    (|\.pre)
                    ('|")
                )
@@ -21,7 +21,7 @@ task :incr do
     ) { "#$1#{$3.succ}#$4" }
 
 
-    File.write 'iterable.gemspec', str
+    File.write 'lib/iterable_array/version.rb', str
 end
 
 desc 'Uninstall gem'
