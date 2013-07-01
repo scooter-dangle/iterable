@@ -5,16 +5,17 @@
 # Or the remix gem, maybe.
 require 'forwardable'
 
-require_relative './iterable_array/version.rb'
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/version.rb"
 
-require_relative './swapable.rb'
-require_relative './iterable_array/special_accessors.rb'
-require_relative './iterable_array/iterators.rb'
-require_relative './iterable_array/iterator_specials.rb'
-require_relative './iterable_array/special_modifiers_noniterating.rb'
+require "#{File.expand_path File.dirname(__FILE__)}/swapable.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_accessors.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterators.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterator_specials.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_modifiers_noniterating.rb"
+
 # The following are not yet modules.
-require_relative './iterable_array/special_modifiers_iterating.rb'
-require_relative './iterable_array/plain_modifiers.rb'
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_modifiers_iterating.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/plain_modifiers.rb"
 
 class IterableArray
     extend Forwardable

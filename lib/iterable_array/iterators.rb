@@ -44,7 +44,7 @@ class IterableArray
             ##################################################
             starter = args.first
             the_final = args.at 1
-            ender = -> { the_final or length }
+            ender = lambda { the_final or length }
 
             #############
             # Iteration #
@@ -404,9 +404,7 @@ class IterableArray
 
         def comb_perm_generator methd, ary, n
             out = []
-            ary.method(methd)[ n, &(->(item) {
-                out << item
-            }) ]
+            ary.send(methd, n) { |item| out << item }
             out
         end
 

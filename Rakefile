@@ -35,7 +35,7 @@ task :install do
 end
 
 desc 'Build and install gem from gemspec and cleanup'
-task gem: [:build, :uninstall, :install] do
+task :gem => [:build, :uninstall, :install] do
     sh %{rm *.gem}
 end
 
@@ -44,5 +44,5 @@ task :test do
     sh %{rspec}
 end
 
-task default: [:build, :install, :test]
+task :default => [:build, :install, :test]
 

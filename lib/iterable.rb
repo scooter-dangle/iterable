@@ -1,2 +1,1 @@
-require_relative './iterable_array.rb'
-
+require "#{File.expand_path File.dirname(__FILE__)}/iterable_array"
