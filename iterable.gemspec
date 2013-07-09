@@ -23,4 +23,5 @@ Gem::Specification.new do |o|
     o               .email = 'ScottLSteele@gmail.com'
     o            .homepage = 'https://github.com/scooter-dangle/iterable'
     o               .files = Dir['lib{/*,}/*.rb']
+    o.add_development_dependency 'rspec'
 end
