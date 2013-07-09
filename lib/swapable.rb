@@ -7,15 +7,13 @@ module Swapable
     def to_a
         self
     end
-    
+
     def dup
         (super).extend Swapable
     end
 
-    def swap_2_indices! arg1, arg2
-        temper = at arg1
-        self[arg1] = at arg2
-        self[arg2] = temper
+    def swap_2_indices! i1, i2
+        self[i1], self[i2] = self[i2], self[i1]
         self
     end
     protected :swap_2_indices!
