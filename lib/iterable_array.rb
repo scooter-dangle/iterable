@@ -8,6 +8,7 @@ require 'forwardable'
 require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/version.rb"
 
 require "#{File.expand_path File.dirname(__FILE__)}/swapable.rb"
+require "#{File.expand_path File.dirname(__FILE__)}/array.rb"
 require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_accessors.rb"
 require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterators.rb"
 require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterator_specials.rb"
