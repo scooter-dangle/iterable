@@ -98,5 +98,11 @@ class IterableArray
         @progenitor = progenitor
         class << self; undef_method :take_progenitor; end
     end
+
+    public
+
+    def to_iter
+        self
+    end
 end
 
