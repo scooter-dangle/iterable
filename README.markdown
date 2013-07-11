@@ -1,5 +1,6 @@
-iterable
+iterable 
 ========
+[![Build Status](https://travis-ci.org/scooter-dangle/iterable.png)](https://travis-ci.org/scooter-dangle/iterable)
 
 A(n unfinished) gem providing arrays with [Wikipedia-defined iteration](http://en.wikipedia.org/wiki/Iterator#Contrasting_with_indexing) (as opposed to Wikipedia-defined indexing) via the IterableArray class, where many operations on an array have a defined behavior _while_ the array is being traversed by an iterator method.
 
