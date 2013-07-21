@@ -174,6 +174,9 @@ class IterableArray
                 @array.shuffle!
 
                 locations = []
+                # For Ruby 1.8, where Array#sample does not exist
+                locations = Sampler.new [] unless locations.respond_to? :sample
+
                 @array.to_a.each_with_index { |item, location| locations << location if item == current_item }
 
                 center_indices_at locations.sample

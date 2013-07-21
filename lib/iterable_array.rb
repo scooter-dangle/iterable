@@ -5,18 +5,23 @@
 # Or the remix gem, maybe.
 require 'forwardable'
 
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/version.rb"
+base_path = File.expand_path File.dirname __FILE__
 
-require "#{File.expand_path File.dirname(__FILE__)}/swapable.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/array.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_accessors.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterators.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/iterator_specials.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_modifiers_noniterating.rb"
+require "#{base_path}/iterable_array/version.rb"
+
+require "#{base_path}/swapable.rb"
+require "#{base_path}/array.rb"
+# Required for ruby 1.8 compatibility by IterableArray#shuffle! during iteration
+require "#{base_path}/sampler.rb" unless [].respond_to? :sample
+
+require "#{base_path}/iterable_array/special_accessors.rb"
+require "#{base_path}/iterable_array/iterators.rb"
+require "#{base_path}/iterable_array/iterator_specials.rb"
+require "#{base_path}/iterable_array/special_modifiers_noniterating.rb"
 
 # The following are not yet modules.
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/special_modifiers_iterating.rb"
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array/plain_modifiers.rb"
+require "#{base_path}/iterable_array/special_modifiers_iterating.rb"
+require "#{base_path}/iterable_array/plain_modifiers.rb"
 
 class IterableArray
     extend Forwardable
@@ -74,9 +79,20 @@ class IterableArray
         remove_methods *@@special_modifiers
     end
 
-    def remove_methods *ary
-        ary.each do |meth|
-            singleton_class.class_exec { remove_method meth }
+    if RUBY_VERSION[0, 3].to_f <= 1.8
+        # Object#singleton_class isn't available in Ruby 1.8
+        # The following Ruby 1.8-compatible version is appreciably
+        # slower in Ruby 1.9 than the version using Object#singleton_class
+        def remove_methods *ary
+            ary.each do |methd|
+                eval "class << self; remove_method :'#{methd}'; end"
+            end
+        end
+    else
+        def remove_methods *ary
+            ary.each do |meth|
+                singleton_class.class_exec { remove_method meth }
+            end
         end
     end
 

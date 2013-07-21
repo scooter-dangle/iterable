@@ -1,5 +1,4 @@
-require_relative '../lib/iterable.rb'
-
+require "#{File.expand_path File.dirname __FILE__}/../lib/iterable"
 
 describe IterableArray do
     it 'does not claim to be an Array' do
@@ -22,7 +21,7 @@ describe IterableArray do
         end
     end
 
-    pending 'responds to every Enumerable instance method' do # MAYbe...
+    it 'responds to every Enumerable instance method' do # MAYbe...
         @iter_ary = IterableArray.new
         Enumerable.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
@@ -264,10 +263,6 @@ describe IterableArray do
     describe 'non-modifying iteration' do
         # Will probably need to have some modification methods implemented
         # before being able to *really* test iteration methods.
-        before :all do
-            @out_1, @out_2 = [], []
-        end
-
         # Some holpful functions... Should I put these somewhere else?
         def appender out
             lambda { |x| out << x }
@@ -511,7 +506,7 @@ describe IterableArray do
         # best one evarr!
         describe 'juggling with #each and #rotate!' do
             it do
-                @batting_order = IterableArray.new [*:a..:d]
+                @batting_order = IterableArray.new [:a, :b, :c, :d]
                 continue_sans_rotation = true
                 @bound = 18
                 catch_and_eacher do |x|
@@ -522,7 +517,7 @@ describe IterableArray do
                     end
                 end
                 output = []
-                5.times { output += [*:a..:d] }
+                5.times { output += [:a, :b, :c, :d] }
                 @batting_history.should == output
             end
         end
@@ -835,10 +830,8 @@ describe IterableArray do
                     break if x == :bob
                 end
 
-                @batting_order.instance_exec { @array.kind_of? Array }
-                    .should be_true
-                @batting_order.instance_exec { @array.kind_of? IterableArray }
-                    .should be_false
+                @batting_order.instance_exec { @array.kind_of? Array }.should be_true
+                @batting_order.instance_exec { @array.kind_of? IterableArray }.should be_false
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
             end
@@ -1012,39 +1005,39 @@ describe IterableArray do
         end
 
         before :each do
-            @ary_1 = [*:a..:e]
+            @ary_1 = [:a, :b, :c, :d, :e]
             @iter_ary_1 = IterableArray.new @ary_1
             @happy_holder = []
             @cozy_container = []
             @counter = 0
         end
 
-        comb_perm_template = ->(methd) do
+        comb_perm_template = lambda do |methd|
             describe methd.to_s do
                 it 'acts like the normal feller from Array in the absence of modification' do
-                    @ary_1.method(methd)[3, &(->(item) { @happy_holder << item })]
-                    @iter_ary_1.method(methd)[3, &(->(item) { @cozy_container << item })]
+                    @ary_1.method(methd).call(3) { |item| @happy_holder << item }
+                    @iter_ary_1.method(methd).call(3) { |item| @cozy_container << item }
                     @happy_holder.should == @cozy_container
                 end
 
                 it "does not yield #{methd}s containing deleted array elements" do
-                    @iter_ary_1.method(methd)[3, &(->(item) do
+                    @iter_ary_1.method(methd).call(3) do |item|
                         @cozy_container += item
                         @happy_holder += item if @counter > 5
                         @iter_ary_1.delete @target if @counter == 5
                         @counter += 1
-                    end)]
+                    end
                     @cozy_container.include?(@target).should be_true
                     @happy_holder.include?(@target).should be_false
                 end
 
                 it "yields #{methd}s containing added array elements" do
-                    @iter_ary_1.method(methd)[3, &(->(item) do
+                    @iter_ary_1.method(methd).call(3) do |item|
                         @cozy_container += item if @counter <= 5
                         @happy_holder += item if @counter > 5
                         @iter_ary_1.unshift @ferigner if @counter == 5
                         @counter += 1
-                    end)]
+                    end
                     @iter_ary_1.include?(@ferigner).should be_true
                     @cozy_container.include?(@ferigner).should be_false
                     @happy_holder.include?(@ferigner).should be_true
