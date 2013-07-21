@@ -82,19 +82,19 @@ class IterableArray
         remove_methods *@@special_modifiers
     end
 
-    if RUBY_VERSION[0, 3].to_f <= 1.8
+    if Class.respond_to? :class_exec and Object.respond_to? :singleton_class
+        def remove_methods *ary
+            ary.each do |meth|
+                singleton_class.class_exec { remove_method meth }
+            end
+        end
+    else
         # Object#singleton_class isn't available in Ruby 1.8
         # The following Ruby 1.8-compatible version is appreciably
         # slower in Ruby 1.9 than the version using Object#singleton_class
         def remove_methods *ary
             ary.each do |methd|
                 eval "class << self; remove_method :'#{methd}'; end"
-            end
-        end
-    else
-        def remove_methods *ary
-            ary.each do |meth|
-                singleton_class.class_exec { remove_method meth }
             end
         end
     end
