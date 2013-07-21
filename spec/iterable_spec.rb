@@ -1,4 +1,5 @@
 require "#{File.expand_path File.dirname __FILE__}/../lib/iterable"
+require "#{File.expand_path File.dirname __FILE__}/spec_helper"
 
 describe IterableArray do
     it 'does not claim to be an Array' do
@@ -86,13 +87,6 @@ describe IterableArray do
 
 
     describe 'instance methods' do
-        if RUBY_VERSION >= '1.9'
-            it 'do not include :nitems since :nitems is not in 1.9.x' do
-                @iter_ary = IterableArray.new ['a', 'b', 'c']
-                @iter_ary.singleton_class.instance_methods.should_not include(:nitems)
-            end
-        end
-
         it 'return an IterableArray when the corresponding Array method would return an array' do
             @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
             @ary = [0, 1, 2, 3]
@@ -120,6 +114,10 @@ describe IterableArray do
             @iter_ary.drop(3)           .should be_an_instance_of(IterableArray)
             @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
             @iter_ary.unshift(num)      .should be_an_instance_of(IterableArray)
+        end
+
+        it 'return an IterableArray when the corresponding Array method would return an array', :method => :sample do
+            @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
             @iter_ary.sample(3)         .should be_an_instance_of(IterableArray)
         end
 
@@ -218,6 +216,34 @@ describe IterableArray do
             6.times { array_1 << @iter_ary.shuffle }
             6.times { array_2 <<      @ary.shuffle }
             array_1.should_not == array_2
+        end
+
+        it "that don't iterate work the same as array methods outside of iteration blocks", :method => :sample do
+            @ary = ['a', 'b', 'c', 'd']
+            @iter_ary = IterableArray.new @ary
+
+            array_1, array_2 = [], []
+            10.times { array_1 << @iter_ary.sample(2) }
+            10.times { array_2 <<      @ary.sample(2) }
+            array_1.should_not == array_2
+
+            @iter_ary.sample(1_000).size.should == @ary.sample(1_000).size
+        end
+
+        it "that don't iterate work the same as array methods outside of iteration blocks", :method => :choice do
+            @ary = ['a', 'b', 'c', 'd']
+            @iter_ary = IterableArray.new @ary
+
+            array_1, array_2 = [], []
+            10.times { array_1 << @iter_ary.choice }
+            10.times { array_2 <<      @ary.choice }
+            array_1.should_not == array_2
+        end
+
+        it "that don't iterate work the same as array methods outside of iteration blocks", :method => :nitems do
+            @ary = ['a', 'b', 'c', 'd']
+            @iter_ary = IterableArray.new @ary
+            @iter_ary.nitems.should == @ary.nitems
         end
     end
 
@@ -484,7 +510,7 @@ describe IterableArray do
         end
 
         # best one evarr!
-        describe 'juggling with #each and #rotate!' do
+        describe 'juggling with #each and #rotate!', :method => :rotate! do
             it do
                 @batting_order = IterableArray.new [:a, :b, :c, :d]
                 continue_sans_rotation = true
@@ -766,7 +792,7 @@ describe IterableArray do
                 @batting_history.should == ['alice', 'bob', 'alice', 'carrie', 'darryl']
             end
 
-            it 'multiple bob\'s' do
+            it "multiple bob's", :method => :sample do
                 class Array
                     alias_method :old_shuffle!, :shuffle!
                     def shuffle!
@@ -993,7 +1019,7 @@ describe IterableArray do
         end
 
         comb_perm_template = lambda do |methd|
-            describe methd.to_s do
+            describe methd.to_s, :method => methd do
                 it 'acts like the normal feller from Array in the absence of modification' do
                     @ary_1.method(methd).call(3) { |item| @happy_holder << item }
                     @iter_ary_1.method(methd).call(3) { |item| @cozy_container << item }

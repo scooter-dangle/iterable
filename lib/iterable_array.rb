@@ -39,7 +39,10 @@ class IterableArray
     @@iterator_specials = [ :tracking, :tracking=, :invert_tracking, ]
 
     @@plain_accessors   = [ :frozen?, :==, :[]=, :size, :length, :to_a, :to_s, :to_json, :to_enum, :include?, :hash, :to_ary, :fetch, :inspect, :at, :join, :empty?, :member?, :pack, :shelljoin, ]
-    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :sample, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :flatten, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :transpose, :uniq, ]
+    @@plain_accessors.push :choice if Array.new.respond_to? :choice
+    @@plain_accessors.push :nitems if Array.new.respond_to? :nitems
+    @@special_accessors = [ :<<, :concat, :&, :|, :*, :+, :-, :[], :drop, :dup, :compact, :slice, :<=>, :eql?, :indices, :indexes, :values_at, :assoc, :rassoc, :first, :sort, :last, :flatten, :reverse, :shuffle, :push, :replace, :rotate, :swap, :swap_indices, :take, :transpose, :uniq, ]
+    @@special_accessors.push :sample if Array.new.respond_to? :sample
 
     @@plain_modifiers   = [ :delete, :delete_at, ]
     @@special_modifiers = [ :clear, :compact!, :flatten!, :insert, :move, :move_from, :shift, :shuffle!, :sort!, :sort_by!, :unshift, :pop, :reverse!, :rotate!, :slice!, :swap!, :swap_indices!, :uniq!, ]
