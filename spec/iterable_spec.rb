@@ -10,13 +10,20 @@ describe IterableArray do
 
     it 'responds to every Array instance method' do # MAYbe...
         @iter_ary = IterableArray.new
-        Array.instance_methods(false).each do |method|
+        mthds = Array.instance_methods(false)
+        # Remove JRuby specific methods
+        mthds.delete :iter_for_each
+        # Remove Rubinius-specific methods
+        mthds.delete :total
+        mthds.delete :total=
+
+        mthds.each do |method|
             @iter_ary.should respond_to(method)
         end
 
         @iter_ary = IterableArray.new [1]
         @iter_ary.each do
-            Array.instance_methods(false).each do |method|
+            mthds.each do |method|
                 @iter_ary.should respond_to(method)
             end
         end
