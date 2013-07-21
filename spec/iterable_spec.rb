@@ -409,40 +409,20 @@ describe IterableArray do
     end
 
     # holper methods
-    def eacher iterator_string=nil, &block
-        if iterator_string == nil
-            @batting_order.each do |x|
-                @batting_history << x
-                block.yield x
-            end
-        else
-            eval %{
-                @batting_order.#{ iterator_string } do |x|
-                    @batting_history << x
-                    block.yield x
-                end
-            }
+    def eacher iterator_string=:each, *args, &block
+        @batting_order.send(iterator_string, *args) do |x|
+            @batting_history << x
+            yield x
         end
     end
 
-    def catch_and_eacher iterator_string=nil, &block
+    def catch_and_eacher iterator_string=:each, *args, &block
         catch :out_of_bound do
-            if iterator_string == nil
-                @batting_order.each do |x|
-                    @batting_history << x
-                    block.yield x
-                    throw :out_of_bound if @counter > @bound
-                    @counter += 1
-                end
-            else
-                eval %{
-                    @batting_order.#{ iterator_string } do |x|
-                        @batting_history << x
-                        block.yield x
-                        throw :out_of_bound if @counter > @bound
-                        @counter += 1
-                    end
-                }
+            @batting_order.send(iterator_string, *args) do |x|
+                @batting_history << x
+                yield x
+                throw :out_of_bound if @counter > @bound
+                @counter += 1
             end
 
             @caught = false
@@ -610,7 +590,7 @@ describe IterableArray do
             # has probably already been tested in the non-modifying
             # iteration section. Should I get rid of it?
             it do
-                catch_and_eacher "cycle(1)" do |x|
+                catch_and_eacher :cycle, 1 do |x|
                     @batting_order.delete_at(@batting_order.index x) if @drop_batter
                     @drop_batter = true if x == :darryl
                 end
@@ -622,7 +602,7 @@ describe IterableArray do
             end
 
             it 'exits a finite cycle early when the array becomes empty' do
-                catch_and_eacher 'cycle(5)' do |x|
+                catch_and_eacher :cycle, 5 do |x|
                     @batting_order.delete_at(@batting_order.index x) if @drop_batter
                     @drop_batter = true if x == :darryl
                 end
@@ -634,7 +614,7 @@ describe IterableArray do
             end
 
             it 'exits an infinite cycle when the array becomes empty' do
-                catch_and_eacher 'cycle' do |x|
+                catch_and_eacher :cycle do |x|
                     @batting_order.delete_at(@batting_order.index x) if @drop_batter
                     @drop_batter = true if x == :darryl
                 end
@@ -646,7 +626,7 @@ describe IterableArray do
             end
 
             it 'continues indefinitely for an infinite cycle when the array is modified but not emptied' do
-                catch_and_eacher 'cycle' do |x|
+                catch_and_eacher :cycle do |x|
                     @batting_order.delete_at(@batting_order.index x) if x == :darryl
                 end
 
@@ -655,7 +635,7 @@ describe IterableArray do
             end
 
             it 'exits after the array is cleared' do
-                catch_and_eacher 'cycle' do |x|
+                catch_and_eacher :cycle do |x|
                     @batting_order.clear if x == :carrie and @counter > 4
                 end
 
@@ -940,7 +920,7 @@ describe IterableArray do
 
         describe ':reverse_each' do
             it do
-                eacher 'reverse_each' do |x|
+                eacher :reverse_each do |x|
                     if x == :carrie
                         eacher do |x|
                             @batting_order.delete_at(@batting_order.index x) if x == :alice
@@ -951,12 +931,12 @@ describe IterableArray do
             end
 
             it do
-                eacher 'reverse_each' do |x|
+                eacher :reverse_each do |x|
                     if x == :carrie
                         @batting_order.delete_at(@batting_order.index x)  # [:alice, :bob, <- :darryl]
                         eacher do |x|  # [ -> :alice, :bob, :darryl]
                             if x == :bob  # [:alice, -> :bob, :darryl]
-                                eacher 'reverse_each' do |x|
+                                eacher :reverse_each do |x|
                                     @batting_order.delete_at(@batting_order.index x)
                                     @batting_order.push(:eve) if x == :bob
                                 end
@@ -986,7 +966,7 @@ describe IterableArray do
                 @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
                 eacher do |x|
                     if x == 'alice'
-                        eacher 'delete_if' do |x|
+                        eacher :delete_if do |x|
                             @batting_order.sort! if x == 'alice'
                             x == 'carrie'
                         end
@@ -1000,12 +980,12 @@ describe IterableArray do
 
     describe 'comb-perm methods' do
         before :all do
-            @target = :c
-            @ferigner = :q
+            @target = 'c'
+            @ferigner = 'q'
         end
 
         before :each do
-            @ary_1 = [:a, :b, :c, :d, :e]
+            @ary_1 = ['a', 'b', 'c', 'd', 'e']
             @iter_ary_1 = IterableArray.new @ary_1
             @happy_holder = []
             @cozy_container = []
