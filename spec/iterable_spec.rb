@@ -12,10 +12,9 @@ describe IterableArray do
         @iter_ary = IterableArray.new
         mthds = Array.instance_methods(false)
         # Remove JRuby specific methods
-        mthds.delete :iter_for_each
+        [:iter_for_each, 'iter_for_each'].each { |method| mthds.delete method }
         # Remove Rubinius-specific methods
-        mthds.delete :total
-        mthds.delete :total=
+        [:total, 'total', :total=, 'total='].each { |method| mthds.delete method }
 
         mthds.each do |method|
             @iter_ary.should respond_to(method)
