@@ -12,7 +12,7 @@ describe IterableArray do
         @iter_ary = IterableArray.new
         mthds = Array.instance_methods(false)
         # Remove JRuby specific methods
-        jruby = ['iter_for_each', 'copy_data_simple']
+        jruby = ['iter_for_each', 'iter_for_each_index', 'iter_for_each_with_index', 'iter_for_reverse_each', 'copy_data_simple']
         jruby += jruby.map &:to_sym
         jruby.each { |method| mthds.delete method }
         # Remove Rubinius-specific methods
