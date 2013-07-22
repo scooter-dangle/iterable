@@ -785,18 +785,7 @@ describe IterableArray do
                     def shuffle!
                         if self == ['alice', 'bob', 'carrie', 'darryl']
                             replace ['bob', 'alice', 'carrie', 'darryl']
-                            if self.class.respond_to? :class_exec
-                                self.class.class_exec { alias_method :shuffle!, :old_shuffle! }
-                            elsif RUBY_ENGINE == 'jruby'
-                                # JRuby sees 'class Array'
-                                # within another 'class Array' and runs the
-                                # resulting code in 'Array::Array'...
-                                # Not sure if it's the JRuby parser or
-                                # something else...
-                                self.class.send :eval, "class << self; alias_method :shuffle!, :old_shuffle!; end"
-                            else
-                                eval "class Array; alias_method :shuffle!, :old_shuffle!; end"
-                            end
+                            self.class.class_exec { alias_method :shuffle!, :old_shuffle! }
                             return self
                         end
                         old_shuffle!
