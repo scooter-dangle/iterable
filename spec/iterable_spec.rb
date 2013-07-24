@@ -19,6 +19,10 @@ describe IterableArray do
         rbx = ['total', 'total=', 'to_generator', 'to_tuple', 'tuple', 'tuple=', 'start', 'start=', 'sort_inplace', 'new_range', 'new_reserved', '__append__', '__marshal__', '__matches_when__', '__rescue_match__']
         rbx += rbx.map &:to_sym
         rbx.each { |method| mthds.delete method }
+        # Remove Ruby2.0-specific methods
+        ruby2 = ['bsearch']
+        ruby2 += ruby2.map &:to_sym
+        ruby2.each { |method| mthds.delete method }
 
         mthds.each do |method|
             @iter_ary.should respond_to(method)
