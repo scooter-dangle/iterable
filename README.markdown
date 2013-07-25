@@ -26,7 +26,7 @@ This gem is still under development&mdash;since it receives absolutely no use, I
 Targets
 -------
 
-Originally built for 1.9.3, the specs currently pass for 1.8.7 and for JRuby and Rubinius in both their respective 1.8 and 1.9 modes. That's far less painful for me to say than it was to achieve.
+Originally built for 1.9.3, the specs currently pass for 1.8.7 and 2.0.0 and for JRuby and Rubinius in both their respective 1.8 and 1.9 modes. That's far less painful for me to say than it was to achieve.
 
 Motivation
 ----------
