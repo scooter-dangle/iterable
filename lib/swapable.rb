@@ -1,15 +1,15 @@
 module Swapable
-    # to_iter doesn't really belong in Swapable
-    def to_iter
-        IterableArray.new self
-    end
-
     def to_a
         self
     end
 
     def dup
         (super).extend Swapable
+    end
+
+    # A version of Array#- that's friendlier to method-chaining
+    def less *elements
+        (self - elements).extend Swapable
     end
 
     def swap_2_indices! i1, i2
