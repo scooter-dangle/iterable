@@ -1,5 +1,5 @@
-require "#{File.expand_path File.dirname __FILE__}/../lib/iterable"
-require "#{File.expand_path File.dirname __FILE__}/spec_helper"
+require File.expand_path('../../lib/iterable', __FILE__)
+require File.expand_path('../spec_helper', __FILE__)
 
 describe IterableArray do
     it 'does not claim to be an Array' do

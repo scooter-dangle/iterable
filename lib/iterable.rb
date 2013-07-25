@@ -1,1 +1,2 @@
-require "#{File.expand_path File.dirname(__FILE__)}/iterable_array"
+require File.expand_path('../iterable_array', __FILE__)
+

@@ -1,5 +1,5 @@
 require 'autotest/restart'
-require 'test_notifier/runner/autotest' unless File.exists?("#{File.expand_path File.dirname __FILE__}/.NO_TEST_NOTIFIER")
+require 'test_notifier/runner/autotest' unless File.exists?(File.expand_path '../.NO_TEST_NOTIFIER', __FILE__)
 
 Autotest.add_hook :initialize do |autotest|
     %w{.git doc *.markdown *.swp *.textile}.each do |exception|
