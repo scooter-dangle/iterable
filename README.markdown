@@ -9,6 +9,8 @@ In Action (with pretty, moving colors!)
 
 If it's running (and it usually is), you can see a live demo (with code at [scooter-dangle/bmore-iterable-talk](http://github.com/scooter-dangle/bmore-iterable-talk)) over at [Tr.yToFoc.us](http://tr.ytofoc.us) if your browser is sufficiently with the times. The example being illustrated is something like this:
 ````ruby
+require 'iterable'
+
 iter = IterableArray.new [*'a' .. 'l']
 
 iter.cycle do |x|
@@ -46,6 +48,8 @@ Usage notes
 
 * `#equal?` is class-aware whereas `#==` is not:
 ````ruby
+require 'iterable'
+#=> true
 a = [:a, :b, :c]
 #=> [:a, :b, :c]
 b = IterableArray.new [:a, :b, :c]
