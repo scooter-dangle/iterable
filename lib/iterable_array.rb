@@ -11,6 +11,8 @@ require "#{base_path}/iterable_array/version.rb"
 
 require "#{base_path}/swapable.rb"
 require "#{base_path}/array.rb"
+
+require "#{base_path}/iterable_array/manager.rb"
 # Required for ruby 1.8 compatibility by IterableArray#shuffle! during iteration
 require "#{base_path}/sampler.rb" unless [].respond_to? :sample
 
