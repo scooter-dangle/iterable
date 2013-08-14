@@ -1,11 +1,11 @@
-class IterableArray
+class Iterable
     module IteratorSpecials
         # specials
         # TODO: either ensure that the following methods are being undefined
         # during #debastardize or make them private... currently they aren't
         # being undefined.
         # TODO: Also, these currently fail in a nested iteration block if they're
-        # called from the main instance of IterableArray...they'll only affect
+        # called from the main instance of Iterable::Array...they'll only affect
         # the outermost iteration block when called by a user (but they should
         # work fine when called internally)
         public

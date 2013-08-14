@@ -1,10 +1,12 @@
-class IterableArray
+class Iterable
+    class Array
     # module SpecialAccessors
         def << arg
             @array << arg
             self
         end
 
+        # @return [Iterable::Array]
         def concat arg
             arg.each { |x| @array << x }
             self
@@ -16,42 +18,48 @@ class IterableArray
             when Fixnum
                 return @array.at(arg1) unless arg2
 
-                IterableArray.new @array[arg1, arg2]
+                Iterable::Array.new @array[arg1, arg2]
 
             when Range
-                IterableArray.new @array[arg1]
+                Iterable::Array.new @array[arg1]
             end
         end
 
         alias_method :slice, :[]
 
+        # @return [Iterable::Array]
         def drop n
-            IterableArray.new @array.drop n
+            Iterable::Array.new @array.drop n
         end
 
+        # @return [Iterable::Array]
         # untested
         def dup
-            IterableArray.new @array.to_a.dup
+            Iterable::Array.new @array.to_a.dup
         end
 
+        # @return [Iterable::Array]
         def first n = nil
             return @array.first if n == nil
-            IterableArray.new @array.first(n)
+            Iterable::Array.new @array.first(n)
         end
 
+        # @return [Iterable::Array]
         def last n = nil
             return @array.last if n == nil
-            IterableArray.new @array.last(n)
+            Iterable::Array.new @array.last(n)
         end
 
+        # @return [Iterable::Array]
         def push *args
             @array.push *args
             self
         end
 
+        # @return [Iterable::Array]
         # untested
         def compact
-            IterableArray.new @array.compact
+            Iterable::Array.new @array.compact
         end
 
         # It looks like Array#assoc and Array#rassoc return
@@ -84,34 +92,41 @@ class IterableArray
         # def nitems
         # end
 
+        # @return [Iterable::Array]
         def & arg
-            IterableArray.new(@array & arg.to_a)
+            Iterable::Array.new(@array & arg.to_a)
         end
 
+        # @return [Iterable::Array]
         def | arg
-            IterableArray.new(@array | arg.to_a)
+            Iterable::Array.new(@array | arg.to_a)
         end
 
+        # @return [Iterable::Array]
         def + arg
-            IterableArray.new(@array + arg)
+            Iterable::Array.new(@array + arg)
         end
 
+        # @return [Iterable::Array]
         def - arg
-            IterableArray.new(@array - arg)
+            Iterable::Array.new(@array - arg)
         end
 
+        # @return [Iterable::Array]
         def * arg
-            return IterableArray.new @array * arg if arg.kind_of? Fixnum
+            return Iterable::Array.new @array * arg if arg.kind_of? Fixnum
             @array * arg
         end
 
+        # @return [Integer]
         def <=>(other)
-            return @array <=> other.to_a if other.kind_of? IterableArray
+            return @array <=> other.to_a if other.kind_of? Iterable::Array
             @array <=> other
         end
 
+        # @return [Iterable::Array]
         def values_at *args
-            out = IterableArray.new
+            out = Iterable::Array.new
             args.each do |arg|
                 out += @array.values_at arg
             end
@@ -123,30 +138,32 @@ class IterableArray
 
         # TODO need Mspec test...ran into problems with this one
         def sample arg = nil
-            return IterableArray.new(@array.sample arg) unless arg.nil?
+            return Iterable::Array.new(@array.sample arg) unless arg.nil?
             @array.sample
         end
 
         # :eql? returns true only when array contents are the same and
-        # both objects are IterableArray instances
+        # both objects are Iterable::Array instances
+        # @return [Boolean]
         def eql? arg
-            (arg.class == IterableArray) and
+            (arg.class == Iterable::Array) and
                 (self == arg.to_a)
         end
 
         # untested
+        # @return [Iterable::Array] sub arrays flattened as in Array#flatten
         def flatten level = -1
-            IterableArray.new @array.flatten(level)
+            Iterable::Array.new @array.flatten(level)
         end
 
         # untested
         def reverse
-            IterableArray.new @array.reverse
+            Iterable::Array.new @array.reverse
         end
 
         # untested
         def rotate n = 1
-            IterableArray.new @array.rotate(n)
+            Iterable::Array.new @array.rotate(n)
         end
 
         # untested
@@ -156,39 +173,40 @@ class IterableArray
         end
 
         def sort
-            IterableArray.new @array.sort
+            Iterable::Array.new @array.sort
         end
 
         def shuffle
-            IterableArray.new @array.shuffle
+            Iterable::Array.new @array.shuffle
         end
 
         def swap *args
-            IterableArray.new @array.swap(*args)
+            Iterable::Array.new @array.swap(*args)
         end
 
         def swap_indices *args
-            IterableArray.new @array.swap_indices(*args)
+            Iterable::Array.new @array.swap_indices(*args)
         end
 
         # untested
         def take n
-            IterableArray.new @array.take(n)
+            Iterable::Array.new @array.take(n)
         end
 
         # untested
-        # Note: All internal arrays will also be IterableArrays.
+        # Note: All internal arrays will also be Iterable::Arrays.
         # Any point at all to this? One doubts...
         def transpose
             # So. Pointless. Blerg.
-            IterableArray.new(@array.transpose.map do |x|
-                IterableArray.new x
+            Iterable::Array.new(@array.transpose.map do |x|
+                Iterable::Array.new x
             end)
         end
 
         # untested
         def uniq
-            IterableArray.new @array.uniq
+            Iterable::Array.new @array.uniq
         end
     # end
+    end
 end

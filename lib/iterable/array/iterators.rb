@@ -1,4 +1,5 @@
-class IterableArray
+class Iterable
+    class Array
     # module Iterators
         private
         def catch_a_break
@@ -34,8 +35,8 @@ class IterableArray
 
             if args.first.kind_of? Range then
                 args[1] = args.first.exclude_end? ?
-                          args.first.last - 1 :
-                          args.first.last
+                              args.first.last - 1 :
+                              args.first.last
                 args[0] = args.first.first
             end
 
@@ -65,7 +66,7 @@ class IterableArray
         def drop_while
             return @array.to_enum :drop_while unless block_given?
 
-            out = IterableArray.new
+            out = Iterable::Array.new
             dropping = true
             each do |x|
                 dropping = yield x if dropping
@@ -77,7 +78,7 @@ class IterableArray
         # untested
         def select
             return @array.to_enum(:select) unless block_given?
-            out = IterableArray.new
+            out = Iterable::Array.new
             each { |x| out << x if yield x }
             out
         end
@@ -193,7 +194,7 @@ class IterableArray
         # untested
         def reject
             return @array.to_enum(:reject) unless block_given?
-            out = IterableArray.new
+            out = Iterable::Array.new
             each { |x| out << x unless yield x }
             out
         end
@@ -244,14 +245,14 @@ class IterableArray
         # untested
         def take_while
             return @array.to_enum(:take_while) unless block_given?
-            out = IterableArray.new
+            out = Iterable::Array.new
             each { |x| break unless yield x; out << x }
             out
         end
 
         def map
             return @array.dup unless block_given?
-            out = IterableArray.new
+            out = Iterable::Array.new
 
             catch_a_break do
                 @backward_index, @current_index, @forward_index = -1, 0, 1
@@ -352,13 +353,13 @@ class IterableArray
 
         # untested
         def product *arrays
-            return IterableArray.new @array.product(*arrays) unless block_given?
+            return Iterable::Array.new @array.product(*arrays) unless block_given?
 
             each do |x|
                 basket = [x].product *arrays
                 # means of skipping a whole chunk of yields
                 catch :product_next do
-                    basket.each { |y| yield IterableArray.new y }
+                    basket.each { |y| yield Iterable::Array.new y }
                 end
             end
         end
@@ -433,4 +434,5 @@ class IterableArray
             queue
         end
     # end
+    end
 end

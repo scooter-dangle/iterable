@@ -1,4 +1,4 @@
-class IterableArray
+class Iterable
     module SpecialModifiersNoniterating
         # untested
         def compact!
@@ -13,7 +13,7 @@ class IterableArray
 
         def shift n = nil
             return @array.shift if n.nil?
-            IterableArray.new @array.shift(n)
+            Iterable::Array.new @array.shift(n)
         end
 
         def insert location, *items
@@ -41,7 +41,7 @@ class IterableArray
 
         def pop n = nil
             return @array.pop if n.nil?
-            IterableArray.new(@array.pop n)
+            Iterable::Array.new(@array.pop n)
         end
 
         def reverse!
@@ -74,7 +74,7 @@ class IterableArray
 
         def slice! *args
             if args.length == 2 or args.at(1).kind_of? Range
-                IterableArray.new @array.slice!(*args)
+                Iterable::Array.new @array.slice!(*args)
             else
                 @array.slice!(*args)
             end
