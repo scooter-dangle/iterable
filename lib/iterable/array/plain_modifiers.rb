@@ -1,5 +1,5 @@
-class Iterable
-    class Array
+module Iterable
+    module Array
         # module PlainModifiers
         private
         def define_plain_modifiers

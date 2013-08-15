@@ -1,4 +1,4 @@
-class IterableArray
+module Iterable
     # module SpecialModifiersIterating
     private
     def define_special_modifiers_iterating

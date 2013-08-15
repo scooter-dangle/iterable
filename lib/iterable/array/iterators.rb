@@ -1,5 +1,5 @@
-class Iterable
-    class Array
+module Iterable
+    module Array
     # module Iterators
         private
         def catch_a_break

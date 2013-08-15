@@ -1,4 +1,4 @@
-class Iterable
+module Iterable
     module IteratorSpecials
         # specials
         # TODO: either ensure that the following methods are being undefined

@@ -1,5 +1,5 @@
-class Iterable
-    class Array
+module Iterable
+    module Array
     # module SpecialAccessors
         def << arg
             @array << arg

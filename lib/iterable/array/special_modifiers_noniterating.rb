@@ -1,4 +1,4 @@
-class Iterable
+module Iterable
     module SpecialModifiersNoniterating
         # untested
         def compact!
