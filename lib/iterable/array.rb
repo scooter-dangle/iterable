@@ -5,12 +5,17 @@
 # Or the remix gem, maybe.
 require 'forwardable'
 
-class Iterable
-    module Alias
-        Array = Array
-    end
+require File.expand_path('../array/special_accessors', __FILE__)
+require File.expand_path('../array/iterators', __FILE__)
+require File.expand_path('../array/iterator_specials', __FILE__)
+require File.expand_path('../array/special_modifiers_noniterating', __FILE__)
 
-    class Array < Alias::Array
+# The following are not yet modules.
+require File.expand_path('../array/special_modifiers_iterating', __FILE__)
+require File.expand_path('../array/plain_modifiers', __FILE__)
+
+module Iterable
+    module Array
         attr :manager
 
         private
@@ -28,28 +33,8 @@ class Iterable
     end
 end
 
-base_path = File.expand_path File.dirname __FILE__
-
-require "#{base_path}/iterable_array/version.rb"
-
-require "#{base_path}/swapable.rb"
-require "#{base_path}/array.rb"
-
-require "#{base_path}/iterable_array/manager.rb"
-# Required for ruby 1.8 compatibility by Iterable::Array#shuffle! during iteration
-require "#{base_path}/sampler.rb" unless [].respond_to? :sample
-
-require "#{base_path}/iterable_array/special_accessors.rb"
-require "#{base_path}/iterable_array/iterators.rb"
-require "#{base_path}/iterable_array/iterator_specials.rb"
-require "#{base_path}/iterable_array/special_modifiers_noniterating.rb"
-
-# The following are not yet modules.
-require "#{base_path}/iterable_array/special_modifiers_iterating.rb"
-require "#{base_path}/iterable_array/plain_modifiers.rb"
-
-class Iterable
-    class Array
+module Iterable
+    module Array
         extend Forwardable
 
         # include self::SpecialAccessors
