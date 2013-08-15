@@ -3,14 +3,14 @@ require 'date'
 require 'iterable/version'
 
 description = <<EOS
-Provides the pseudo-class Iterable::Array, which implements all of the
-methods of Array (as of Ruby 1.9.3) in an iterable-aware fashion. I.e.,
-behavior is defined to the greatest extent possible for operations that
-modify an Iterable from within an iteration block (e.g. each, map,
-delete_if, reverse_each). To use, call #to_iter on a pre-existing Array or
-use Iterable::Array.new; the Iterable::Array should act identically to a
-regular Array except that it responds logically to modifications during
-iteration.
+Provides the module (and pseudo-class) Iterable::Array, which implements
+all of the methods of Array (as of Ruby 1.9.3) in an iterable-aware
+fashion. I.e., behavior is defined to the greatest extent possible for
+operations that modify an Iterable from within an iteration block (e.g.
+each, map, delete_if, reverse_each). To use, call #to_iter on a
+pre-existing Array or use Iterable::Array.new; the Iterable::Array should
+act identically to a regular Array except that it responds logically to
+modifications during iteration.
 EOS
 
 Gem::Specification.new do |o|
