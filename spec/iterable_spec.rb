@@ -1,15 +1,15 @@
 require File.expand_path('../../lib/iterable', __FILE__)
 require File.expand_path('../spec_helper', __FILE__)
 
-describe IterableArray do
+describe Iterable::Array do
     it 'does not claim to be an Array' do
-        @iter_ary = IterableArray.new
+        @iter_ary = Iterable::Array.new
         @iter_ary.class.should_not == Array
-        @iter_ary.class.should == IterableArray
+        @iter_ary.class.should == Iterable::Array
     end
 
     it 'responds to every Array instance method' do # MAYbe...
-        @iter_ary = IterableArray.new
+        @iter_ary = Iterable::Array.new
         mthds = Array.instance_methods(false)
         # Remove JRuby specific methods
         jruby = ['copy_data', 'dimensions', 'yaml_initialize', 'iter_for_each', 'iter_for_each_index', 'iter_for_each_with_index', 'iter_for_reverse_each', 'copy_data_simple']
@@ -28,7 +28,7 @@ describe IterableArray do
             @iter_ary.should respond_to(method)
         end
 
-        @iter_ary = IterableArray.new [1]
+        @iter_ary = Iterable::Array.new [1]
         @iter_ary.each do
             mthds.each do |method|
                 @iter_ary.should respond_to(method)
@@ -37,12 +37,12 @@ describe IterableArray do
     end
 
     it 'responds to every Enumerable instance method' do # MAYbe...
-        @iter_ary = IterableArray.new
+        @iter_ary = Iterable::Array.new
         Enumerable.instance_methods(false).each do |method|
             @iter_ary.should respond_to(method)
         end
 
-        @iter_ary = IterableArray.new [1]
+        @iter_ary = Iterable::Array.new [1]
         @iter_ary.each do
             Enumerable.instance_methods(false).each do |method|
                 @iter_ary.should respond_to(method)
@@ -53,9 +53,9 @@ describe IterableArray do
     describe ':assoc and :rassoc' do
         # This test are super stupid. No point for it. Please
         # to get rid of so fast. Mebbeh.
-        it 'work like Array#assoc and Array#rassoc but return IterableArrays' do
-            @ary = [42, ['x', 'y', 'z'], [0, 1, 2], IterableArray.new( [:alpha, :beta, :gamma] )]
-            @iter_ary = IterableArray.new @ary
+        it 'work like Array#assoc and Array#rassoc but return Iterable::Arrays' do
+            @ary = [42, ['x', 'y', 'z'], [0, 1, 2], Iterable::Array.new( [:alpha, :beta, :gamma] )]
+            @iter_ary = Iterable::Array.new @ary
 
             @iter_ary.assoc(0).should == @ary.assoc(0)
             @iter_ary.assoc(1).should == @ary.assoc(1)
@@ -74,14 +74,14 @@ describe IterableArray do
     describe ':==' do
         it 'returns false for differing array content' do
             @ary_1 = [0, 1, 2]
-            @iter_ary_1 = IterableArray.new ['a', 'b', 'c']
+            @iter_ary_1 = Iterable::Array.new ['a', 'b', 'c']
             ( @iter_ary_1 == @ary_1 ).should be_false
             ( @ary_1 == @iter_ary_1 ).should be_false
         end
 
         it 'returns true if array content matches but classes differ' do
             @ary_1 = [0, 1, 2]
-            @iter_ary_1 = IterableArray.new @ary_1
+            @iter_ary_1 = Iterable::Array.new @ary_1
             ( @iter_ary_1 == @ary_1 ).should be_true
             ( @ary_1 == @iter_ary_1 ).should be_true
         end
@@ -91,9 +91,9 @@ describe IterableArray do
     it ':eql? acts like a class-sensitive version of :==' do
         @ary_1 = [0, 1, 2]
         @ary_2 = ['a', 'b', 'c']
-        @iter_ary_1 = IterableArray.new @ary_1
-        @iter_ary_2 = IterableArray.new @ary_1
-        @iter_ary_3 = IterableArray.new @ary_2
+        @iter_ary_1 = Iterable::Array.new @ary_1
+        @iter_ary_2 = Iterable::Array.new @ary_1
+        @iter_ary_3 = Iterable::Array.new @ary_2
         @iter_ary_1.eql?(@ary_1).should be_false
         @iter_ary_1.eql?(@iter_ary_2).should be_true
         @iter_ary_1.eql?(@iter_ary_3).should be_false
@@ -101,45 +101,45 @@ describe IterableArray do
 
 
     describe 'instance methods' do
-        it 'return an IterableArray when the corresponding Array method would return an array' do
-            @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
+        it 'return an Iterable::Array when the corresponding Array method would return an array' do
+            @iter_ary = Iterable::Array.new ['a', 'b', 'c', 'd']
             @ary = [0, 1, 2, 3]
             num   = 3
-            ( @iter_ary & @ary )        .should be_an_instance_of(IterableArray)
-            ( @iter_ary + @ary )        .should be_an_instance_of(IterableArray)
-            ( @iter_ary - @ary )        .should be_an_instance_of(IterableArray)
-            ( @iter_ary | @ary )        .should be_an_instance_of(IterableArray)
-            ( @iter_ary * num  )        .should be_an_instance_of(IterableArray)
-            @iter_ary.sort              .should be_an_instance_of(IterableArray)
-            ( @iter_ary << num )        .should be_an_instance_of(IterableArray)
-            @iter_ary.concat([num])     .should be_an_instance_of(IterableArray)
-            @iter_ary[1, 2]             .should be_an_instance_of(IterableArray)
-            @iter_ary[1...num]          .should be_an_instance_of(IterableArray)
-            @iter_ary.slice(1, 2)       .should be_an_instance_of(IterableArray)
-            @iter_ary.slice(1...num)    .should be_an_instance_of(IterableArray)
-            @iter_ary.values_at(1...num).should be_an_instance_of(IterableArray)
-            @iter_ary.values_at(0)      .should be_an_instance_of(IterableArray)
-            @iter_ary.values_at(1, 0)   .should be_an_instance_of(IterableArray)
-            @iter_ary.indices((1..2))   .should be_an_instance_of(IterableArray)
-            @iter_ary.indexes((1..2))   .should be_an_instance_of(IterableArray)
-            @iter_ary.first(3)          .should be_an_instance_of(IterableArray)
-            @iter_ary.last(3)           .should be_an_instance_of(IterableArray)
-            @iter_ary.shuffle           .should be_an_instance_of(IterableArray)
-            @iter_ary.drop(3)           .should be_an_instance_of(IterableArray)
-            @iter_ary.push(num)         .should be_an_instance_of(IterableArray)
-            @iter_ary.unshift(num)      .should be_an_instance_of(IterableArray)
+            ( @iter_ary & @ary )        .should be_an_instance_of(Iterable::Array)
+            ( @iter_ary + @ary )        .should be_an_instance_of(Iterable::Array)
+            ( @iter_ary - @ary )        .should be_an_instance_of(Iterable::Array)
+            ( @iter_ary | @ary )        .should be_an_instance_of(Iterable::Array)
+            ( @iter_ary * num  )        .should be_an_instance_of(Iterable::Array)
+            @iter_ary.sort              .should be_an_instance_of(Iterable::Array)
+            ( @iter_ary << num )        .should be_an_instance_of(Iterable::Array)
+            @iter_ary.concat([num])     .should be_an_instance_of(Iterable::Array)
+            @iter_ary[1, 2]             .should be_an_instance_of(Iterable::Array)
+            @iter_ary[1...num]          .should be_an_instance_of(Iterable::Array)
+            @iter_ary.slice(1, 2)       .should be_an_instance_of(Iterable::Array)
+            @iter_ary.slice(1...num)    .should be_an_instance_of(Iterable::Array)
+            @iter_ary.values_at(1...num).should be_an_instance_of(Iterable::Array)
+            @iter_ary.values_at(0)      .should be_an_instance_of(Iterable::Array)
+            @iter_ary.values_at(1, 0)   .should be_an_instance_of(Iterable::Array)
+            @iter_ary.indices((1..2))   .should be_an_instance_of(Iterable::Array)
+            @iter_ary.indexes((1..2))   .should be_an_instance_of(Iterable::Array)
+            @iter_ary.first(3)          .should be_an_instance_of(Iterable::Array)
+            @iter_ary.last(3)           .should be_an_instance_of(Iterable::Array)
+            @iter_ary.shuffle           .should be_an_instance_of(Iterable::Array)
+            @iter_ary.drop(3)           .should be_an_instance_of(Iterable::Array)
+            @iter_ary.push(num)         .should be_an_instance_of(Iterable::Array)
+            @iter_ary.unshift(num)      .should be_an_instance_of(Iterable::Array)
         end
 
-        it 'return an IterableArray when the corresponding Array method would return an array', :method => :sample do
-            @iter_ary = IterableArray.new ['a', 'b', 'c', 'd']
-            @iter_ary.sample(3)         .should be_an_instance_of(IterableArray)
+        it 'return an Iterable::Array when the corresponding Array method would return an array', :method => :sample do
+            @iter_ary = Iterable::Array.new ['a', 'b', 'c', 'd']
+            @iter_ary.sample(3)         .should be_an_instance_of(Iterable::Array)
         end
 
         it "that don't iterate work the same as array methods outside of iteration blocks" do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
             @ary_2 = ['c', 'd', 'e']
-            @iter_ary_2 = IterableArray.new @ary_2
+            @iter_ary_2 = Iterable::Array.new @ary_2
             num = 3
 
             # :sort
@@ -195,7 +195,7 @@ describe IterableArray do
 
             # :join
             # Need to determine how to handle the case where an
-            # IterableArray contains further IterableArrays. This
+            # Iterable::Array contains further Iterable::Arrays. This
             # also applies to :transpose.
             @iter_ary.join(' ').should == @ary.join(' ')
             @iter_ary.join.should == @ary.join
@@ -234,7 +234,7 @@ describe IterableArray do
 
         it "that don't iterate work the same as array methods outside of iteration blocks", :method => :sample do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
 
             array_1, array_2 = [], []
             10.times { array_1 << @iter_ary.sample(2) }
@@ -246,7 +246,7 @@ describe IterableArray do
 
         it "that don't iterate work the same as array methods outside of iteration blocks", :method => :choice do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
 
             array_1, array_2 = [], []
             10.times { array_1 << @iter_ary.choice }
@@ -256,7 +256,7 @@ describe IterableArray do
 
         it "that don't iterate work the same as array methods outside of iteration blocks", :method => :nitems do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
             @iter_ary.nitems.should == @ary.nitems
         end
     end
@@ -264,9 +264,9 @@ describe IterableArray do
     describe 'modifiers outside of iteration' do
         before :each do
             @ary_1 = ['a', 'b', 'c', 'd']
-            @iter_ary_1 = IterableArray.new @ary_1
+            @iter_ary_1 = Iterable::Array.new @ary_1
             @ary_2 = ['c', 'd', 'e']
-            @iter_ary_2 = IterableArray.new @ary_2
+            @iter_ary_2 = Iterable::Array.new @ary_2
             @num = 3
         end
 
@@ -322,7 +322,7 @@ describe IterableArray do
 
         before :each do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
             @out_1, @out_2 = [], []
         end
 
@@ -333,7 +333,7 @@ describe IterableArray do
 
 #        it 'is this test even working?' do
 #            @ary.should == ['a', 'b', 'c', 'd']
-#            @iter_ary.should == IterableArray.new(['a', 'b', 'c', 'd'])
+#            @iter_ary.should == Iterable::Array.new(['a', 'b', 'c', 'd'])
 #            @ary.each(&(appender @out_1)).should == ['a', 'b', 'c', 'd']
 #            @out_1.should == ['a', 'b', 'c', 'd']
 #        end
@@ -342,35 +342,35 @@ describe IterableArray do
             @iter_ary.each(&(appender @out_1)).should ==
                  @ary.each(&(appender @out_2))
             check_outs
-            @iter_ary.each {}.should be_an_instance_of(IterableArray)
+            @iter_ary.each {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':each_index' do
             @iter_ary.each_index(&(appender @out_1)).should ==
                  @ary.each_index(&(appender @out_2))
             check_outs
-            @iter_ary.each_index {}.should be_an_instance_of(IterableArray)
+            @iter_ary.each_index {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':each_with_index' do
             @iter_ary.each_with_index(&(each_with_index_appender @out_1)).should ==
                  @ary.each_with_index(&(each_with_index_appender @out_2))
             check_outs
-            @iter_ary.each_with_index {}.should be_an_instance_of(IterableArray)
+            @iter_ary.each_with_index {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':reverse_each' do
             @iter_ary.reverse_each(&(appender @out_1)).should ==
                  @ary.reverse_each(&(appender @out_2))
             check_outs
-            @iter_ary.reverse_each {}.should be_an_instance_of(IterableArray)
+            @iter_ary.reverse_each {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':map / :collect' do
             @iter_ary.map(&(appender @out_1)).should ==
                  @ary.map(&(appender @out_2))
             check_outs
-            @iter_ary.map {}.should be_an_instance_of(IterableArray)
+            @iter_ary.map {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':map! / :collect!' do
@@ -378,7 +378,7 @@ describe IterableArray do
                  @ary.map!(&(map_appender @out_2))
             @iter_ary.should == @ary
             check_outs
-            @iter_ary.map! {}.should be_an_instance_of(IterableArray)
+            @iter_ary.map! {}.should be_an_instance_of(Iterable::Array)
         end
 
         it ':cycle' do
@@ -435,7 +435,7 @@ describe IterableArray do
     describe 'non-array methods' do
         before :each do
             @ary = ['a', 'b', 'c', 'd']
-            @iter_ary = IterableArray.new @ary
+            @iter_ary = Iterable::Array.new @ary
             @out_1, @out_2 = [], []
         end
 
@@ -475,7 +475,7 @@ describe IterableArray do
         end
 
         before :each do
-            @batting_order = IterableArray.new [:alice, :bob, :carrie, :darryl, :eve]
+            @batting_order = Iterable::Array.new [:alice, :bob, :carrie, :darryl, :eve]
             @batting_history = []
 
             @drop_batter = false
@@ -526,7 +526,7 @@ describe IterableArray do
         # best one evarr!
         describe 'juggling with #each and #rotate!', :method => :rotate! do
             it do
-                @batting_order = IterableArray.new [:a, :b, :c, :d]
+                @batting_order = Iterable::Array.new [:a, :b, :c, :d]
                 continue_sans_rotation = true
                 @bound = 18
                 catch_and_eacher do |x|
@@ -738,7 +738,7 @@ describe IterableArray do
         describe ":sort! the bob's" do
             describe 'one bob' do
                 it do
-                    @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
+                    @batting_order = Iterable::Array.new ['bob', 'darryl', 'alice', 'carrie']
                     eacher do |x|
                         @batting_order.sort! if x == 'alice'
                     end
@@ -749,7 +749,7 @@ describe IterableArray do
 
             describe "multiple bob's" do
                 before :each do
-                    @batting_order = IterableArray.new ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob']
+                    @batting_order = Iterable::Array.new ['alice', 'bob', 'darryl', 'bob', 'darryl', 'carrie', 'bob']
                     @bob_counter = 0
                 end
 
@@ -797,7 +797,7 @@ describe IterableArray do
                 end
 
 
-                @batting_order = IterableArray.new ['alice', 'bob', 'carrie', 'darryl']
+                @batting_order = Iterable::Array.new ['alice', 'bob', 'carrie', 'darryl']
                 eacher do |x|
                     @batting_order.shuffle! if x == 'bob'
                 end
@@ -827,7 +827,7 @@ describe IterableArray do
                 end
 
 
-                @batting_order = IterableArray.new ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
+                @batting_order = Iterable::Array.new ['alice', 'bob', 'bob', 'bob', 'carrie', 'darryl', 'darryl']
                 @batting_history = []
                 @bob_counter = 0
 
@@ -851,7 +851,7 @@ describe IterableArray do
                 end
 
                 @batting_order.instance_exec { @array.kind_of? Array }.should be_true
-                @batting_order.instance_exec { @array.kind_of? IterableArray }.should be_false
+                @batting_order.instance_exec { @array.kind_of? Iterable::Array }.should be_false
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
             end
@@ -864,7 +864,7 @@ describe IterableArray do
                 end
 
                 @batting_order.instance_exec { @array.kind_of? Array }.should be_true
-                @batting_order.instance_exec { @array.kind_of? IterableArray }.should be_false
+                @batting_order.instance_exec { @array.kind_of? Iterable::Array }.should be_false
                 @batting_history.should == [:alice, :bob]
                 result.should == nil
             end
@@ -928,7 +928,7 @@ describe IterableArray do
         end
 
         before :each do
-            @batting_order = IterableArray.new [:alice, :bob, :carrie, :darryl]
+            @batting_order = Iterable::Array.new [:alice, :bob, :carrie, :darryl]
             @batting_history = []
 
             @drop_batter = false
@@ -1003,7 +1003,7 @@ describe IterableArray do
 
         describe ':sort! and :delete_if...together for the first time for your titillation' do
             it do
-                @batting_order = IterableArray.new ['bob', 'darryl', 'alice', 'carrie']
+                @batting_order = Iterable::Array.new ['bob', 'darryl', 'alice', 'carrie']
                 eacher do |x|
                     if x == 'alice'
                         eacher :delete_if do |x|
@@ -1026,7 +1026,7 @@ describe IterableArray do
 
         before :each do
             @ary_1 = ['a', 'b', 'c', 'd', 'e']
-            @iter_ary_1 = IterableArray.new @ary_1
+            @iter_ary_1 = Iterable::Array.new @ary_1
             @happy_holder = []
             @cozy_container = []
             @counter = 0

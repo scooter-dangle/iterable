@@ -1,3 +1,5 @@
+Iterable = Module.new
+
 require File.expand_path('../array', __FILE__)
 require File.expand_path('../iterable_array', __FILE__)
 # Required for ruby 1.8 compatibility by Iterable::Array#shuffle! during iteration
@@ -10,5 +12,8 @@ require File.expand_path('../iterable/manager', __FILE__)
 require File.expand_path('../iterable/version', __FILE__)
 
 module Iterable
+    def self.extend_object obj
+        return obj.extend self::Array if obj.kind_of? self::Aliases::Array
+        super
+    end
 end
-

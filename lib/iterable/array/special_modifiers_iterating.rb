@@ -216,14 +216,6 @@ module Iterable
                 center_indices_at arg2 if temp_holder == arg1
                 @array.swap_indices! arg1, arg2
             end
-
-            private
-            def center_indices_at new_index
-                movement = @current_index - new_index
-                @current_index  -= movement
-                @forward_index  -= movement
-                @backward_index -= movement
-            end
         end
     end
 end

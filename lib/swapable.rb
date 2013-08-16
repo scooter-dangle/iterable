@@ -1,4 +1,8 @@
 module Swapable
+    def self.new *args
+        Array.new(*args).extend self
+    end
+
     def to_a
         self
     end
